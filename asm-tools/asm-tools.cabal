@@ -1,0 +1,70 @@
+name:
+  asm-tools
+version:
+  0.4.0
+synopsis:
+  Tools used by the platform modules
+homepage:
+  https://github.com/alexkazik/asm
+license:
+  BSD3
+license-file:
+  LICENSE
+author:
+  ALeX Kazik
+maintainer:
+  alex@kazik.de
+copyright:
+  2017 ALeX Kazik
+category:
+  Compilers/Interpreters
+build-type:
+  Simple
+cabal-version:
+  >= 1.10
+
+library {
+  default-language:
+    Haskell2010
+  hs-source-dirs:
+    src
+  ghc-options: {
+    -Wall
+  }
+  exposed-modules: {
+    Asm.Tools
+    Asm.Tools.Data.RLE
+    Asm.Tools.Image
+    Asm.Tools.Image.Embed
+  }
+  other-modules: {
+    Asm.Tools.Image.Internal
+  }
+  build-depends:
+    { asm-core == 0.4.*
+    , asm-data == 0.4.*
+    , base
+    , bytestring
+    , containers
+    , directory
+    , JuicyPixels
+    , syb
+    , template-haskell
+    , text
+    , vector
+    }
+  default-extensions: {
+    BinaryLiterals
+    DefaultSignatures
+    DeriveDataTypeable
+    LambdaCase
+    MultiWayIf
+    NamedFieldPuns
+    NoImplicitPrelude
+    OverloadedStrings
+    QuasiQuotes
+    RecordWildCards
+    ScopedTypeVariables
+    StandaloneDeriving
+  }
+}

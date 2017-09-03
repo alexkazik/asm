@@ -1,0 +1,81 @@
+name:
+  asm-cpu6502
+version:
+  0.4.0
+synopsis:
+  The 6502 Cpu specific parts of the assembler
+homepage:
+  https://github.com/alexkazik/asm
+license:
+  BSD3
+license-file:
+  LICENSE
+author:
+  ALeX Kazik
+maintainer:
+  alex@kazik.de
+copyright:
+  2017 ALeX Kazik
+category:
+  Compilers/Interpreters
+build-type:
+  Simple
+cabal-version:
+  >= 1.10
+
+library {
+  default-language:
+    Haskell2010
+  hs-source-dirs:
+    src
+  ghc-options: {
+    -Wall
+  }
+  exposed-modules: {
+    Asm.Cpu6502
+    Asm.Cpu6502.Compiler.Function
+    Asm.Cpu6502.Compiler.Phase2
+    Asm.Cpu6502.Compiler.Phase3
+    Asm.Cpu6502.Compiler.Phase4
+    Asm.Cpu6502.Compiler.Phase5
+    Asm.Cpu6502.Data.Cpu6502
+    Asm.Cpu6502.Data.CpuData6502
+    Asm.Cpu6502.Data.CpuSource6502
+    Asm.Cpu6502.Data.FunctionKey
+    Asm.Cpu6502.Data.MetaKey
+    Asm.Cpu6502.Data.OpCodes
+    Asm.Cpu6502.OpCodes.Generator
+    Asm.Cpu6502.OpCodes.Parser
+    Asm.Cpu6502.OpCodes.Quote
+    Asm.Cpu6502.Parser
+    Asm.Cpu6502.Parser.CpuStmt
+    Asm.Cpu6502.Suffixed
+  }
+  build-depends:
+    { asm-core == 0.4.*
+    , asm-data == 0.4.*
+    , asm-parser == 0.4.*
+    , base
+    , containers
+    , extra
+    , heredoc
+    , syb
+    , template-haskell
+    , text
+    , vector
+    }
+  default-extensions: {
+    BinaryLiterals
+    DefaultSignatures
+    DeriveDataTypeable
+    LambdaCase
+    MultiWayIf
+    NamedFieldPuns
+    NoImplicitPrelude
+    OverloadedStrings
+    QuasiQuotes
+    RecordWildCards
+    ScopedTypeVariables
+    StandaloneDeriving
+  }
+}
