@@ -6,18 +6,15 @@ module Asm.Parser.Parser.Basic
   ) where
 
 import           Asm.Core.Prelude
-import qualified Data.Char                  as C (toUpper)
-import           Data.Scientific
-import           Text.Megaparsec            as Export (between, choice, getPosition, label, lookAhead, sepBy, try,
-                                                       (<?>))
-import qualified Text.Megaparsec            as MP
-import           Text.Megaparsec.Char       as Export (newline, string, string')
-import qualified Text.Megaparsec.Char       as MP
-import qualified Text.Megaparsec.Char.Lexer as MP
-import           Text.Megaparsec.Expr       as Export (Operator (..), makeExprParser)
-import           Text.Megaparsec.Pos        as Export (SourcePos)
+import qualified Data.Char               as C (toUpper)
+import           Text.Megaparsec         as Export (between, choice, getPosition, label, lookAhead, sepBy, try, (<?>))
+import qualified Text.Megaparsec         as MP
+import           Text.Megaparsec.Char    as Export (newline, string, string')
+import qualified Text.Megaparsec.Char    as MP
+import           Text.Megaparsec.Expr    as Export (Operator (..), makeExprParser)
+import           Text.Megaparsec.Pos     as Export (SourcePos)
 
-import           Asm.Parser.Parser.Class    as Export
+import           Asm.Parser.Parser.Class as Export
 
 --
 -- global parameters
@@ -103,14 +100,6 @@ wrapPosition = (,) <$> MP.getPosition
 sepBy1 :: Parser a -> Parser sep -> Parser (NonNull [a])
 {-# INLINE sepBy1 #-}
 sepBy1 a b = impureNonNull <$> MP.sepBy1 a b
-
-parseDecimalInteger :: Parser Integer
-{-# INLINE parseDecimalInteger #-}
-parseDecimalInteger = lexeme MP.decimal
-
-parseScientific :: Parser Scientific
-{-# INLINE parseScientific #-}
-parseScientific = lexeme MP.scientific
 
 -- exact match without following chars
 

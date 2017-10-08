@@ -23,7 +23,7 @@ parseInteger =
     , (string' "0x" *> hexadecimal) <?> "hexadecimal integer"
     , (string' "0b" *> binary)      <?> "binary integer"
     , (string' "0d" *> decimal)     <?> "decimal integer"
-    , parseDecimalInteger           <?> "decimal integer"
+    , decimal                       <?> "decimal integer"
     ] <?> "integer"
   where
     binary :: Parser Integer
@@ -62,11 +62,11 @@ parseInteger =
 parseIntExprI :: Parser (PExprI pe)
 parseIntExprI =
   choice
-    [ (string' "0o" *> (checkMask <$> octal))             <?> "octal integer"
-    , (string' "0x" *> (checkMask <$> hexadecimal))       <?> "hexadecimal integer"
-    , (string' "0b" *> (checkMask <$> binary))            <?> "binary integer"
-    , (string' "0d" *> decimal)                           <?> "decimal integer"
-    , (PEConstInt . fromIntegral) <$> parseDecimalInteger <?> "decimal integer"
+    [ (string' "0o" *> (checkMask <$> octal))       <?> "octal integer"
+    , (string' "0x" *> (checkMask <$> hexadecimal)) <?> "hexadecimal integer"
+    , (string' "0b" *> (checkMask <$> binary))      <?> "binary integer"
+    , (string' "0d" *> decimal)                     <?> "decimal integer"
+    , decimal                                       <?> "decimal integer"
     ] <?> "integer"
   where
     binary :: Parser TInt64

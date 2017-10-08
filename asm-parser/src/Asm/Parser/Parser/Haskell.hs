@@ -4,6 +4,8 @@ module Asm.Parser.Parser.Haskell
   ) where
 
 import           Asm.Core.Prelude
+import qualified Text.Megaparsec.Char       as MP
+import qualified Text.Megaparsec.Char.Lexer as MP
 
 import           Asm.Parser.Data.Haskell
 import           Asm.Parser.Parser.Basic
@@ -13,7 +15,7 @@ import           Asm.Parser.Parser.Integer
 -- Haskell entry
 
 parseHaskellExpr :: Parser Haskell
-parseHaskellExpr = choice
+parseHaskellExpr = lexeme $ choice
   [ HVar <$> haskellVarName
   , HCon <$> haskellConName
   , between (symbol "(") (symbol ")") (withNewlines parseHaskellTerm)
@@ -22,14 +24,14 @@ parseHaskellExpr = choice
 -- haskell sub-parsers
 
 haskellVarName :: Parser String
-haskellVarName = (:) <$> oneOf "abcdefghijklmnopqrstuvwxyz" <*> (unpack <$> manyOf haskellNameChar)
+haskellVarName = (:) <$> oneOf "abcdefghijklmnopqrstuvwxyz" <*> (many $ MP.oneOf haskellNameChar)
 
 haskellConName :: Parser String
-haskellConName = (:) <$> oneOf "ABCDEFGHIJKLMNOPQRSTUVWXYZ" <*> (unpack <$> manyOf haskellNameChar)
+haskellConName = (:) <$> oneOf "ABCDEFGHIJKLMNOPQRSTUVWXYZ" <*> (many $ MP.oneOf haskellNameChar)
 
 haskellNameChar :: String
 {-# INLINABLE haskellNameChar #-}
-haskellNameChar = "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+haskellNameChar = "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'"
 
 parseHaskellTerm :: Parser Haskell
 parseHaskellTerm = do
@@ -46,7 +48,7 @@ parseHaskellTerm = do
 
 parseHaskellApp :: Parser Haskell
 parseHaskellApp = do
-  a <- sepBy1 parseHaskellElem sc
+  a <- sepBy1 parseHaskellElem (some $ MP.oneOf whiteSpaceWithoutNewline)
   return $ HApp a
 
 parseHaskellElem :: Parser Haskell
@@ -54,7 +56,7 @@ parseHaskellElem = choice
   [ HVar <$> haskellVarName
   , HCon <$> haskellConName
   , between (symbol "(") (symbol ")") parseHaskellTerm
-  , HString <$> (char '"' *> many (noneOf "\\\"" <|> (char '\\' *> oneOf "\\\"")) <* char '"' <* sc)
-  , try $ HScientific <$> parseScientific
-  , HInteger <$> parseInteger
+  , HString <$> (char '"' *> many (noneOf "\\\"" <|> (char '\\' *> oneOf "\\\"")) <* char '"')
+  , try (HInteger <$> parseInteger)
+  , HScientific <$> MP.scientific
   ]
