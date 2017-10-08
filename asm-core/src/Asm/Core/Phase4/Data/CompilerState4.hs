@@ -89,5 +89,9 @@ instance CpuData c => CSM34 (CSM4 c) where
   toolPoolGetPoolDefinitionC = state (\s -> (cs4PoolDefinition s, s))
   -- position
   toolPositionGetC = state (\s -> (cs4Position s, s))
-  setPositionC n v = state (\s -> ((), s{cs4Position = M.insert n v (cs4Position s)}))
+  setPositionC n v = state (\s -> ((), go s))
+    where
+      go s
+        | Just v == M.lookup n (cs4Position s) = s
+        | otherwise = s{cs4Position = M.insert n v (cs4Position s), cs4HasChanged = True}
   isPhase4C = return True
