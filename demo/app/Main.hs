@@ -14,6 +14,7 @@ import           System.Directory
 import           System.FilePath
 
 import           Demo.C64.Image
+import           Demo.Multi.UnRLE
 import           Demo.Output
 
 
@@ -51,6 +52,7 @@ runAll directory = do
     moduleResults =
       concat
         [ moduleC64Image
+        , moduleMultiUnRLE
         ]
   forM_ (concat $ map moFiles moduleResults) $ \(fileName, fileData) ->
     BSL.writeFile (directory </> fileName) (toLazyByteString fileData)

@@ -62,12 +62,14 @@ library {
   }
   exposed-modules: {
     Demo.C64.Image
+    Demo.Multi.UnRLE
     Demo.Output
   }
   build-depends:
     -- assembler
     { asm-core == 0.4.*
     , asm-c64 == 0.4.*
+    , asm-cpu6809 == 0.4.*
     , asm-cpu6502 == 0.4.*
     -- other resources
     , base

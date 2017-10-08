@@ -13,6 +13,7 @@ import qualified Data.Vector.Storable    as SV
 
 import           Asm.C64
 
+import           Demo.Multi.UnRLE
 import           Demo.Output
 
 
