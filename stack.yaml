@@ -40,6 +40,7 @@ packages:
 - 'asm-data'
 - 'asm-parser'
 - 'asm-cpu6502'
+- 'asm-cpu6809'
 - 'asm-c64'
 - 'asm-tools'
 - 'demo'
