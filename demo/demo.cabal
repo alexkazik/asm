@@ -1,7 +1,7 @@
 name:
   demo
 version:
-  0.4.0
+  0.4.1
 synopsis:
   A few demo programs using the assembler
 homepage:
@@ -67,10 +67,10 @@ library {
   }
   build-depends:
     -- assembler
-    { asm-core == 0.4.*
-    , asm-c64 == 0.4.*
-    , asm-cpu6809 == 0.4.*
-    , asm-cpu6502 == 0.4.*
+    { asm-core == 0.4.1
+    , asm-c64 == 0.4.1
+    , asm-cpu6809 == 0.4.1
+    , asm-cpu6502 == 0.4.1
     -- other resources
     , base
     , bytestring

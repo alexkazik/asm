@@ -1,7 +1,7 @@
 name:
   asm-data
 version:
-  0.4.0
+  0.4.1
 synopsis:
   Data structures used by the assembler but not specific to it
 homepage:

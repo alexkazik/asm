@@ -1,7 +1,7 @@
 name:
   asm-cpu6502
 version:
-  0.4.0
+  0.4.1
 synopsis:
   The 6502 Cpu specific parts of the assembler
 homepage:
@@ -52,9 +52,9 @@ library {
     Asm.Cpu6502.Suffixed
   }
   build-depends:
-    { asm-core == 0.4.*
-    , asm-data == 0.4.*
-    , asm-parser == 0.4.*
+    { asm-core == 0.4.1
+    , asm-data == 0.4.1
+    , asm-parser == 0.4.1
     , base
     , containers
     , extra

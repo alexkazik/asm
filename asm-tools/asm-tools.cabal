@@ -1,7 +1,7 @@
 name:
   asm-tools
 version:
-  0.4.0
+  0.4.1
 synopsis:
   Tools used by the platform modules
 homepage:
@@ -41,8 +41,8 @@ library {
     Asm.Tools.Image.Internal
   }
   build-depends:
-    { asm-core == 0.4.*
-    , asm-data == 0.4.*
+    { asm-core == 0.4.1
+    , asm-data == 0.4.1
     , base
     , bytestring
     , containers
