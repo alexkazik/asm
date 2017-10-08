@@ -4,10 +4,22 @@
 
 module Demo.Output where
 
+import           Data.ByteString.Builder
+
 import           Asm.Core.Compiler
 
 
-moduleOutput :: String -> CompilerResult c -> String
-moduleOutput moduleName compilerResult =
-    "Module: " ++ moduleName ++ "\n" ++
-    show (crPoolsStats compilerResult) ++ "\n"
+data ModuleOutput
+  = ModuleOutput
+    { moName  :: String
+    , moStats :: String
+    , moFiles :: [(FilePath, Builder)]
+    }
+
+moduleOutput :: String -> CompilerResult c -> [(FilePath, Builder)] -> ModuleOutput
+moduleOutput moduleName compilerResult files =
+  ModuleOutput
+    { moName = moduleName
+    , moStats = show (crPoolsStats compilerResult)
+    , moFiles = files
+    }

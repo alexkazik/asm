@@ -14,6 +14,7 @@ import           System.Directory
 import           System.FilePath
 
 import           Demo.C64.Image
+import           Demo.Output
 
 
 data Options
@@ -48,8 +49,12 @@ runAll directory = do
   unless outputExists $ error "Error: output directory does not exists"
   let
     moduleResults =
-      [ moduleC64Image
-      ]
-  forM_ (concat $ map snd moduleResults) $ \(fileName, fileData) ->
+      concat
+        [ moduleC64Image
+        ]
+  forM_ (concat $ map moFiles moduleResults) $ \(fileName, fileData) ->
     BSL.writeFile (directory </> fileName) (toLazyByteString fileData)
-  putStr (concat $ map fst moduleResults)
+  putStr (concat $ map printInfo moduleResults)
+  where
+    printInfo mo =
+      "Module " ++ moName mo ++ "\n" ++ moStats mo ++ "\n"

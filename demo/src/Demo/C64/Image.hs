@@ -26,14 +26,15 @@ imageRle = SV.convert $ compressRLE $ createScreenAndBitmap $ withSlicesOf 8 8 (
 source :: Asm
 source = $(asmFile "./demo.asm")
 
-moduleC64Image :: (String, [(FilePath, Builder)])
+moduleC64Image :: [ModuleOutput]
 moduleC64Image =
   let
     cr = compile source
     Just (poolStart, poolData) = lookup "out" (crPoolsWithData cr)
   in
-    (
-      moduleOutput "c64-image" cr
-    , [ ("c64-image.prg", word16LE (fromIntegral poolStart) <> poolDataToByteStringBuilder 0 poolData)
-      ]
-    )
+    [ moduleOutput
+        "c64-image"
+        cr
+        [ ("c64-image.prg", word16LE (fromIntegral poolStart) <> poolDataToByteStringBuilder 0 poolData)
+        ]
+    ]

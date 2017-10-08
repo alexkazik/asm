@@ -62,8 +62,6 @@ library {
   }
   exposed-modules: {
     Demo.C64.Image
-  }
-  other-modules: {
     Demo.Output
   }
   build-depends:
