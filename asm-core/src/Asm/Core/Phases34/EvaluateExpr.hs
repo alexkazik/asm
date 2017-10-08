@@ -36,7 +36,7 @@ evaluateExprC x@(E4LoopVariable loc l) = do
     (return (KDData TDInt, x))
     (printErrorC $ (loc, "ELoopVariable: " ++ show l):[sourcePos||])
     isPhase4
-evaluateExprC x@(E4Meta _ m) = return (KDMeta m, x)
+evaluateExprC x@(E4Meta _ m _) = return (KDMeta m, x)
 evaluateExprC x@E4ConstBool{} = return (KDData TDBool, x)
 evaluateExprC x@E4ConstInt{} = return (KDData TDInt, x)
 evaluateExprC x@E4ConstMaskedInt{} = return (KDData TDMaskedInt, x)

@@ -45,6 +45,9 @@ applyMetaExprC (E3DerefStruct loc s e) = do
     (E4NamespaceRef l1 n) -> do
       l' <- resolveNameC [sourcePos||] loc e n
       applyMetaExprC (E3LabelRef l1 l')
+    (E4Meta l1 _ n) -> do
+      l' <- resolveNameC [sourcePos||] loc e n
+      applyMetaExprC (E3LabelRef l1 l')
     _ -> return (E4DerefStruct loc s' e)
 applyMetaExprC (E3Function loc f es) = do
   es' <- mapM applyMetaExprC es
@@ -83,7 +86,7 @@ applyMetaExprC (E3LabelRef loc l) =
     (_, KDTypeInExpr) -> do
         t <- getTypeInExprC l
         applyMetaExprC t
-    (_, KDMeta m) -> return (E4Meta loc m)
+    (_, KDMeta m) -> return (E4Meta loc m l)
     (_, KDLoopVariable) -> return (E4LoopVariable loc l)
     (loc', x) -> printErrorC $ (loc, "type of labelref unknown: " ++ showPretty x):(loc', "definition"):[sourcePos||]
 applyMetaExprC (E3MagicValue loc a) = return (E4MagicValue loc a)

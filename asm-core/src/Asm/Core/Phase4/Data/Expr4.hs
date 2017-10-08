@@ -47,7 +47,7 @@ data Expr4 c
   | E4Function Location !FunctionKey ![Expr4 c]
   -- Reference to Namespace/Variable/TypeDefinition
   | E4NamespaceRef Location !Reference
-  | E4Meta Location !MetaKey
+  | E4Meta Location !MetaKey !Reference
   | E4LoopVariable Location !Reference
   | E4MagicValue Location !Text
 
@@ -93,7 +93,7 @@ instance CpuData c => PrettySrc (Expr4 c) where
           _              -> return $ pshow f ++ pretty '(' ++ encloseSep mempty mempty ", " ps' ++ pretty ')'
       go (E4RangedInt _ _l _h _no _s) = return "!EAddressRange"
       go (E4NamespaceRef _ n) = return $ "!E4NamespaceRef " ++ pretty n
-      go (E4Meta _ n) = return $ "!E4Meta " ++ pshow n
+      go (E4Meta _ n r) = return $ "!E4Meta " ++ pshow n ++ " (" ++ pretty r ++ ")"
       go (E4LoopVariable _ n) = return $ "!E4LoopVariable " ++ pretty n
       go (E4MagicValue _ v) = return $ pretty '#' ++ pretty v
 
@@ -115,7 +115,7 @@ instance LocationOf (Expr4 c) where
   locationOf (E4DerefStruct loc _ _)       = loc
   locationOf (E4Function loc _ _)          = loc
   locationOf (E4NamespaceRef loc _)        = loc
-  locationOf (E4Meta loc _)                = loc
+  locationOf (E4Meta loc _ _)              = loc
   locationOf (E4LoopVariable loc _)        = loc
   locationOf (E4RangedInt loc _ _ _ _)     = loc
   locationOf (E4Type loc _ _)              = loc
