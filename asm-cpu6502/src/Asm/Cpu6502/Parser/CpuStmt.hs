@@ -24,8 +24,8 @@ parseStmtCpu6502 :: Parser PStmtCpu6502
 parseStmtCpu6502 = do
   op <-
     choice $
-      map (\(s,o) -> identifier' s *> pure o) $
-        sortOn (\(s,_) -> negate $ length s)
+      map (\(s, o) -> identifier' s *> pure o) $
+        sortOn (\(s, _) -> negate $ length s)
           opcodeNames
   choice
     [ try (parseInline op)

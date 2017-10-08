@@ -8,6 +8,7 @@ import           Asm.Core.Data.KindDefinition
 import           Asm.Core.Data.MetaKey
 import           Asm.Core.Data.Reference
 import           Asm.Core.Data.TypeDefinition
+import           Asm.Core.Flags
 import           Asm.Core.Phase3.CompilerState3
 import           Asm.Core.Phase3.MetaData
 import           Asm.Core.Phase4.Data.Expr4
@@ -84,8 +85,9 @@ sizeC _ _                                             = return FnrNoMatch
 sizeC' :: (CSM34 m, Cpu c) => Location -> Reference -> m (FunctionResult c)
 sizeC' loc name = do
   sta <- getPoolStateC name
-  traceM $ "size" ++ show name ++ " " ++ show (psLengthLow sta) ++ " " ++ show (psLengthHigh sta)
-  traceM $ show sta
+  when flagDebugCompiler $ do
+    traceM $ "size" ++ show name ++ " " ++ show (psLengthLow sta) ++ " " ++ show (psLengthHigh sta)
+    traceM $ show sta
   if InfInt64 (psLengthLow sta) == psLengthHigh sta
     then return $ FnrResult (KDData TDInt, E4ConstInt loc $ psLengthLow sta)
     else return $ FnrRangedInt (InfInt64 (psLengthLow sta)) (psLengthHigh sta) Nothing

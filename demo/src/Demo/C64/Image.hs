@@ -15,6 +15,7 @@ import           Asm.C64
 
 import           Demo.Output
 
+
 imageRle :: Vector ByteValSimple
 imageRle = SV.convert $ compressRLE $ createScreenAndBitmap $ withSlicesOf 8 8 (renderHiresL 15) $(imageWithUpdate "./image.png")
   where

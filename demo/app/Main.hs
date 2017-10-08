@@ -15,6 +15,7 @@ import           System.FilePath
 
 import           Demo.C64.Image
 
+
 data Options
   = Options
     { optionsOutput  :: FilePath
