@@ -1,7 +1,7 @@
 name:
   demo
 version:
-  0.4.1
+  0.4.2
 synopsis:
   A few demo programs using the assembler
 homepage:
@@ -69,7 +69,7 @@ library {
     -- assembler
     { asm-core == 0.4.1
     , asm-c64 == 0.4.1
-    , asm-cpu6809 == 0.4.1
+    , asm-cpu6809 == 0.4.2
     , asm-cpu6502 == 0.4.1
     -- other resources
     , base

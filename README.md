@@ -25,7 +25,7 @@ CPUs
 ----
 
 - 6502, 6502 with illegals, 65c02
-- 6809 (in progress)
+- 6809, partial 6309
 - open framefork to add more
 
 
@@ -49,4 +49,4 @@ TODO
 - Documentation of the source of the compiler
 - Nicer error messages
 - More/better examples
-- Atari and 6809 support
+- Atari support

@@ -1,7 +1,7 @@
 name:
   asm-cpu6809
 version:
-  0.4.1
+  0.4.2
 synopsis:
   The 6809 Cpu specific parts of the assembler
 homepage:
