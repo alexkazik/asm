@@ -68,6 +68,20 @@ cpu6809OptimiseLocalStmtBlockC = return . go
           : block
           )
           = CS5Final{s5fCode = [opc|ldd.imm|], s5fData = dataA ++ dataB} : go block
+    -- lde.imm ; ldf.imm -> ldw.imm
+    go
+      (     CS5Final{s5fCode = [opc|lde.imm|], s5fData = dataA}
+          : CS5Final{s5fCode = [opc|ldf.imm|], s5fData = dataB}
+          : block
+          )
+          = CS5Final{s5fCode = [opc|ldw.imm|], s5fData = dataA ++ dataB} : go block
+    -- ldf.imm ; lde.imm -> ldw.imm
+    go
+      (     CS5Final{s5fCode = [opc|ldf.imm|], s5fData = dataB}
+          : CS5Final{s5fCode = [opc|lde.imm|], s5fData = dataA}
+          : block
+          )
+          = CS5Final{s5fCode = [opc|ldw.imm|], s5fData = dataA ++ dataB} : go block
     -- merge two following data segments together
     go
       (     CS5Data{s5dExpr = dataA}

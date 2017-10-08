@@ -73,13 +73,17 @@ mkOpCodes
   # page 1
 
   neg.dir      00 [6809,6309] byte
+  # oim.immdir 01      [6309] byte
+  # aim.immdir 02      [6309] byte
   com.dir      03 [6809,6309] byte
   lsr.dir      04 [6809,6309] byte
+  # eim.immdir 05      [6309] byte
   ror.dir      06 [6809,6309] byte
   asr.dir      07 [6809,6309] byte
   lsl.dir      08 [6809,6309] byte
   rol.dir      09 [6809,6309] byte
   dec.dir      0a [6809,6309] byte
+  # tim.immdir 0b      [6309] byte
   inc.dir      0c [6809,6309] byte
   tst.dir      0d [6809,6309] byte
   jmp.dir      0e [6809,6309] code
@@ -87,6 +91,7 @@ mkOpCodes
 
   nop.imp      12 [6809,6309]
   sync.imp     13 [6809,6309]
+  sexw.imp     14      [6309]
   lbra.rel16   16 [6809,6309]
   lbsr.rel16   17 [6809,6309]
   daa.imp      19 [6809,6309]
@@ -154,26 +159,34 @@ mkOpCodes
   clrb.imp     5f [6809,6309]
 
   neg.idx      60 [6809,6309] byte
+  # oim.immidx 61      [6309] byte
+  # aim.immidx 62      [6309] byte
   com.idx      63 [6809,6309] byte
   lsr.idx      64 [6809,6309] byte
+  # eim.immidx 65      [6309] byte
   ror.idx      66 [6809,6309] byte
   asr.idx      67 [6809,6309] byte
   lsl.idx      68 [6809,6309] byte
   rol.idx      69 [6809,6309] byte
   dec.idx      6a [6809,6309] byte
+  # tim.immidx 6b      [6309] byte
   inc.idx      6c [6809,6309] byte
   tst.idx      6d [6809,6309] byte
   jmp.idx      6e [6809,6309] code
   clr.idx      6f [6809,6309] byte
 
   neg.ext      70 [6809,6309] byte
+  # oim.immext 71      [6309] byte
+  # aim.immext 72      [6309] byte
   com.ext      73 [6809,6309] byte
   lsr.ext      74 [6809,6309] byte
+  # eim.immext 75      [6309] byte
   ror.ext      76 [6809,6309] byte
   asr.ext      77 [6809,6309] byte
   lsl.ext      78 [6809,6309] byte
   rol.ext      79 [6809,6309] byte
   dec.ext      7a [6809,6309] byte
+  # tim.immext 7b      [6309] byte
   inc.ext      7c [6809,6309] byte
   tst.ext      7d [6809,6309] byte
   jmp.ext      7e [6809,6309] code
@@ -257,6 +270,7 @@ mkOpCodes
   orb.imm8     ca [6809,6309]
   addb.imm8    cb [6809,6309]
   ldd.imm16    cc [6809,6309]
+  ldq.imm16    cd      [6309]
   ldu.imm16    ce [6809,6309]
 
   subb.dir     d0 [6809,6309] byte
@@ -329,60 +343,225 @@ mkOpCodes
   lbgt.rel16 102e [6809,6309]
   lble.rel16 102f [6809,6309]
 
+  addr.imm8  1030      [6309]
+  adcr.imm8  1031      [6309]
+  subr.imm8  1032      [6309]
+  sbcr.imm8  1033      [6309]
+  andr.imm8  1034      [6309]
+  orr.imm8   1035      [6309]
+  eorr.imm8  1036      [6309]
+  cmpr.imm8  1037      [6309]
+  pshsw.imm8 1038      [6309]
+  pulsw.imm8 1039      [6309]
+  pshuw.imm8 103a      [6309]
+  puluw.imm8 103b      [6309]
   swi2.imp   103f [6809,6309]
 
+  negd.imp   1040      [6309]
+  comd.imp   1043      [6309]
+  lsrd.imp   1044      [6309]
+  rord.imp   1046      [6309]
+  asrd.imp   1047      [6309]
+  lsld.imp   1048      [6309]
+  rold.imp   1049      [6309]
+  decd.imp   104a      [6309]
+  incd.imp   104c      [6309]
+  tstd.imp   104d      [6309]
+  clrd.imp   104f      [6309]
+
+  negw.imp   1050      [6309]
+  comw.imp   1053      [6309]
+  lsrw.imp   1054      [6309]
+  rorw.imp   1056      [6309]
+  asrw.imp   1057      [6309]
+  lslw.imp   1058      [6309]
+  decw.imp   105a      [6309]
+  incw.imp   105c      [6309]
+  tstw.imp   105d      [6309]
+  clrw.imp   105f      [6309]
+
+  subw.imm16 1080      [6309]
+  cmpw.imm16 1081      [6309]
+  sbcd.imm16 1082      [6309]
   cmpd.imm16 1083 [6809,6309]
+  andd.imm16 1084      [6309]
+  bitd.imm16 1085      [6309]
+  ldw.imm16  1086      [6309]
+  eord.imm16 1088      [6309]
+  adcd.imm16 1089      [6309]
+  ord.imm16  108a      [6309]
+  addw.imm16 108b      [6309]
   cmpy.imm16 108c [6809,6309]
   ldy.imm16  108e [6809,6309]
 
+  subw.dir   1090      [6309] byte
+  cmpw.dir   1091      [6309] byte
+  sbcd.dir   1092      [6309] byte
   cmpd.dir   1093 [6809,6309] byte
+  andd.dir   1094      [6309] byte
+  bitd.dir   1095      [6309] byte
+  ldw.dir    1096      [6309] byte
+  stw.dir    1097      [6309] byte
+  eord.dir   1098      [6309] byte
+  adcd.dir   1099      [6309] byte
+  ord.dir    109a      [6309] byte
+  addw.dir   109b      [6309] byte
   cmpy.dir   109c [6809,6309] byte
   ldy.dir    109e [6809,6309] byte
   sty.dir    109f [6809,6309] byte
 
+  subw.idx   10a0      [6309] byte
+  cmpw.idx   10a1      [6309] byte
+  sbcd.idx   10a2      [6309] byte
   cmpd.idx   10a3 [6809,6309] byte
+  andd.idx   10a4      [6309] byte
+  bitd.idx   10a5      [6309] byte
+  ldw.idx    10a6      [6309] byte
+  stw.idx    10a7      [6309] byte
+  eord.idx   10a8      [6309] byte
+  adcd.idx   10a9      [6309] byte
+  ord.idx    10aa      [6309] byte
+  addw.idx   10ab      [6309] byte
   cmpy.idx   10ac [6809,6309] byte
   ldy.idx    10ae [6809,6309] byte
   sty.idx    10af [6809,6309] byte
 
+  subw.ext   10b0      [6309] byte
+  cmpw.ext   10b1      [6309] byte
+  sbcd.ext   10b2      [6309] byte
   cmpd.ext   10b3 [6809,6309] byte
+  andd.ext   10b4      [6309] byte
+  bitd.ext   10b5      [6309] byte
+  ldw.ext    10b6      [6309] byte
+  stw.ext    10b7      [6309] byte
+  eord.ext   10b8      [6309] byte
+  adcd.ext   10b9      [6309] byte
+  ord.ext    10ba      [6309] byte
+  addw.ext   10bb      [6309] byte
   cmpy.ext   10bc [6809,6309] byte
   ldy.ext    10be [6809,6309] byte
   sty.ext    10bf [6809,6309] byte
 
   lds.imm16  10ce [6809,6309]
 
+  ldq.dir    10dc      [6309] byte
+  stq.dir    10dd      [6309] byte
   lds.dir    10de [6809,6309] byte
   sts.dir    10df [6809,6309] byte
 
+  ldq.idx    10ec      [6309] byte
+  stq.idx    10ed      [6309] byte
   lds.idx    10ee [6809,6309] byte
   sts.idx    10ef [6809,6309] byte
 
+  ldq.ext    10fc      [6309] byte
+  stq.ext    10fd      [6309] byte
   lds.ext    10fe [6809,6309] byte
   sts.ext    10ff [6809,6309] byte
 
 
   # page 3
 
+  # band.bitdir  1130      [6309] byte
+  # biand.bitdir 1131      [6309] byte
+  # bor.bitdir   1132      [6309] byte
+  # bior.bitdir  1133      [6309] byte
+  # beor.bitdir  1134      [6309] byte
+  # bieor.bitdir 1135      [6309] byte
+  # ldbt.bitdir  1136      [6309] byte
+  # stbt.bitdir  1137      [6309] byte
+  tfmii.imm8 1138      [6309]
+  tfmdd.imm8 1139      [6309]
+  tfmik.imm8 113a      [6309]
+  tfmki.imm8 113b      [6309]
+  bitmd.imm8 113c      [6309]
+  ldmd.imm8  113d      [6309]
   swi3.imp   113f [6809,6309]
 
+  come.imp   1143      [6309]
+  dece.imp   114a      [6309]
+  ince.imp   114c      [6309]
+  tste.imp   114d      [6309]
+  clre.imp   114f      [6309]
+
+  comf.imp   1153      [6309]
+  decf.imp   115a      [6309]
+  incf.imp   115c      [6309]
+  tstf.imp   115d      [6309]
+  clrf.imp   115f      [6309]
+
+  sube.imm8  1180      [6309]
+  cmpe.imm8  1181      [6309]
   cmpu.imm16 1183 [6809,6309]
+  lde.imm8   1186      [6309]
+  adde.imm8  118b      [6309]
   cmps.imm16 118c [6809,6309]
+  divd.imm8  118d      [6309]
+  divq.imm16 118e      [6309]
+  muld.imm16 118f      [6309]
 
+  sube.dir   1190      [6309] byte
+  cmpe.dir   1191      [6309] byte
   cmpu.dir   1193 [6809,6309] byte
+  lde.dir    1196      [6309] byte
+  ste.dir    1197      [6309] byte
+  adde.dir   119b      [6309] byte
   cmps.dir   119c [6809,6309] byte
+  divd.dir   119d      [6309] byte
+  divq.dir   119e      [6309] byte
+  muld.dir   119f      [6309] byte
 
+  sube.idx   11a0      [6309] byte
+  cmpe.idx   11a1      [6309] byte
   cmpu.idx   11a3 [6809,6309] byte
+  lde.idx    11a6      [6309] byte
+  ste.idx    11a7      [6309] byte
+  adde.idx   11ab      [6309] byte
   cmps.idx   11ac [6809,6309] byte
+  divd.idx   11ad      [6309] byte
+  divq.idx   11ae      [6309] byte
+  muld.idx   11af      [6309] byte
 
+  sube.ext   11b0      [6309] byte
+  cmpe.ext   11b1      [6309] byte
   cmpu.ext   11b3 [6809,6309] byte
+  lde.ext    11b6      [6309] byte
+  ste.ext    11b7      [6309] byte
+  adde.ext   11bb      [6309] byte
   cmps.ext   11bc [6809,6309] byte
+  divd.ext   11bd      [6309] byte
+  divq.ext   11be      [6309] byte
+  muld.ext   11bf      [6309] byte
+
+  subf.imm8  11c0      [6309]
+  cmpf.imm8  11c1      [6309]
+  ldf.imm8   11c6      [6309]
+  addf.imm8  11cb      [6309]
+
+  subf.dir   11d0      [6309] byte
+  cmpf.dir   11d1      [6309] byte
+  ldf.dir    11d6      [6309] byte
+  stf.dir    11d7      [6309] byte
+  addf.dir   11db      [6309] byte
+
+  subf.idx   11e0      [6309] byte
+  cmpf.idx   11e1      [6309] byte
+  ldf.idx    11e6      [6309] byte
+  stf.idx    11e7      [6309] byte
+  addf.idx   11eb      [6309] byte
+
+  subf.ext   11f0      [6309] byte
+  cmpf.ext   11f1      [6309] byte
+  ldf.ext    11f6      [6309] byte
+  stf.ext    11f7      [6309] byte
+  addf.ext   11fb      [6309] byte
 
   |]
   -- aliases
   [ ("asl", "lsl")
   , ("asla", "lsla")
   , ("aslb", "lslb")
+  , ("asld", "lsld")
   , ("bhs", "bcc")
   , ("blo", "bcs")
   ]

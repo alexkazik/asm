@@ -12,7 +12,7 @@ import           Asm.Cpu6809.Data.OpCodes
 import           Asm.Cpu6809.OpCodes.Quote
 
 parseCpu6809Stmt :: Parser PStmtCpu6809
-parseCpu6809Stmt = parseData <|> parseStmtCpu6809
+parseCpu6809Stmt = parseData <|> try parseTfm <|> parseStmtCpu6809
 
 parseData :: Parser PStmtCpu6809
 parseData = do
@@ -31,8 +31,23 @@ parseStmtCpu6809 = do
     extraParsers
       | fromOperator op `elem` [ [opc|pshs.imm|], [opc|pshu.imm|], [opc|puls.imm|], [opc|pulu.imm|] ]
           = [ try (parsePshPul op) ]
-      | fromOperator op `elem` [ [opc|tfr.imm|], [opc|exg.imm|] ]
-          = [ try (parseTfrExg op) ]
+      | fromOperator op `elem`
+          [ [opc|tfr.imm|]
+          , [opc|exg.imm|]
+          , [opc|addr.imm|]
+          , [opc|adcr.imm|]
+          , [opc|subr.imm|]
+          , [opc|sbcr.imm|]
+          , [opc|andr.imm|]
+          , [opc|orr.imm|]
+          , [opc|eorr.imm|]
+          , [opc|cmpr.imm|]
+          , [opc|tfmii.imm|]
+          , [opc|tfmdd.imm|]
+          , [opc|tfmik.imm|]
+          , [opc|tfmki.imm|]
+          ]
+          = [ try (parseRegisterOp op) ]
       | otherwise = []
   choice $
     extraParsers ++
@@ -63,29 +78,57 @@ parsePshPul op = do
         , symbol' "pc" *> pure 128
         ]
 
-parseTfrExg :: Asm.Cpu6809.Data.OpCodes.Operator -> Parser PStmtCpu6809
-parseTfrExg op = do
+parseRegisterOp :: Asm.Cpu6809.Data.OpCodes.Operator -> Parser PStmtCpu6809
+parseRegisterOp op = do
   _ <- optional $ string' ".imm"
   sc
   loc <- getPosition
-  src <- register
+  src <- parseInterRegister
   symbol ","
-  dst <- register
+  dst <- parseInterRegister
   return $ PSRegular op [AMImm] (Just (loc, PEConstInt $ (src `shiftL` 4) .|. dst))
+
+parseInterRegister :: Parser Int64
+parseInterRegister =
+  choice
+    [ symbol' "d"  *> pure 0b0000
+    , symbol' "x"  *> pure 0b0001
+    , symbol' "y"  *> pure 0b0010
+    , symbol' "u"  *> pure 0b0011
+    , symbol' "s"  *> pure 0b0100
+    , symbol' "pc" *> pure 0b0101
+    , symbol' "w"  *> pure 0b0110 -- 6309 only
+    , symbol' "v"  *> pure 0b0111 -- 6309 only
+    , symbol' "a"  *> pure 0b1000
+    , symbol' "b"  *> pure 0b1001
+    , symbol' "cc" *> pure 0b1010
+    , symbol' "dp" *> pure 0b1011
+    , symbol' "n"  *> pure 0b1100 -- 6309 only
+    , symbol' "m"  *> pure 0b1101 -- 6309 only
+    , symbol' "e"  *> pure 0b1110 -- 6309 only
+    , symbol' "f"  *> pure 0b1111 -- 6309 only
+    ]
+
+parseTfm :: Parser PStmtCpu6809
+parseTfm = do
+  rword' "tfm"
+  _ <- optional $ string' ".imm"
+  sc
+  loc <- getPosition
+  src <- parseInterRegister
+  srcMode <- optional parseIncDec
+  symbol ","
+  dst <- parseInterRegister
+  dstMode <- optional parseIncDec
+  op' <- op srcMode dstMode
+  return $ PSRegular op' [AMImm] (Just (loc, PEConstInt $ (src `shiftL` 4) .|. dst))
   where
-    register =
-      choice
-        [ symbol' "d"  *> pure 0b0000
-        , symbol' "x"  *> pure 0b0001
-        , symbol' "y"  *> pure 0b0010
-        , symbol' "u"  *> pure 0b0011
-        , symbol' "s"  *> pure 0b0100
-        , symbol' "pc" *> pure 0b0101
-        , symbol' "a"  *> pure 0b1000
-        , symbol' "b"  *> pure 0b1001
-        , symbol' "cc" *> pure 0b1010
-        , symbol' "dp" *> pure 0b1011
-        ]
+    parseIncDec = (symbol "+" *> pure True) <|> (symbol "-" *> pure False)
+    op (Just True)  (Just True)  = return $ Operator [opc|tfmii.imm|]
+    op (Just False) (Just False) = return $ Operator [opc|tfmdd.imm|]
+    op (Just True)   Nothing     = return $ Operator [opc|tfmik.imm|]
+    op  Nothing     (Just True)  = return $ Operator [opc|tfmki.imm|]
+    op _ _                       = fail "Unsupported tfm mode"
 
 parseInline :: Asm.Cpu6809.Data.OpCodes.Operator -> Parser PStmtCpu6809
 parseInline op = do

@@ -31,7 +31,7 @@ unrle6809 = [asm6809|
     bra run
 
   copy:
-    suba 0x7f -- substract 0x80 to remove the topmost bit, add 1
+    suba 0x7f -- subtract 0x80 to remove the topmost bit, add 1
   copy_loop:
     ldb ,X+
     stb ,Y+
@@ -52,6 +52,40 @@ demo6809 = [asm6809|
     set meta.cpu = #6809
     pool out = 0x0000
     $block unrle6809 @out
+  |]
+
+unrle6309 :: Asm6809
+unrle6309 = [asm6809|
+    // This code can be relocated
+    // E: must be zero!
+    // X: ptr to input
+    // Y: ptr to output
+    // start with "jsr unrle.run"
+
+  fill:
+    addf 2
+    tfm X, Y+
+    leax 1, X -- X = X + 1
+    bra run
+
+  copy:
+    subf 0x7f -- subtract 0x80 to remove the topmost bit, add 1
+    tfm X+, Y+
+
+  run:
+    ldf ,X+
+    bmi copy
+    bne fill
+
+  done:
+    rts
+  |]
+
+demo6309 :: Asm6809
+demo6309 = [asm6809|
+    set meta.cpu = #6309
+    pool out = 0x0000
+    $block unrle6309 @out
   |]
 
 unrle6502 :: LabelName -> Expr6502 -> Asm6502
@@ -136,12 +170,17 @@ moduleMultiUnRLE :: [ModuleOutput]
 moduleMultiUnRLE =
   let
     cr6809 = compile6809 demo6809
+    cr6309 = compile6809 demo6309
     cr6502 = compile6502 demo6502
   in
     [ moduleOutput
         "multi-unrle (6809)"
         cr6809
         [ ("unrle-6809.bin", poolDataToByteStringBuilder 0 (getOut cr6809)) ]
+    , moduleOutput
+        "multi-unrle (6309)"
+        cr6309
+        [ ("unrle-6309.bin", poolDataToByteStringBuilder 0 (getOut cr6309)) ]
     , moduleOutput
         "multi-unrle (6502)"
         cr6502
