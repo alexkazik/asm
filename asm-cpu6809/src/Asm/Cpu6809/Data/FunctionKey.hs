@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module Asm.Cpu6809.Data.FunctionKey
   ( module Asm.Core.Data.FunctionKey
   , module Asm.Cpu6809.Data.FunctionKey

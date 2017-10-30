@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskellQuotes #-}
-
 module Asm.Core.SourcePos.Quasi
   ( sourcePos
   ) where

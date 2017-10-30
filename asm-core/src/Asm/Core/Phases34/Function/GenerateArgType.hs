@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskellQuotes #-}
-
 module Asm.Core.Phases34.Function.GenerateArgType where
 
 import           Asm.Core.Prelude

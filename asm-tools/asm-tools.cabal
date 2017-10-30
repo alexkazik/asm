@@ -66,5 +66,6 @@ library {
     RecordWildCards
     ScopedTypeVariables
     StandaloneDeriving
+    TemplateHaskell
   }
 }

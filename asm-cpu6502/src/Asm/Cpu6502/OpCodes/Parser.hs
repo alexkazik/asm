@@ -1,6 +1,4 @@
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TemplateHaskellQuotes #-}
 
 module Asm.Cpu6502.OpCodes.Parser
   ( AddressMode(..)

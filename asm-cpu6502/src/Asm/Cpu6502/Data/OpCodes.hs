@@ -1,5 +1,4 @@
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module Asm.Cpu6502.Data.OpCodes
   ( AddressMode(..)

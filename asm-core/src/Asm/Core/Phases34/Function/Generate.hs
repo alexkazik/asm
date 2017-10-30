@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module Asm.Core.Phases34.Function.Generate
   ( toAsmFunction
   , toAsmFunctionNoWild

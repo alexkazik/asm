@@ -1,7 +1,5 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TemplateHaskellQuotes #-}
 
 module Asm.Cpu6809.OpCodes.Generator
   ( AddressMode(..)

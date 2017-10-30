@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskellQuotes #-}
-
 module Asm.Core.Data.FunctionKey.Internal
   ( FunctionKey
   , functionKeyName

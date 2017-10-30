@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskellQuotes #-}
-
 module Asm.Tools.Image.Embed
   ( embedImage
   ) where

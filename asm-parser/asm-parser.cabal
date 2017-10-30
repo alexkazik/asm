@@ -97,5 +97,6 @@ library {
     QuasiQuotes
     ScopedTypeVariables
     StandaloneDeriving
+    TemplateHaskell
   }
 }

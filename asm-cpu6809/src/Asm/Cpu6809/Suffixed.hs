@@ -1,6 +1,5 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE TemplateHaskellQuotes #-}
 
 module Asm.Cpu6809.Suffixed
   ( module Asm.Core

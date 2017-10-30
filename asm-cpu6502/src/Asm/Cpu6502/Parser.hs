@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskellQuotes #-}
-
 module Asm.Cpu6502.Parser
   ( expr6502
   , asm6502

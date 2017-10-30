@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskellQuotes #-}
-
 module Asm.Parser.Quote
  ( module Asm.Parser.Quote
  , getPosition

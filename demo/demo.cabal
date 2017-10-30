@@ -83,5 +83,6 @@ library {
     NoImplicitPrelude
     OverloadedStrings
     QuasiQuotes
+    TemplateHaskell
   }
 }
