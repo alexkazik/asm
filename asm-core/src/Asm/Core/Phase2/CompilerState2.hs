@@ -9,6 +9,7 @@ import           Asm.Core.Prelude
 import qualified Data.Map.Strict                        as M
 import           Data.Proxy
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.Cpu
 import           Asm.Core.Data.FunctionKey
 import           Asm.Core.Data.KindDefinition
@@ -46,16 +47,19 @@ addTypeInExprC :: Cpu c => Reference -> Expr3 c -> CSM2 c ()
 addTypeInExprC k v = modify (\s -> s{cs2TypeInExpr = M.insert k v (cs2TypeInExpr s)})
 
 resolveNameC :: Cpu c => [(Location, String)] -> Location -> Text -> CSM2 c Reference
-resolveNameC errs loc name = state go
+resolveNameC errs loc name = do
+  gets go >>= \case
+    [] -> do
+      cs2Path' <- gets cs2Path
+      $throwFatalError ((loc, "Can't find name \"" ++ unpack name ++ "\" on path " ++ show cs2Path'):errs)
+    [path] -> return path
+    ps -> do
+      cs2Path' <- gets cs2Path
+      $throwFatalError ((loc, "1/Name \"" ++ unpack name ++ "\" is not unique on path " ++ show cs2Path'):([], show ps):errs)
   where
-    go s@CSt2{..} = case go' of
-      [] -> printErrorS s $ (loc, "Can't find name \"" ++ unpack name ++ "\" on path " ++ show cs2Path):errs++[sourcePos||]
-      [path] -> (path, s)
-      ps -> printErrorS s $ (loc, "1/Name \"" ++ unpack name ++ "\" is not unique on path " ++ show cs2Path):([], show ps):errs++[sourcePos||]
-      where
-        go'
-          | isPrefixOf "__" name = maybeToList $ R.lookup cs2Path name cs2Data
-          | otherwise = R.search cs2Path name cs2Data
+    go CSt2{..}
+      | isPrefixOf "__" name = maybeToList $ R.lookup cs2Path name cs2Data
+      | otherwise = R.search cs2Path name cs2Data
 
 getKindC :: Cpu c => Reference -> CSM2 c (Location, KindDefinition)
 getKindC i = gets (\CSt2{..} -> R.get i cs2Data)

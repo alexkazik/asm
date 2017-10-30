@@ -5,6 +5,7 @@ module Asm.Core.Phase3.Compiler
 import           Asm.Core.Prelude
 import qualified Data.Map                            as M
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.Cpu
 import           Asm.Core.Data.Reference
 import           Asm.Core.Phase2.Data.CompilerState2
@@ -18,12 +19,10 @@ import           Asm.Core.SourcePos
 import           Asm.Data.InfInt64
 
 
-compile3 :: Cpu c => (CompilerReader2 c, Stmt3Block c, CompilerState2 c, CompilerWriter2 c) -> (CompilerReader3 c, CompilerState3 c, CompilerWriter3 c)
-compile3 (r2, x2, s2, w2) =
-  let
-    ((), s3, w3) = runRWS go r3 (initialState3 r2 s2 w2)
-  in
-    (r3, s3, w3)
+compile3 :: Cpu c => (CompilerReader2 c, Stmt3Block c, CompilerState2 c, CompilerWriter2 c) -> Error CompilerError (CompilerReader3 c, CompilerState3 c, CompilerWriter3 c)
+compile3 (r2, x2, s2, w2) = do
+  ((), s3, w3) <- runRWST go r3 (initialState3 r2 s2 w2)
+  return (r3, s3, w3)
   where
     r3 = initialReader3 r2 s2 w2 functionKeyMap
     go = do
@@ -31,9 +30,7 @@ compile3 (r2, x2, s2, w2) =
       modify (\s -> s{cs3CallPaths = mergeCallPaths (cs3CallPaths s)})
       placeInPoolC x2 >>= \case
         [] -> return ()
-        (firstStmt:_) -> printErrorC $
-            (locationOf firstStmt, "Code at top level") :
-            [sourcePos||]
+        (firstStmt:_) -> $throwFatalError [(locationOf firstStmt, "Code at top level")]
       mapM_ setLowerBoundC =<< M.toList <$> getPositionsC
 
 setLowerBoundC :: Cpu c => (Reference, (Maybe Reference, Either (InfInt64, InfInt64) Int64)) -> CSM3 c ()

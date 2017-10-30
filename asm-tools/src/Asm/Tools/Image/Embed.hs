@@ -3,24 +3,26 @@ module Asm.Tools.Image.Embed
   ) where
 
 import           Asm.Core.Prelude
-import           Codec.Picture            as Juicy
-import qualified Data.ByteString          as BS
-import qualified Data.ByteString.Lazy     as BL
+import           Codec.Picture                  as Juicy
+import qualified Data.ByteString                as BS
+import qualified Data.ByteString.Lazy           as BL
 import           Data.ByteString.Unsafe
-import qualified Data.Vector.Storable     as SV
-import qualified Data.Vector.Unboxed      as UV
-import qualified Language.Haskell.TH      as TH
+import qualified Data.Vector.Storable           as SV
+import qualified Data.Vector.Unboxed            as UV
+import qualified Language.Haskell.TH            as TH
 import           System.Directory
 import           System.IO.Unsafe
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.File
-import           Asm.Core.SourcePos
+import           Asm.Core.SourcePos.Type
 
-import           Asm.Tools.Image.Internal (createImage)
+import           Asm.Tools.Image.Internal       (createImage)
 
 embedImage :: (Int -> SV.Vector Word8 -> (UV.Vector Word8, SV.Vector Word8)) -> Bool -> FilePath -> TH.Q TH.Exp
 {-# INLINE embedImage #-}
 embedImage conv doUpdate fp = do
+  pos <- getPosition
   fp' <- getRelativeFilePathQ True fp
 
   TH.runIO $ do
@@ -28,7 +30,7 @@ embedImage conv doUpdate fp = do
 
     let
       image = case decodePng origFile of
-        Left err  -> printError [(spInternal, err)]
+        Left err  -> $printError [([pos], err)]
         Right img -> convertRGBA8 img
 
       (convertedData, imageData') = conv (imageWidth image * imageHeight image) (imageData image)

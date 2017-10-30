@@ -9,6 +9,7 @@ import           Asm.Core.Prelude
 import qualified Data.Map.Strict                        as M
 import           Data.Proxy
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.Cpu
 import           Asm.Core.Data.KindDefinition
 import           Asm.Core.Data.MetaKey
@@ -61,8 +62,7 @@ initialState1 =
     initTree r (I (e, k, l):is) t =
       case insert' r e k t of
         Right (r', t') -> initTree r is (initTree r' l t')
-        -- Left r'        -> printError (([], "unable to create initial data: " ++ show (r, e, r')):[sourcePos|unable to create initial data|])
-        _              -> printError [sourcePos|unable to create initial data|]
+        Left r'        -> [printInternalError|unable to create initial data: ($r, $e, $r')|]
     insert' :: Reference -> Text -> KindDefinition -> R.Tree (Location, KindDefinition) -> Either Reference (Reference, R.Tree (Location, KindDefinition))
     insert' p e k d =
       either check Right $ R.insert p e (spBuiltin, k) d
@@ -76,20 +76,27 @@ addAliasC :: Cpu c => Reference -> Expr12 c -> CSM1 c ()
 addAliasC k v = tell mempty{cs1Aliases = M.singleton k v}
 
 addNameC :: Cpu c => Text -> (Location, KindDefinition) -> CSM1 c Reference
-addNameC name type'@(loc,_) = state go
-  where
-    go s@CSt1{..} =
-      case R.insert cs1Path name type' cs1Data of
-        Left _ref -> printErrorS s ((loc, "duplicate/1"):[sourcePos||])
-        Right (path, tree) ->
-          if isPrefixOf "~" name || cs1OnlySystemNames == 0
-            then
-              if isPrefixOf "__" name
-                then (path, s{cs1Data = tree})
-                else case R.link (headEx cs1AliasPath) name path tree of
-                  Left ref    -> printErrorS s $ (loc, "duplicate/2 name " ++ unpack name):([],"path: " ++ show cs1AliasPath):([],"dest: " ++ show ref):[sourcePos||]
-                  Right tree' -> (path, s{cs1Data = tree'})
-            else printErrorS s ((loc, "no names allowed"):[sourcePos||])
+addNameC name type'@(loc,_) = do
+  CSt1{..} <- get
+  case R.insert cs1Path name type' cs1Data of
+    Left ref -> do
+      $throwError [(loc, "duplicate/1")]
+      return ref
+    Right (path, tree) ->
+      if isPrefixOf "~" name || cs1OnlySystemNames == 0
+        then
+          if isPrefixOf "__" name
+            then do
+              modify (\s -> s{cs1Data = tree})
+              return path
+            else case R.link (headEx cs1AliasPath) name path tree of
+              Left ref    -> do
+                $throwError [(loc, "duplicate/2 name " ++ unpack name),([],"path: " ++ show cs1AliasPath),([],"dest: " ++ show ref)]
+                return ref
+              Right tree' -> do
+                modify (\s -> s{cs1Data = tree'})
+                return path
+        else $throwFatalError [(loc, "no names allowed")]
 
 getUniqueNameC :: Cpu c => CSM1 c Text
 getUniqueNameC = do

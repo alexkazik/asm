@@ -4,6 +4,7 @@ import           Asm.Core.Prelude
 import qualified Data.Map.Strict                     as M
 import qualified Data.Vector                         as V
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.ByteVal
 import           Asm.Core.Data.Cpu
 import           Asm.Core.Data.Reference
@@ -11,14 +12,15 @@ import           Asm.Core.Phase4.CompilerState4
 import           Asm.Core.Phase4.Data.PoolData
 import           Asm.Core.Phases.Data.PoolDefinition
 import           Asm.Core.Phases34.Data.PoolState
-import           Asm.Core.SourcePos
 import           Asm.Data.ByteValSimple
 
 getPoolsC :: Cpu c => CSM4 c (Map Reference (PoolData c))
 getPoolsC = gets cs4PoolData
 
 getPoolDataC :: Cpu c => Reference -> CSM4 c (PoolData c)
-getPoolDataC p = state (\s -> (fromMaybe (printErrorS s $ ([], "getPoolDataC " ++ show p ++ show (M.keys $ cs4PoolData s)):[sourcePos||]) $ M.lookup p (cs4PoolData s), s))
+getPoolDataC p = do
+  x <- M.lookup p <$> gets cs4PoolData
+  $fromJustOrError [([], "getPoolDataC " ++ show p)] x
 
 setPoolsC :: Cpu c => Map Reference (PoolData c) -> CSM4 c ()
 setPoolsC pools = modify (\s -> s{cs4PoolData = pools})

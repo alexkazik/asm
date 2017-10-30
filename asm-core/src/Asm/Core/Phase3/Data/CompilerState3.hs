@@ -13,6 +13,7 @@ import           Asm.Core.Prelude
 import qualified Data.Map.Strict                        as M
 import qualified Data.Set                               as S
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.CpuData
 import           Asm.Core.Data.FunctionKey
 import           Asm.Core.Data.KindDefinition
@@ -71,7 +72,7 @@ data CompilerState3 c
     }
 
 -- the monad it lives in
-type CSM3 c = RWS (CompilerReader3 c) (CompilerWriter3 c) (CompilerState3 c)
+type CSM3 c = RWST (CompilerReader3 c) (CompilerWriter3 c) (CompilerState3 c) (Error CompilerError)
 
 instance CpuData c => CompilerState1234S (CompilerState3 c) where
   dumpStateS s = displayPretty $ vsep

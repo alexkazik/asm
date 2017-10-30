@@ -6,6 +6,7 @@ import           Asm.Core.Prelude
 import qualified Data.Map.Strict                  as M
 import qualified Data.Vector                      as V
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.ByteVal
 import           Asm.Core.Data.ByteValPiece
 import           Asm.Core.Data.Cpu
@@ -30,7 +31,9 @@ import           Asm.Core.SourcePos
 
 
 placeInPoolC :: Cpu c => Stmt3Block c -> CSM3 c (Stmt4Block c)
-placeInPoolC block = concat <$> mapM placeStmtInPoolC block
+placeInPoolC block = concat <$> mapM (recoverFatalError [] . placeStmtInPoolC) block
+
+-- all following functions throws an fatal error, which is recovered above
 
 wrapMetaLevel :: Cpu c => CSM3 c a -> CSM3 c a
 wrapMetaLevel x = do
@@ -62,28 +65,28 @@ placeStmtInPoolC (S3MetaSet loc k v) = do
     (KDMeta k'', _) -> do
       setMetaExprC k'' v' loc
       return []
-    _ -> printError $ (loc, "set meta with non meta key"):[sourcePos||]
+    _ -> $throwFatalError [(loc, "set meta with non meta key")]
 placeStmtInPoolC (S3MetaUnset loc k) = do
   k' <- evaluateExprTopC =<< applyMetaExprC k
   case k' of
     (KDMeta k'', _) -> do
       unsetMetaExprC k''
       return []
-    _ -> printError $ (loc, "unset meta with non meta key"):[sourcePos||]
+    _ -> $throwFatalError [(loc, "unset meta with non meta key")]
 placeStmtInPoolC (S3MetaSticky loc k) = do
   k' <- evaluateExprTopC =<< applyMetaExprC k
   case k' of
     (KDMeta k'', _) -> do
       stickyMetaExprC k''
       return []
-    _ -> printError $ (loc, "sticky meta with non meta key"):[sourcePos||]
+    _ -> $throwFatalError [(loc, "sticky meta with non meta key")]
 placeStmtInPoolC (S3MetaUnsticky loc k) = do
   k' <- evaluateExprTopC =<< applyMetaExprC k
   case k' of
     (KDMeta k'', _) -> do
       unstickyMetaExprC k''
       return []
-    _ -> printError $ (loc, "unsticky meta with non meta key"):[sourcePos||]
+    _ -> $throwFatalError [(loc, "unsticky meta with non meta key")]
 
 -- remove the namespace layer
 placeStmtInPoolC (S3Namespace _ _ block) =
@@ -95,7 +98,7 @@ placeStmtInPoolC (S3Block loc _ poolMay block) =
     forM_ poolMay $ \pool -> do
       pool' <- evaluateExprTopC =<< applyMetaExprC pool
       setMetaExprC metaPoolCode pool' loc
-    pl <- fromMaybeC ((loc, "meta.pool.code is not set"):[sourcePos||]) =<< getMetaExprMayC [metaPoolCode]
+    pl <- $fromJustOrError [(loc, "meta.pool.code is not set")] =<< getMetaExprMayC [metaPoolCode]
     p' <- getPoolElemRefC loc pl
     block' <- placeInPoolC block
 
@@ -123,44 +126,44 @@ placeStmtInPoolC (S3LabelDefinition loc n) = do
   setPositionC n (map fst pl', Left (minBound, maxBound))
   return [S4LabelDefinition loc n]
 
-placeStmtInPoolC S3VariableUnresolved{} = printError [sourcePos|S3Variable:Unresolved|]
+placeStmtInPoolC stmt@S3VariableUnresolved{} = $throwFatalError [(locationOf stmt, "S3Variable:Unresolved")]
 placeStmtInPoolC (S3Variable loc VTPointer n ty v p al pg) = do
-  when (al /= 1 || isJust pg) $ printErrorC $ (loc, "only a var or const can use align/page"):[sourcePos||]
-  when (ty == poolType) $ printErrorC $ (loc, "a pool can only be used in a var or const"):[sourcePos||]
-  when (isJust p) $ printErrorC $ (loc, "pointer can't have a pool"):[sourcePos||]
+  when (al /= 1 || isJust pg) $ $throwFatalError [(loc, "only a var or const can use align/page")]
+  when (ty == poolType) $ $throwFatalError [(loc, "a pool can only be used in a var or const")]
+  when (isJust p) $ $throwFatalError [(loc, "pointer can't have a pool")]
   case v of
     Just vv -> do
       applyMetaExprC vv >>= evaluateExprTopC >>= \case
-        (_, E4ConstInt _ i) -> setPositionC n (Nothing, Right i)
-        _ -> printErrorC $ (loc, "pointer variable must be an integer and immediately solvable"):[sourcePos||]
-    Nothing -> printErrorC $ (loc, "pointer variable must have an initial value"):[sourcePos||]
+        (_, E4ConstInt _ i) ->
+          setPositionC n (Nothing, Right i)
+        _ -> $throwFatalError [(loc, "pointer variable must be an integer and immediately solvable")]
+    Nothing -> $throwFatalError [(loc, "pointer variable must have an initial value")]
   return []
 placeStmtInPoolC (S3Variable loc vt n ty v p al pg) = do
   case v of
     Just _ ->
       when (vt == VTLocal) $
-        printErrorC $ (loc, "local variable must not have an inital value"):[sourcePos||]
+        $throwFatalError [(loc, "local variable must not have an initial value")]
     Nothing ->
       when (vt == VTConst) $
-        printErrorC $ (loc, "const variable must have an initial value"):[sourcePos||]
+        $throwFatalError [(loc, "const variable must have an initial value")]
   unless (vt == VTVar || vt == VTConst) $ do
     when (al /= 1 || isJust pg) $
-      printErrorC $ (loc, "only a var or const can use align/page"):[sourcePos||]
+      $throwFatalError [(loc, "only a var or const can use align/page")]
     when (ty == poolType) $
-      printErrorC $ (loc, "a pool can only be used in a var or const"):[sourcePos||]
+      $throwFatalError [(loc, "a pool can only be used in a var or const")]
   q <-
     case p of
-      Just p'
-        | vt == VTInline -> printErrorC $ (loc, "inline can't have a pool"):[sourcePos||]
-        | otherwise -> do
-            (poolKind, poolValue) <- evaluateExprTopC =<< applyMetaExprC p'
-            return (poolKind, poolValue, loc)
+      Just p' -> do
+        when (vt == VTInline) $ $throwFatalError [(loc, "inline can't have a pool")]
+        (poolKind, poolValue) <- evaluateExprTopC =<< applyMetaExprC p'
+        return (poolKind, poolValue, loc)
       Nothing
-        | ty == poolType -> printErrorC $ (loc, "a pool to be placed must have a destination pool"):[sourcePos||]
-        | vt == VTLocal -> fromMaybeC ((loc, "meta.pool[.local] is not set"):[sourcePos||]) =<< getMetaExprMayC [metaPoolLocal, metaPool]
-        | vt == VTConst -> fromMaybeC ((loc, "meta.pool[.const] is not set"):[sourcePos||]) =<< getMetaExprMayC [metaPoolConst, metaPool]
-        | vt == VTInline -> fromMaybeC ((loc, "meta.pool[.code] is not set"):[sourcePos||]) =<< getMetaExprMayC [metaPoolCode, metaPool]
-        | otherwise -> fromMaybeC ((loc, "meta.pool[.var] is not set"):[sourcePos||]) =<< getMetaExprMayC [metaPoolVar, metaPool] -- VTVar
+        | ty == poolType -> $throwFatalError [(loc, "a pool to be placed must have a destination pool")]
+        | vt == VTLocal -> $fromJustOrError [(loc, "meta.pool[.local] is not set")] =<< getMetaExprMayC [metaPoolLocal, metaPool]
+        | vt == VTConst -> $fromJustOrError [(loc, "meta.pool[.const] is not set")] =<< getMetaExprMayC [metaPoolConst, metaPool]
+        | vt == VTInline -> $fromJustOrError [(loc, "meta.pool[.code] is not set")] =<< getMetaExprMayC [metaPoolCode, metaPool]
+        | otherwise -> $fromJustOrError [(loc, "meta.pool[.var] is not set")] =<< getMetaExprMayC [metaPoolVar, metaPool] -- VTVar
   (p', pVirt) <- getPoolElemRefC loc q
   setPositionC n (Just p', Left (minBound, maxBound))
   if | ty == poolType ->
@@ -169,8 +172,8 @@ placeStmtInPoolC (S3Variable loc vt n ty v p al pg) = do
             applyMetaExprC vv >>= evaluateExprTopC >>= \case
               (_, E4Pointer _ vvn (TDPool True _ vnnVirt) 0) ->
                 addPoolToPoolC loc (vvn, vnnVirt) n (p', pVirt) (if vt == VTConst then ByteValIsConst else ByteValIsInit)
-              (_, ee) -> printErrorC $ (loc, "pool initializer not found or not of type pool container: " ++ show ee):[sourcePos||]
-          Nothing -> printErrorC $ (loc, "pool variable must have an initial value"):[sourcePos||]
+              (_, ee) -> $throwFatalError [(loc, "pool initializer not found or not of type pool container: " ++ show ee)]
+          Nothing -> $throwFatalError [(loc, "pool variable must have an initial value")]
      | vt == VTInline -> do
           v' <- mapM applyMetaExprC v
           size <- sizeOfTypeDefinitionC ty
@@ -225,35 +228,35 @@ toByteValVectorC fn isConst (TDArray t s) e' = do
         vLength = length e
         v = map (fromByteValSimple isConst) $ V.convert e
       go loc v vLength elemSize fill
-    e -> printErrorC $ (locationOf e, "toByteValVectorC is not fully defined: " ++ show t ++ " / " ++ showPrettySrc e):[sourcePos||]
+    e -> $throwFatalError [(locationOf e, "toByteValVectorC is not fully defined: " ++ show t ++ " / " ++ showPrettySrc e)]
   where
     go loc v vLength elemSize fill =
       case (map fromIntegral s, fill) of
         (Nothing, _) -> return v
         (Just s', Nothing)
-          | s' /= vLength -> printErrorC $ (loc, "array-size-mismatch"):[sourcePos||]
+          | s' /= vLength -> $throwFatalError [(loc, "array-size-mismatch")]
           | otherwise -> return v
         (Just s', Just fill')
-          | vLength > s' -> printErrorC $ (loc, "array-size-mismatch"):[sourcePos||]
+          | vLength > s' -> $throwFatalError [(loc, "array-size-mismatch")]
           | otherwise -> return $ v V.++ V.replicate ((s' - vLength) * elemSize) (ByteValCode isConst fill')
 toByteValVectorC fn isConst (TDStruct s) e' =
   (snd <$> evaluateExprTopC e') >>= \case
     (E4UserStructOrUnion loc e fill) ->
       toByteValVectorStructC fn loc isConst s e fill >>= checkStructOrUnion loc
-    e -> printErrorC $ (locationOf e, "toByteValVectorC is not fully defined(1): " ++ show s ++ " / " ++ showPrettySrc e):[sourcePos||]
+    e -> $throwFatalError [(locationOf e, "toByteValVectorC is not fully defined(1): " ++ show s ++ " / " ++ showPrettySrc e)]
 toByteValVectorC fn isConst td@(TDUnion s) e' =
   (snd <$> evaluateExprTopC e') >>= \case
     (E4UserStructOrUnion loc e fill) -> do
       size <- sizeOfTypeDefinitionC td
       toByteValVectorUnionC fn loc isConst size s e fill >>= checkStructOrUnion loc
-    e -> printErrorC $ (locationOf e, "toByteValVectorC is not fully defined(1): " ++ show s ++ " / " ++ showPrettySrc e):[sourcePos||]
-toByteValVectorC _ _ t e = printErrorC $ (locationOf e, "toByteValVectorC is not fully defined(2): " ++ show t ++ " / " ++ showPrettySrc e):[sourcePos||]
+    e -> $throwFatalError [(locationOf e, "toByteValVectorC is not fully defined(1): " ++ show s ++ " / " ++ showPrettySrc e)]
+toByteValVectorC _ _ t e = $throwFatalError [(locationOf e, "toByteValVectorC is not fully defined(2): " ++ show t ++ " / " ++ showPrettySrc e)]
 
 checkStructOrUnion :: Cpu c => Location -> ([Vector (ByteVal (Expr4 c))], Map Text a) -> CSM3 c (Vector (ByteVal (Expr4 c)))
-checkStructOrUnion loc (res, dat) =
-  case M.toList dat of
-    [] -> return $ V.concat res
-    dat' -> printErrorC $ (loc, "toByteValVectorC: elements not used: " ++ intercalate ", " (map (unpack . fst) dat')):[sourcePos||]
+checkStructOrUnion loc (res, dat) = do
+  unless (M.null dat) $
+    $throwError [(loc, "toByteValVectorC: elements not used: " ++ intercalate ", " (map (unpack . fst) (M.toList dat)))]
+  return $ V.concat res
 
 toByteValVectorStructC :: Cpu c => FunctionKey -> Location -> ConstOrInit -> [(Maybe Text, TypeDefinition)] -> Map Text (Expr4 c) -> Maybe (Expr4 c) -> CSM3 c ([Vector (ByteVal (Expr4 c))], Map Text (Expr4 c))
 toByteValVectorStructC fn loc constOrInit struct dat fill =
@@ -269,7 +272,7 @@ toByteValVectorStructC fn loc constOrInit struct dat fill =
           case fill of
             Just f ->
               return (res ++ [V.replicate (fromIntegral size) (ByteValCode constOrInit f)], dta)
-            Nothing -> printErrorC $ (loc, "toByteValVectorC: hole in struct"):[sourcePos||]
+            Nothing -> $throwFatalError [(loc, "toByteValVectorC: hole in struct")]
     findData (res, dta) (Nothing, td) = do
       size <- sizeOfTypeDefinitionC td
       case td of
@@ -279,7 +282,7 @@ toByteValVectorStructC fn loc constOrInit struct dat fill =
         _ -> case fill of
           Just f ->
             return (res ++ [V.replicate (fromIntegral size) (ByteValCode constOrInit f)], dta)
-          Nothing -> printErrorC $ (loc, "toByteValVectorC: hole in struct"):[sourcePos||]
+          Nothing -> $throwFatalError [(loc, "toByteValVectorC: hole in struct")]
 
 toByteValVectorUnionC :: Cpu c => FunctionKey -> Location -> ConstOrInit -> Int64 -> [(Maybe Text, TypeDefinition)] -> Map Text (Expr4 c) -> Maybe (Expr4 c) -> CSM3 c ([Vector (ByteVal (Expr4 c))], Map Text (Expr4 c))
 toByteValVectorUnionC fn loc constOrInit size union dta fill =
@@ -288,7 +291,7 @@ toByteValVectorUnionC fn loc constOrInit size union dta fill =
     case fill of
       Just f ->
         return ([V.replicate (fromIntegral size) (ByteValCode constOrInit f)], dta)
-      Nothing -> printErrorC $ (loc, "toByteValVectorC: hole in union"):[sourcePos||]
+      Nothing -> $throwFatalError [(loc, "toByteValVectorC: hole in union")]
   [(res, td, dta')] -> do
     sizeTd <- sizeOfTypeDefinitionC td
     if sizeTd == size
@@ -296,8 +299,8 @@ toByteValVectorUnionC fn loc constOrInit size union dta fill =
       else case fill of
         Just f -> do
           return (res ++ [V.replicate (fromIntegral size) (ByteValCode constOrInit f)], dta)
-        Nothing -> printErrorC $ (loc, "toByteValVectorC: hole in union"):[sourcePos||]
-  _ -> printErrorC $ (loc, "toByteValVectorC: multiple union sources"):[sourcePos||]
+        Nothing -> $throwFatalError [(loc, "toByteValVectorC: hole in union")]
+  _ -> $throwFatalError [(loc, "toByteValVectorC: multiple union sources")]
   where
     findData (Just nam, td) =
       case M.lookup nam dta of

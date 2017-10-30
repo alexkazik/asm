@@ -36,7 +36,7 @@ cpu6502LookupNamesStmtC _ CS1Regular{..} = do
     )
 
 cpu6502LookupNamesStmtC loc CS1Inline{..} = do
-  s3iName <- (resolveNameC [sourcePos||] loc . labelIdValue loc) s1iName
+  s3iName <- resolveNameC $sourcePos loc (labelIdValue loc s1iName)
   let
      s3iOperator = s1iOperator
      s3iIndexMode = s1iIndexMode

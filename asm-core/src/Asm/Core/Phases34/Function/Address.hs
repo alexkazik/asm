@@ -2,6 +2,7 @@ module Asm.Core.Phases34.Function.Address where
 
 import           Asm.Core.Prelude
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.Cpu
 import           Asm.Core.Data.FunctionKey
 import           Asm.Core.Data.KindDefinition
@@ -29,7 +30,7 @@ showAddrCheck AddrCheckCode = "code"
 -- TODO: check if already placed and reduce then
 addrC :: (CSM34 m, Cpu c) => AddrCheck -> Function m c
 addrC ac loc [(KDPointer t, E4Pointer _ n _ o)] = do
-  unless (checkType ac t) $ printErrorC $ (loc, "Type mismatch, expected: " ++ showAddrCheck ac ++ ", actual: " ++ show t):[sourcePos||]
+  unless (checkType ac t) $ $throwError [(loc, "Type mismatch, expected: " ++ showAddrCheck ac ++ ", actual: " ++ show t)]
   getPositionC n >>= \case
     (Right p) ->
       return $ FnrResult (KDData TDInt, E4ConstInt loc $ p + o)
@@ -60,7 +61,7 @@ bankC :: (CSM34 m, Cpu c) => Function m c
 bankC loc [(_, E4Pointer _ n _ _)] =
   getPositionPoolC n >>= \case
     Just poolName -> do
-      tpd <- fromMaybeC ((loc, "is not a pool"):[sourcePos||]) =<< getPoolDefinitionC poolName
+      tpd <- $fromJustOrError [(loc, "is not a pool")] =<< getPoolDefinitionC poolName
       return $ FnrResult (KDData TDInt, E4ConstInt loc $ pdBank tpd)
     Nothing ->
       return $ FnrResult (KDData TDInt, E4ConstInt loc 0)
@@ -68,16 +69,16 @@ bankC _ _                             = return FnrNoMatch
 
 bankMetaFunctionC :: Cpu c => FunctionKey -> Location -> [Expr4 c] -> CSM3 c (Expr4 c)
 bankMetaFunctionC _f loc [] = do
-  p <- fromMaybeC ((loc, "meta.pool.code is not set"):[sourcePos||]) =<< getMetaExprMayC [metaPoolCode]
+  p <- $fromJustOrError [(loc, "meta.pool.code is not set")] =<< getMetaExprMayC [metaPoolCode]
   (name, _) <- getPoolElemRefC loc p
-  tpd <- fromMaybeC ((loc, "is not a pool"):(locationOf p, "definition of pool"):[sourcePos||]) =<< getPoolDefinitionC name
+  tpd <- $fromJustOrError [(loc, "is not a pool"),(locationOf p, "definition of pool")] =<< getPoolDefinitionC name
   return (E4ConstInt loc $ pdBank tpd)
 bankMetaFunctionC f loc es  = return (E4Function loc f es)
 
 sizeC :: (CSM34 m, Cpu c) => Function m c
 sizeC loc [(_, E4Pointer _ name (TDPool True _ _) _)] = sizeC' loc name
 sizeC loc [(_, E4Pointer _ _ TDPool{} _)]
-  = printErrorC $ (loc, "Only the size of a pool definition can be determined, but neither of a pool element nor a variable"):[sourcePos||]
+  = $throwFatalError [(loc, "Only the size of a pool definition can be determined, but neither of a pool element nor a variable")]
 sizeC loc [(KDPointer t@TDStruct{}, _)]               = sizeC'' loc t
 sizeC loc [(KDType t, _)]                             = sizeC'' loc t
 sizeC _ _                                             = return FnrNoMatch

@@ -34,15 +34,20 @@ library {
   exposed-modules: {
     Asm.Data.BitList
     Asm.Data.ByteValSimple
+    Asm.Data.Control.Monad.Error
     Asm.Data.InfInt64
     Asm.Data.Ternary
     Asm.Data.Word256
   }
   other-modules: {
+    Asm.Data.Control.Monad.Error.Class
+    Asm.Data.Control.Monad.Error.Internal
     Asm.Data.Ternary.Internal
   }
   build-depends:
     { base
+    , mtl
+    , transformers
     }
   default-extensions:  {
     BinaryLiterals

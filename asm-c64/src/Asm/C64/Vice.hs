@@ -9,11 +9,11 @@ import qualified Data.Text.Lazy                      as TL
 import           Text.Printf
 
 import           Asm.Core
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.Reference
 import           Asm.Core.Phase4.Data.CompilerResult
 import           Asm.Core.Phase4.Data.CompilerState4
 import           Asm.Core.Prelude
-import           Asm.Core.SourcePos
 
 generateViceSybols :: CompilerResult c -> LText
 generateViceSybols cr = intercalate "\n" (map printLab $ generateSybolTable $ M.toList $ cs4Position $ crState cr) `mappend` "\n"
@@ -40,7 +40,7 @@ generateSybolTable = sortOn fst . separateSameName . alignSameName . joinSamePos
           where
             n' = TL.split (== '.') (TL.fromStrict n)
             n'' = filter (not . TL.any (=='~')) n'
-        go _ _ = printError [sourcePos|generateSybolTable: not all symbols are fully defined|]
+        go _ _ = [printInternalError|generateSybolTable: not all symbols are fully defined|]
     joinSamePos :: [(Int64, [LText])] -> [(Int64, LText)]
     joinSamePos = map (\(p,t) -> (p, intercalate "_X_" (sort t)))
     alignSameName :: [(Int64, LText)] -> [(LText, [Int64])]

@@ -5,6 +5,7 @@ module Asm.Cpu6502.Compiler.Phase4
 
 import           Asm.Core.Prelude
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.CpuData
 import           Asm.Core.Data.Ternary
 import           Asm.Core.Phase4.CompilerState4
@@ -43,7 +44,7 @@ cpu6502ConvertToStmt5C loc CS4Inline{..} =
       e3 <- case ee of
         Just eee -> snd <$> evaluateExprTopC eee
         Nothing  -> return (E4ConstMaskedInt loc (0 *& 0))
-      when (size /= s4iSize) $ printErrorC $ (loc, "inline variable has the wrong size"):[sourcePos||]
+      when (size /= s4iSize) $ $throwError [(loc, "inline variable has the wrong size")]
       setHasChangedC
       return
         [ CS5Data
@@ -54,7 +55,9 @@ cpu6502ConvertToStmt5C loc CS4Inline{..} =
             { s5dData = genData e3 size []
             }
         ]
-    Nothing -> printErrorC $ (loc, "can't find inline variable"):[sourcePos||]
+    Nothing -> do
+      $throwError [(loc, "can't find inline variable")]
+      return []
     where
       genData _ 0 res    = res
       genData expr n res = expr : genData (E4Function loc opShiftR [expr, E4ConstInt loc 8]) (n-1) res

@@ -5,6 +5,7 @@ module Asm.Core.Phase3.MetaDataApply
 
 import           Asm.Core.Prelude
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.Cpu
 import           Asm.Core.Data.FunctionKey
 import           Asm.Core.Data.KindDefinition
@@ -43,10 +44,10 @@ applyMetaExprC (E3DerefStruct loc s e) = do
   s' <- applyMetaExprC s
   case s' of
     (E4NamespaceRef l1 n) -> do
-      l' <- resolveNameC [sourcePos||] loc e n
+      l' <- resolveNameC $sourcePos loc e n
       applyMetaExprC (E3LabelRef l1 l')
     (E4Meta l1 _ n) -> do
-      l' <- resolveNameC [sourcePos||] loc e n
+      l' <- resolveNameC $sourcePos loc e n
       applyMetaExprC (E3LabelRef l1 l')
     _ -> return (E4DerefStruct loc s' e)
 applyMetaExprC (E3Function loc f es) = do
@@ -88,7 +89,7 @@ applyMetaExprC (E3LabelRef loc l) =
         applyMetaExprC t
     (_, KDMeta m) -> return (E4Meta loc m l)
     (_, KDLoopVariable) -> return (E4LoopVariable loc l)
-    (loc', x) -> printErrorC $ (loc, "type of labelref unknown: " ++ showPretty x):(loc', "definition"):[sourcePos||]
+    (loc', x) -> $throwFatalError [(loc, "type of labelref unknown: " ++ showPretty x), (loc', "definition")]
 applyMetaExprC (E3MagicValue loc a) = return (E4MagicValue loc a)
 
 applyMetaExprSndC :: Cpu c => (t, Expr3 c) -> CSM3 c (t, Expr4 c)

@@ -4,7 +4,7 @@ module Asm.Core.Prelude
   ) where
 
 import           ClassyPrelude              as Export hiding (Builder (..), mask, terror, try, undefined, union)
-import           Control.Monad.RWS.Strict   as Export (RWS, get, gets, modify, put, runRWS, state, tell)
+import           Control.Monad.RWS.Strict   as Export (RWST, get, gets, modify, put, runRWST, tell)
 import           Control.Monad.State.Strict as Export (MonadState, State, evalState, runState)
 import           Data.Bits                  as Export
 import           Data.Char                  as Export (ord)

@@ -2,6 +2,7 @@ module Asm.Core.Phases34.Function.Integer where
 
 import           Asm.Core.Prelude
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.Ternary
 import           Asm.Core.SourcePos
 import           Asm.Data.InfInt64
@@ -103,10 +104,10 @@ miRotateSection4 loc n c w o = rotateSection loc o w v c *| rotateSection loc o 
 
 rotateSection :: (Bits b, Num b) => Location -> Int -> Int -> b -> Int -> b
 rotateSection loc o w n c
-  | o < 0 = printError $ (loc, "rotateSection: offset is negative"):[sourcePos||]
-  | w < 1 = printError $ (loc, "rotateSection: width is zero or negative"):[sourcePos||]
+  | o < 0 = $printError [(loc, "rotateSection: offset is negative")]
+  | w < 1 = $printError [(loc, "rotateSection: width is zero or negative")]
   | maybe False (\x -> o+w > x) (bitSizeMaybe n)
-      = printError $ (loc, "rotateSection: offset+width is bigger than the size"):[sourcePos||]
+      = $printError [(loc, "rotateSection: offset+width is bigger than the size")]
   | otherwise
       = n .&. complement mask .|.
         (shiftL maskedN cc .|. shiftR maskedN (w - cc)) .&. mask

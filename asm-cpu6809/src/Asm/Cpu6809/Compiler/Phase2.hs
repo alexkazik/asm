@@ -15,7 +15,7 @@ import           Asm.Cpu6809.Data.OpCodes
 
 cpu6809LookupNamesStmtC :: Location -> CS12 Cpu6809 -> CSM2 Cpu6809 (Maybe (CS3 Cpu6809), [Expr3 Cpu6809])
 cpu6809LookupNamesStmtC loc CS1Inline{..} = do
-  s3iInline <- resolveNameC [sourcePos||] loc (labelIdValue loc s1iInline)
+  s3iInline <- resolveNameC $sourcePos loc (labelIdValue loc s1iInline)
   return
     ( Just
         CS3Inline

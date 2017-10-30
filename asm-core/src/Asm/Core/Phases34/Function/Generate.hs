@@ -6,6 +6,7 @@ module Asm.Core.Phases34.Function.Generate
 import           Asm.Core.Prelude
 import           Language.Haskell.TH                        as TH
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.KindDefinition
 import           Asm.Core.Data.Ternary
 import           Asm.Core.Data.TypeDefinition
@@ -44,7 +45,7 @@ toAsmFunction' wild fn = do
   typeSignature1 <- reify fn >>= \case
     (VarI _ ty _) -> return ty
     -- it's a more complex definition (e.g. with some type binding)
-    x -> printError [sourcePos|Not a simple function: $x|]
+    x -> [printInternalError|Not a simple function: $x|]
   let
     -- convert the argument list and map it to 'ArgType'
     typeSignature2 = map typeToAT $ argumentsToList typeSignature1
@@ -77,7 +78,7 @@ toAsmFunction' wild fn = do
 argumentsToList :: TH.Type -> [Name]
 argumentsToList (AppT (AppT ArrowT (ConT x)) y) = x : argumentsToList y
 argumentsToList (ConT x)                        = [x]
-argumentsToList x                               = printError [sourcePos|Unknown type construct: $x|]
+argumentsToList x                               = [printInternalError|Unknown type construct: $x|]
 
 -- | For each haskell function two case lines will be generated, one with
 --   'generateCaseResult' and one with 'generateCaseUnchanged' and after that
@@ -237,7 +238,7 @@ generateCaseUnchanged args ret = do
         ]
 
 genResult :: Location -> [InfInt64] -> FunctionResult c
-genResult loc [] = printError ((loc, "genResult calles with no arguments"):[sourcePos||])
+genResult loc [] = $printError [(loc, "genResult called with no arguments")]
 genResult loc r =
   let
     imi@(InfInt64 mi) = minimumEx r

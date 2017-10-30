@@ -9,13 +9,11 @@ module Asm.Core.SourcePos.Type
   , initialSourcePos
   , sourcePosShortList
   , sourcePosShortListS
-  , printError
   , getPosition
   , sourceName
   , Asm.Core.SourcePos.Type.sourceLine
   , LocationOf(..)
   , spBuiltin
-  , spInternal
   ) where
 
 import           Asm.Core.Prelude
@@ -47,16 +45,6 @@ initialSourcePos = initialPos
 
 spBuiltin :: Location
 spBuiltin = [initialSourcePos "BUILTIN"]
-
-spInternal :: Location
-spInternal = [initialSourcePos "INTERNAL"]
-
-printError :: [(Location, String)] -> a
-printError err =
-  errorWithoutStackTrace $ "Error: " ++
-  concatMap (\(loc, msg) ->
-    msg ++ "\n" ++ concatMap (\x -> "- " ++ sourcePosPretty x ++ "\n") loc
-  ) err
 
 -- helper for all quasi quoters
 getPosition :: TH.Q SourcePos

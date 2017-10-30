@@ -6,6 +6,7 @@ import           Asm.Core.Prelude
 import qualified Data.Map.Strict                     as M
 import           Data.Proxy
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.ByteValPiece
 import           Asm.Core.Data.Cpu
 import           Asm.Core.Data.CpuData
@@ -18,7 +19,7 @@ import           Asm.Core.Phase4.Pool
 import           Asm.Core.Phase4.PoolData
 import           Asm.Core.Phases.Data.PoolDefinition
 import           Asm.Core.Phases34.Data.PoolState
-import           Asm.Core.SourcePos
+import           Asm.Core.PrettyPrint.Use
 import           Asm.Data.InfInt64
 
 calcPoolStateC :: Cpu c => CSM4 c ()
@@ -35,9 +36,9 @@ calcInnerC startLow startHigh (p:ps) = do
   -- debug
   sta <- getPoolStateC p
   when (lH == 0) $
-    printError [sourcePos|length to zero ($p, $lL, $lH, $sta) ; $(showPretty poolD)|]
+    $throwFatalError [([], "length to zero " ++ show (p, lL, lH, sta) ++ " ; " ++ showPretty poolD)]
   when (lL < psLengthLow sta || lH > psLengthHigh sta) $
-    printError [sourcePos|length mismatch ($p, $lL, $lH, $sta) ; $(showPretty poolD)|]
+    $throwFatalError [([], "length mismatch " ++ show (p, lL, lH, sta) ++ " ; " ++ showPretty poolD)]
   -- /debug
   setPoolStateC
     p

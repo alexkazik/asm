@@ -1,5 +1,6 @@
 module Asm.Core.Compiler
   ( compileGeneric
+  , compileGeneric'
   , CompilerResult
   , crPoolsWithData
   , crPoolsStats
@@ -10,11 +11,14 @@ module Asm.Core.Compiler
   ) where
 
 import           Asm.Core.Prelude
+import           Control.Arrow
 import qualified Data.ByteString                     as BS
 import           Data.ByteString.Builder
 import qualified Data.ByteString.Lazy                as BL
 import qualified Data.Vector                         as V
 
+import           Asm.Core.Control.CompilerError
+import           Asm.Core.Data.CompilerError
 import           Asm.Core.Data.Cpu
 import           Asm.Core.Phase1.Compiler
 import           Asm.Core.Phase2.Compiler
@@ -23,8 +27,14 @@ import           Asm.Core.Phase4.Compiler
 import           Asm.Core.Phase4.Data.CompilerResult
 import           Asm.Data.ByteValSimple
 
-compileGeneric :: (CpuSource c) => Source c -> CompilerResult c
-compileGeneric blk = compile4 $ compile3 $ compile2 $ compile1 (fromSource blk)
+compileGeneric :: (CpuSource c) => Source c -> Either ([(String, [String])]) (CompilerResult c)
+compileGeneric blk =
+  left convertCompilerError $
+    runError $
+      compile1 (fromSource blk) >>= compile2 >>= compile3 >>= compile4
+
+compileGeneric' :: (CpuSource c) => Source c -> CompilerResult c
+compileGeneric' = either printCompilerError id . compileGeneric
 
 poolDataToByteString :: Word8 -> Vector ByteValSimple -> ByteString
 poolDataToByteString def = BS.pack . map (final def) . V.toList

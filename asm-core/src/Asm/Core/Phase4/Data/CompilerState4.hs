@@ -11,6 +11,7 @@ module Asm.Core.Phase4.Data.CompilerState4
 import           Asm.Core.Prelude
 import qualified Data.Map.Strict                        as M
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.CpuData
 import           Asm.Core.Data.FunctionKey
 import           Asm.Core.Data.Reference
@@ -46,7 +47,7 @@ data CompilerState4 c
     }
 
 -- the monad it lives in
-type CSM4 c = RWS (CompilerReader4 c) () (CompilerState4 c)
+type CSM4 c = RWST (CompilerReader4 c) () (CompilerState4 c) (Error CompilerError)
 
 instance CpuData c => Eq (CompilerState4 c) where
   a == b =

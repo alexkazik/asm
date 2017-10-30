@@ -4,16 +4,16 @@ module Asm.Core.Phases34.TypeDefinition
 
 import           Asm.Core.Prelude
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.TypeDefinition
 import           Asm.Core.Phases34.Data.CompilerState34
-import           Asm.Core.SourcePos
 
 
 sizeOfTypeDefinitionC :: CSM34 m => TypeDefinition -> m Int64
 
 sizeOfTypeDefinitionC TDByte = return 1
 
-sizeOfTypeDefinitionC (TDTypeRef loc ref) = printErrorC $ (loc, "typeref not resolved: " ++ show ref):[sourcePos||]
+sizeOfTypeDefinitionC (TDTypeRef loc ref) = $throwFatalError [(loc, "typeref not resolved: " ++ show ref)]
 
 sizeOfTypeDefinitionC (TDArray _ Nothing) =
   return 0
@@ -30,4 +30,4 @@ sizeOfTypeDefinitionC (TDUnion l) = do
   sizes <- mapM (sizeOfTypeDefinitionC . snd) l
   return $ maximumEx sizes
 
-sizeOfTypeDefinitionC x = printErrorC $ ([], "sizeOfTypeDefinitionC " ++ show x):[sourcePos||]
+sizeOfTypeDefinitionC x = $throwFatalError [([], "sizeOfTypeDefinitionC " ++ show x)]

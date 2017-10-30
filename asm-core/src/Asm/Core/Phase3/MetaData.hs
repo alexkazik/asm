@@ -2,6 +2,7 @@ module Asm.Core.Phase3.MetaData where
 
 import           Asm.Core.Prelude
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.Cpu
 import           Asm.Core.Data.KindDefinition
 import           Asm.Core.Data.MetaKey
@@ -14,8 +15,11 @@ import           Asm.Core.SourcePos
 
 getPoolElemRefC :: Cpu c => Location -> (KindDefinition, Expr4 c, Location) -> CSM3 c (Reference, Bool)
 getPoolElemRefC _ (_, E4Pointer _ pn (TDPool _ True virt) 0, _) = return (pn, virt)
-getPoolElemRefC loc (k,e, loc2)             = printErrorC $ (loc, "it's not a pool: " ++ showPretty k ++ " <- " ++ showPrettySrc e):(loc2, "definition"):[sourcePos||]
-
+getPoolElemRefC loc (k, e, loc2) =
+  $throwFatalError
+    [ (loc, "it's not a pool: " ++ showPretty k ++ " <- " ++ showPrettySrc e)
+    , (loc2, "definition")
+    ]
 
 {-
   Get/Set all metas (within each block at first get is called then
@@ -52,7 +56,9 @@ getMetaMagicMayC keys'' = do
     go meta (key:keys') =
       case mkmLookup key meta of
         Just (_, E4MagicValue _ v, loc) -> return $ Just (v, loc)
-        Just (_, _, loc)                -> printErrorC $ (loc, "meta is expected to be a magic value"):[sourcePos||]
+        Just (_, _, loc)                -> do
+          $throwError [(loc, "meta is expected to be a magic value")]
+          return Nothing
         Nothing                         -> go meta keys'
 
 

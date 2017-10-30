@@ -4,9 +4,9 @@ module Asm.Parser.ToCompiler.Stmt
 
 import           Asm.Core.Prelude
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Phase1.Data.Expr12
 import           Asm.Core.Phase1.Data.Stmt1
-import           Asm.Core.SourcePos
 
 import           Asm.Parser.Data.PExpr
 import           Asm.Parser.Data.PStmt
@@ -101,22 +101,22 @@ convertStmt (loc, PSAlias n t) = do
   return $ S1Alias loc' n' t'
 
 -- all the following statements should have been either replaced, removed or thrown an error earlier
-convertStmt (loc, x@PSBuildIf{}) = printError $ ([loc], "convertStmt: " ++ show x):[sourcePos||]
-convertStmt (loc, x@PSBuildElseif{}) = printError $ ([loc], "convertStmt: " ++ show x):[sourcePos||]
-convertStmt (loc, x@PSBuildElse) = printError $ ([loc], "convertStmt: " ++ show x):[sourcePos||]
-convertStmt (loc, x@PSBuildEndif) = printError $ ([loc], "convertStmt: " ++ show x):[sourcePos||]
-convertStmt (loc, x@PSBuildNamespace{}) = printError $ ([loc], "convertStmt: " ++ show x):[sourcePos||]
-convertStmt (loc, x@PSBuildBlock{}) = printError $ ([loc], "convertStmt: " ++ show x):[sourcePos||]
-convertStmt (loc, x@PSBuildFor{}) = printError $ ([loc], "convertStmt: " ++ show x):[sourcePos||]
-convertStmt (loc, x@PSBuildEnd) = printError $ ([loc], "convertStmt: " ++ show x):[sourcePos||]
-convertStmt (loc, x@PSBuildDirectIf{}) = printError $ ([loc], "convertStmt: " ++ show x):[sourcePos||]
-convertStmt (loc, x@PSBuildDirectElseif{}) = printError $ ([loc], "convertStmt: " ++ show x):[sourcePos||]
-convertStmt (loc, x@PSBuildDirectElse) = printError $ ([loc], "convertStmt: " ++ show x):[sourcePos||]
-convertStmt (loc, x@PSBuildDirectEndif) = printError $ ([loc], "convertStmt: " ++ show x):[sourcePos||]
-convertStmt (loc, x@PSAntiBuildDirectIfBlock{}) = printError $ ([loc], "convertStmt: " ++ show x):[sourcePos||]
-convertStmt (loc, x@PSAntiNamespace{}) = printError $ ([loc], "convertStmt: " ++ show x):[sourcePos||]
-convertStmt (loc, x@PSAntiBlock{}) = printError $ ([loc], "convertStmt: " ++ show x):[sourcePos||]
-convertStmt (loc, x@PSNothing) = printError $ ([loc], "convertStmt: " ++ show x):[sourcePos||]
+convertStmt (loc, x@PSBuildIf{}) = $printError [([loc], "convertStmt: " ++ show x)]
+convertStmt (loc, x@PSBuildElseif{}) = $printError [([loc], "convertStmt: " ++ show x)]
+convertStmt (loc, x@PSBuildElse) = $printError [([loc], "convertStmt: " ++ show x)]
+convertStmt (loc, x@PSBuildEndif) = $printError [([loc], "convertStmt: " ++ show x)]
+convertStmt (loc, x@PSBuildNamespace{}) = $printError [([loc], "convertStmt: " ++ show x)]
+convertStmt (loc, x@PSBuildBlock{}) = $printError [([loc], "convertStmt: " ++ show x)]
+convertStmt (loc, x@PSBuildFor{}) = $printError [([loc], "convertStmt: " ++ show x)]
+convertStmt (loc, x@PSBuildEnd) = $printError [([loc], "convertStmt: " ++ show x)]
+convertStmt (loc, x@PSBuildDirectIf{}) = $printError [([loc], "convertStmt: " ++ show x)]
+convertStmt (loc, x@PSBuildDirectElseif{}) = $printError [([loc], "convertStmt: " ++ show x)]
+convertStmt (loc, x@PSBuildDirectElse) = $printError [([loc], "convertStmt: " ++ show x)]
+convertStmt (loc, x@PSBuildDirectEndif) = $printError [([loc], "convertStmt: " ++ show x)]
+convertStmt (loc, x@PSAntiBuildDirectIfBlock{}) = $printError [([loc], "convertStmt: " ++ show x)]
+convertStmt (loc, x@PSAntiNamespace{}) = $printError [([loc], "convertStmt: " ++ show x)]
+convertStmt (loc, x@PSAntiBlock{}) = $printError [([loc], "convertStmt: " ++ show x)]
+convertStmt (loc, x@PSNothing) = $printError [([loc], "convertStmt: " ++ show x)]
 
 convertIfBlock :: CpuParser c ps pe => (PExpr pe, [PStmt ps pe]) -> PCSM (Text, Expr12 c, Stmt1Block c)
 convertIfBlock (e, block) = do

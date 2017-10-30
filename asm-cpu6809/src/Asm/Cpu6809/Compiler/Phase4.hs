@@ -2,6 +2,7 @@ module Asm.Cpu6809.Compiler.Phase4 where
 
 import           Asm.Core.Prelude
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.CpuData
 import           Asm.Core.Data.Ternary
 import           Asm.Core.Phase4.CompilerState4
@@ -20,7 +21,7 @@ cpu6809ConvertToStmt5C loc CS4Inline{..} =
       e3 <- case ee of
         Just eee -> snd <$> evaluateExprTopC eee
         Nothing  -> return (E4ConstMaskedInt loc (0 *& 0))
-      when (size /= s4iSize) $ printErrorC $ (loc, "inline variable has the wrong size"):[sourcePos||]
+      when (size /= s4iSize) $ $throwError [(loc, "inline variable has the wrong size")]
       setHasChangedC
       return
         [ CS5Data
@@ -33,17 +34,18 @@ cpu6809ConvertToStmt5C loc CS4Inline{..} =
             { s5dExpr = genData e3 size []
             }
         ]
-    Nothing -> printErrorC $ (loc, "can't find inline variable"):[sourcePos||]
+    Nothing -> do
+      $throwError [(loc, "can't find inline variable")]
+      return []
     where
       genData _ 0 res    = res
       genData expr n res = genData (E4Function loc opShiftR [expr, E4ConstInt loc 8]) (n-1) res ++ [expr]
 cpu6809ConvertToStmt5C loc CS4Final{..} = do
   optExpr <- snd <$> evaluateExprTopC s4fOptimise
-  let
-    opt =
-      case optExpr of
-        E4ConstBool _ v -> v
-        _               -> printError $ (loc, "meta.optimise has to be flat"):[sourcePos||]
+  opt <-
+    case optExpr of
+      E4ConstBool _ v -> return v
+      _               -> $throwFatalError [(loc, "meta.optimise has to be flat")]
   s5fData <- mapM (fmap snd . evaluateExprTopC) s4fData
   return $
     bool

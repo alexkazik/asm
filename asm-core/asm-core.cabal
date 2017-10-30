@@ -45,9 +45,11 @@ library {
   exposed-modules: {
     Asm.Core
     Asm.Core.Compiler
+    Asm.Core.Control.CompilerError
     Asm.Core.Data.ByteVal
     Asm.Core.Data.ByteValPiece
     Asm.Core.Data.ByteValPiece.Combine
+    Asm.Core.Data.CompilerError
     Asm.Core.Data.Cpu
     Asm.Core.Data.CpuData
     Asm.Core.Data.FunctionKey

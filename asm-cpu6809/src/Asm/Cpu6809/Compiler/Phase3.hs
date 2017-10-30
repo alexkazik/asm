@@ -4,6 +4,7 @@ import           Asm.Core.Prelude
 import qualified Data.IntMap.Strict               as IM
 import qualified Data.Map.Strict                  as M
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.CpuData
 import           Asm.Core.Data.KindDefinition
 import           Asm.Core.Data.TypeDefinition
@@ -23,9 +24,9 @@ import           Asm.Cpu6809.Data.MetaKey
 import           Asm.Cpu6809.Data.OpCodes
 
 cpu6809ApplyMetaStmtC :: Location -> CS3 Cpu6809 -> CSM3 Cpu6809 (Stmt4Block Cpu6809)
-cpu6809ApplyMetaStmtC loc CS3Inline{..} = do
+cpu6809ApplyMetaStmtC loc CS3Inline{..} = recoverFatalError [] $ do
   (_, am) <- pickCpu loc s3iOperator
-  op@(code, _, _) <- fromMaybeC ((loc, "unknown addressing mode for opcode " ++ showPretty s3iOperator):[sourcePos||]) (M.lookup s3iAM am)
+  op@(code, _, _) <- $fromJustOrError [(loc, "unknown addressing mode for opcode " ++ showPretty s3iOperator)] (M.lookup s3iAM am)
   return
     [ S4CpuStmt
         loc
@@ -44,14 +45,14 @@ cpu6809ApplyMetaStmtC loc CS3Inline{..} = do
     sizeOfStmt AMIdx (Just 3) _      = 3
     sizeOfStmt AMExt _ _             = 2
     sizeOfStmt AMRel _ (_, rel16, _) = bool 1 2 rel16
-    sizeOfStmt _ _ _                 = printError $ (loc, "Unable to determine size of statement"):[sourcePos||]
+    sizeOfStmt _ _ _                 = $printError [(loc, "Unable to determine size of statement")]
 
 cpu6809ApplyMetaStmtC loc CS3Indexed{..} = do
   (_c, am) <- pickCpu loc s3xOperator
   exprMay <- mapM applyMetaExprC s3xExpr
-  sxOp' <- fromMaybeC ((loc, "unknown addressing mode for opcode " ++ showPretty s3xOperator):[sourcePos||]) (M.lookup AMIdx am)
+  sxOp' <- $fromJustOrError [(loc, "unknown addressing mode for opcode " ++ showPretty s3xOperator)] (M.lookup AMIdx am)
   checkOfs16 <- getCheck16C loc [metaCheckOfs16, metaCheckOfs, metaCheck]
-  s4fOptimise <- fromMaybe (printError $ (loc, "meta.optimise is undefined"):[sourcePos||]) . map (\(_,a,_) -> a) <$> getMetaExprMayC [metaOptimise]
+  s4fOptimise <- $fromJustOrError [(loc, "meta.optimise is undefined")] =<< (map (\(_,a,_) -> a) <$> getMetaExprMayC [metaOptimise])
   let
     sxOp = bool sxOp' ((\(a,b,_) -> (a,b,Just fnAddrByte)) sxOp') s3xIndirect
   case (s3xIndexed, exprMay, sxOp) of
@@ -121,8 +122,8 @@ cpu6809ApplyMetaStmtC loc CS3Indexed{..} = do
             RegY -> ("meta.y", metaY)
             RegU -> ("meta.u", metaU)
             RegS -> ("meta.s", metaS)
-            _    -> printError $ (loc, "invalid register"):[sourcePos||]
-      registerValue <- fromMaybe (printError $ (loc, regName ++ " is undefined"):[sourcePos||]) . map (\(_,a,_) -> a) <$> getMetaExprMayC [regMeta]
+            _    -> $printError [(loc, "invalid register")]
+      registerValue <- $fromJustOrError [(loc, regName ++ " is undefined")] =<< (map (\(_,a,_) -> a) <$> getMetaExprMayC [regMeta])
       let
         offset =
           E4Function loc opMINUS
@@ -133,11 +134,11 @@ cpu6809ApplyMetaStmtC loc CS3Indexed{..} = do
     (IMOffset r, _, (s4fCode, _, _)) -> do
       offset <- evaluateExprTopC (fromMaybe (E4ConstInt loc 0) exprMay) >>= \case
         (KDData{}, expr) -> return expr
-        _ -> printErrorC $ (loc, "unknown addressing mode for opcode(5) " ++ showPretty s3xOperator):[sourcePos||]
+        _ -> $throwFatalError [(loc, "unknown addressing mode for opcode(5) " ++ showPretty s3xOperator)]
       genIMOffset loc checkOfs16 s3xOperator s3xIndirect s4fOptimise r s4fCode offset
     (IMIncrement r bwd dbl, _, (s4fCode, _, _)) -> do
+      rm <- ofsRegBit loc r
       let
-        rm = ofsRegBit loc r
         im = indirectMask s3xIndirect
         incdec =
           case (bwd, dbl) of
@@ -147,7 +148,7 @@ cpu6809ApplyMetaStmtC loc CS3Indexed{..} = do
             (True,  True ) -> 0b00000011
       offset <- evaluateExprTopC (fromMaybe (E4ConstInt loc 0) exprMay) >>= \case
         (KDData{}, expr) -> return expr
-        _ -> printErrorC $ (loc, "unknown addressing mode for opcode(5) " ++ showPretty s3xOperator):[sourcePos||]
+        _ -> $throwFatalError [(loc, "unknown addressing mode for opcode(5) " ++ showPretty s3xOperator)]
       return
         [ S4IfBlock loc
           [ ( "~~"
@@ -165,13 +166,13 @@ cpu6809ApplyMetaStmtC loc CS3Indexed{..} = do
             )
           ]
         ]
-    _ -> printErrorC $ (loc, "unknown addressing mode for opcode(6) " ++ showPretty s3xOperator):[sourcePos||]
+    _ -> $throwFatalError [(loc, "unknown addressing mode for opcode(6) " ++ showPretty s3xOperator)]
 
 cpu6809ApplyMetaStmtC loc CS3Regular{s3rExpr = Nothing, ..} = do
   (_c, am) <- pickCpu loc s3rOperator
   let
     op = M.filterWithKey (\k _ -> k `elem` s3rAM) am
-  s4fOptimise <- fromMaybe (printError $ (loc, "meta.optimise is undefined"):[sourcePos||]) . map (\(_,a,_) -> a) <$> getMetaExprMayC [metaOptimise]
+  s4fOptimise <- $fromJustOrError [(loc, "meta.optimise is undefined")] =<< (map (\(_,a,_) -> a) <$> getMetaExprMayC [metaOptimise])
   case M.toList op of
     [(AMImp, (s4fCode, _, _))] ->
       return
@@ -185,14 +186,14 @@ cpu6809ApplyMetaStmtC loc CS3Regular{s3rExpr = Nothing, ..} = do
               , ..
               }
         ]
-    _ -> printErrorC ((loc, "unknown addressing mode for opcode " ++ showPretty s3rOperator):[sourcePos|srAM = $s3rAM, am = $am|])
+    _ -> $throwFatalError [(loc, "unknown addressing mode for opcode " ++ showPretty s3rOperator)]
 
 cpu6809ApplyMetaStmtC loc CS3Regular{s3rExpr = Just s3rExpr, ..} = do
   (_c, am') <- pickCpu loc s3rOperator
   srDp <- map (\(_,a,_) -> a) <$> getMetaExprMayC [metaDP]
   s3rExpr' <- applyMetaExprC s3rExpr
   (srExpr', am) <- addressModeOfExpression loc s3rOperator s3rExpr' am'
-  s4fOptimise <- fromMaybe (printError $ (loc, "meta.optimise is undefined"):[sourcePos||]) . map (\(_,a,_) -> a) <$> getMetaExprMayC [metaOptimise]
+  s4fOptimise <- $fromJustOrError [(loc, "meta.optimise is undefined")] =<< (map (\(_,a,_) -> a) <$> getMetaExprMayC [metaOptimise])
   let
     op = M.filterWithKey (\k _ -> k `elem` s3rAM) am
     genExt :: Word16 -> FunctionKey -> Stmt4Block Cpu6809
@@ -315,7 +316,7 @@ cpu6809ApplyMetaStmtC loc CS3Regular{s3rExpr = Just s3rExpr, ..} = do
                   ]
               Nothing ->
                 return $ genExt codeExt fnAddrType
-    _ -> printErrorC ((loc, "unknown addressing mode for opcode " ++ showPretty s3rOperator):[sourcePos|srAM = $s3rAM, am = $am|])
+    _ -> $throwFatalError [(loc, "unknown addressing mode for opcode " ++ showPretty s3rOperator)]
 cpu6809ApplyMetaStmtC loc CS3Data{..} = do
   sdExprMeta <- mapM applyMetaExprC s3dExpr
   sdCheck8 <- getCheck8C loc [metaCheckImm8, metaCheckImm, metaCheck]
@@ -326,10 +327,10 @@ cpu6809ApplyMetaStmtC loc CS3Data{..} = do
 
 pickCpu :: Location -> Operator -> CSM3 Cpu6809 (Text, Map AddressMode (Word16, Bool, Maybe FunctionKey))
 pickCpu loc sOperator = do
-  (c, cloc) <- fromMaybeC ((loc, "meta.cpu is not set"):[sourcePos||]) =<< getMetaMagicMayC [metaCpu]
-  cpu <- fromMaybeC ((loc, "unknown cpu " ++ show c):(cloc, "defined at"):[sourcePos||]) (M.lookup c cpuVariants)
-  ops <- fromMaybeC ((loc, "unknown cpu " ++ show c):(cloc, "defined at"):[sourcePos||]) (IM.lookup (fromCpuVariant cpu) opcodes)
-  op <- fromMaybeC ((loc, "unknown opcode " ++ showPretty sOperator):[sourcePos||]) (IM.lookup (fromOperator sOperator) ops)
+  (c, cloc) <- $fromJustOrError [(loc, "meta.cpu is not set")] =<< getMetaMagicMayC [metaCpu]
+  cpu <- $fromJustOrError [(loc, "unknown cpu " ++ show c),(cloc, "defined at")] (M.lookup c cpuVariants)
+  ops <- $fromJustOrError [(loc, "unknown cpu " ++ show c),(cloc, "defined at")] (IM.lookup (fromCpuVariant cpu) opcodes)
+  op <- $fromJustOrError [(loc, "unknown opcode " ++ showPretty sOperator)] (IM.lookup (fromOperator sOperator) ops)
   return (c, op)
 
 addressModeOfExpression :: Pretty a => Location -> Operator -> Expr4 Cpu6809 -> Map AddressMode a -> CSM3 Cpu6809 (Expr4 Cpu6809, Map AddressMode a)
@@ -342,7 +343,7 @@ addressModeOfExpression loc sOperator sExpr sOp = do
         KDData{}    -> [AMImm]
         _           -> []
     s3 = M.filterWithKey (\k _ -> k `elem` addrmodeOfExpr) sOp
-  when (null s3) $ printErrorC $ (loc, "unknown addressing mode for opcode(3) " ++ showPretty sOperator ++ "; t2: " ++ showPretty typeOfExpr ++ "; sOp: " ++ showPretty sOp):[sourcePos||]
+  when (null s3) $ $throwFatalError [(loc, "unknown addressing mode for opcode(3) " ++ showPretty sOperator ++ "; t2: " ++ showPretty typeOfExpr ++ "; sOp: " ++ showPretty sOp)]
   return (expr', s3)
 
 
@@ -353,12 +354,12 @@ isInRange loc lo e hi =
     , E4Function loc opLE [e, E4ConstInt loc hi]
     ]
 
-ofsRegBit :: Location -> Register -> Int64
-ofsRegBit _ RegX = 0b00000000
-ofsRegBit _ RegY = 0b00100000
-ofsRegBit _ RegU = 0b01000000
-ofsRegBit _ RegS = 0b01100000
-ofsRegBit loc _  = printError $ (loc, "invalid register"):[sourcePos||]
+ofsRegBit :: Location -> Register -> CSM3 Cpu6809 Int64
+ofsRegBit _ RegX = return 0b00000000
+ofsRegBit _ RegY = return 0b00100000
+ofsRegBit _ RegU = return 0b01000000
+ofsRegBit _ RegS = return 0b01100000
+ofsRegBit loc _  = $throwFatalError [(loc, "invalid register")]
 
 indirectMask :: Bool -> Int64
 indirectMask = bool 0 0b00010000
@@ -376,8 +377,8 @@ genIMOffset
 genIMOffset loc checkOfs16 s3xOperator s3xIndirect s4fOptimise r s4fCode offset = do
   let
     isPC = r == RegPC
-    rm = bool (ofsRegBit loc r) 0b00000100 isPC
     im = indirectMask s3xIndirect
+  rm <- bool (ofsRegBit loc r) (return 0b00000100) isPC
   return
     [ S4IfBlock loc
       [ ( "~~"

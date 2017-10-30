@@ -7,6 +7,7 @@ module Asm.Parser.Data.ToByte
 
 import           Asm.Core.Prelude
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.ByteVal
 import           Asm.Core.Data.Ternary
 import           Asm.Core.SourcePos
@@ -28,7 +29,7 @@ instance ToByte pe Word8 where
 instance ToByte pe Char where
   toByte loc x =
     if ox < 0 || ox > 0xff
-      then printError $ ([loc], "Char out of range"):[sourcePos||]
+      then $printError [([loc], "Char out of range")]
       else (loc, PEByteVal (ByteValConst $ bit ox))
     where
       ox = ord x
@@ -46,7 +47,7 @@ instance ToByte pe (Maybe ByteValSimple) where
 instance ToByte pe TInt64 where
   toByte loc x =
     bool
-      (printError $ ([loc], "TInt64 out of range"):[sourcePos||])
+      ($printError [([loc], "TInt64 out of range")])
       (loc, PEByteVal $ byteValMaskedWord8 ByteValIsConst (fromIntegral v) (fromIntegral m))
       (isTInt64inRange 0 255 0xff x)
     where
@@ -67,5 +68,5 @@ instance ToByte pe Word where
 toInt :: (CpuParser c ps pe, Integral i) => String -> SourcePos -> i -> PExpr pe
 toInt name loc i =
   if i < 0 || i > 0xff
-    then printError $ ([loc], name ++ " out of range"):[sourcePos||]
+    then $printError [([loc], name ++ " out of range")]
     else (loc, PEByteVal (ByteValConst $ bit $ fromIntegral i))

@@ -4,6 +4,7 @@ module Asm.Core.Phase1.RegisterNames
 
 import           Asm.Core.Prelude
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.Cpu
 import           Asm.Core.Data.KindDefinition
 import           Asm.Core.Data.TypeDefinition
@@ -34,10 +35,14 @@ registerNamesStmtC :: Cpu c => Stmt1 c -> CSM1 c (Maybe (Stmt2 c))
 
 registerNamesStmtC (S1LabelDefinition loc name) = (Just . S2LabelDefinition loc) <$> addNameC name (loc, KDPointer TDCode)
 
-registerNamesStmtC (S1Variable loc vt name td v p al pg) = do
-  when (not (isPrefixOf "_" name) && vt == VTLocal) $ printErrorC ((loc, "local variable must start with a underscore"):[sourcePos||])
-  n <- addNameC name (loc, KDPointer TDInvalid)
-  return $ Just $ S2Variable loc vt n td v p al pg
+registerNamesStmtC (S1Variable loc vt name td v p al pg) =
+  if (not (isPrefixOf "_" name) && vt == VTLocal)
+    then do
+      $throwError [(loc, "local variable must start with a underscore")]
+      return Nothing
+    else do
+      n <- addNameC name (loc, KDPointer TDInvalid)
+      return $ Just $ S2Variable loc vt n td v p al pg
 
 registerNamesStmtC (S1Namespace loc n block) = do
   name <- maybe getUniqueNameC return n

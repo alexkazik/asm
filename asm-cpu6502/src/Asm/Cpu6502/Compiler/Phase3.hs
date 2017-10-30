@@ -6,6 +6,7 @@ import           Asm.Core.Prelude
 import qualified Data.IntMap.Strict               as IM
 import qualified Data.Map.Strict                  as M
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.CpuData
 import           Asm.Core.Data.KindDefinition
 import           Asm.Core.Data.TypeDefinition
@@ -29,7 +30,7 @@ import           Asm.Cpu6502.Data.OpCodes
 --
 
 cpu6502ApplyMetaStmtC :: Location -> CS3 Cpu6502 -> CSM3 Cpu6502 (Stmt4Block Cpu6502)
-cpu6502ApplyMetaStmtC loc CS3Data{..} = do
+cpu6502ApplyMetaStmtC loc CS3Data{..} = recoverFatalError [] $ do
   s4dData' <- mapM applyMetaExprC s3dData
   sdCheck8 <- getCheck8C loc [metaCheckImm8, metaCheckImm, metaCheck]
   let
@@ -44,18 +45,18 @@ cpu6502ApplyMetaStmtC loc CS3Regular{s3rExpr = Nothing, ..} = do
     s4fOperator = s3rOperator
     s4fData = []
     s4fLabel = Nothing
-  s4fOptimise <- fromMaybe (printError $ (loc, "meta.optimise is undefined"):[sourcePos||]) . map (\(_,a,_) -> a) <$> getMetaExprMayC [metaOptimise]
+  s4fOptimise <- $fromJustOrError [(loc, "meta.optimise is undefined")] =<< (map (\(_,a,_) -> a) <$> getMetaExprMayC [metaOptimise])
   case M.lookup AMImp op of
     Just (s4fCode, _, _) ->
       return [S4CpuStmt loc CS4Final{..}]
       -- return [S4CpuStmt loc $ CS4Final c s3rOperator code [] Nothing sfOptimise]
-    _ -> printErrorC ((loc, "unknown addressing mode for opcode " ++ showPretty s3rOperator):[sourcePos|srIndexMode = $s3rIndexMode, am = $am, srAddressMode = $s3rAddressMode|])
+    _ -> $throwFatalError [(loc, "unknown addressing mode for opcode " ++ showPretty s3rOperator)]
 
 cpu6502ApplyMetaStmtC loc CS3Regular{s3rExpr = Just s3rExpr, ..} = do
   (s4fCpu, am') <- pickCpu loc s3rOperator s3rIndexMode
   srExprMeta <- applyMetaExprC s3rExpr
   (srExpr', am) <- addressModeOfExpression loc s3rOperator srExprMeta am'
-  s4fOptimise <- fromMaybe (printError $ (loc, "meta.optimise is undefined"):[sourcePos||]) . map (\(_,a,_) -> a) <$> getMetaExprMayC [metaOptimise]
+  s4fOptimise <- $fromJustOrError [(loc, "meta.optimise is undefined")] =<< (map (\(_,a,_) -> a) <$> getMetaExprMayC [metaOptimise])
   let
     op = M.filterWithKey (\k _ -> k `elem` s3rAddressMode) am
     s4fOperator = s3rOperator
@@ -120,7 +121,7 @@ cpu6502ApplyMetaStmtC loc CS3Regular{s3rExpr = Just s3rExpr, ..} = do
 
 cpu6502ApplyMetaStmtC loc CS3Inline{..} = do
   (_, am) <- pickCpu loc s3iOperator s3iIndexMode
-  (s4iCode, _, _) <- fromMaybeC ((loc, "unknown addressing mode for opcode " ++ showPretty s3iOperator):[sourcePos||]) (M.lookup s3iAddressMode am)
+  (s4iCode, _, _) <- $fromJustOrError [(loc, "unknown addressing mode for opcode " ++ showPretty s3iOperator)] (M.lookup s3iAddressMode am)
   let
     s4iOperator = s3iOperator
     s4iName = s3iName
@@ -131,7 +132,7 @@ cpu6502ApplyMetaStmtC loc CS3Inline{..} = do
     sizeOfStmt AMZp  = 1
     sizeOfStmt AMImm = 1
     sizeOfStmt AMRel = 1
-    sizeOfStmt _     = printError $ (loc, "Unable to determine size of statement"):[sourcePos||]
+    sizeOfStmt _     = $printError [(loc, "Unable to determine size of statement")]
 
 
 -- helper
@@ -146,14 +147,14 @@ addressModeOfExpression loc sOperator sExpr sOp = do
         KDData{}    -> [AMImm]
         _           -> []
     s3 = M.filterWithKey (\k _ -> k `elem` addrmodeOfExpr) sOp
-  when (null s3) $ printErrorC $ (loc, "unknown addressing mode for opcode(3) " ++ showPretty sOperator ++ "; t2: " ++ showPretty typeOfExpr ++ "; sOp: " ++ showPretty sOp):[sourcePos||]
+  when (null s3) $ $throwFatalError [(loc, "unknown addressing mode for opcode(3) " ++ showPretty sOperator ++ "; t2: " ++ showPretty typeOfExpr ++ "; sOp: " ++ showPretty sOp)]
   return (expr', s3)
 
 pickCpu :: Location -> Operator -> IndexMode -> CSM3 Cpu6502 (CpuVariant, Map AddressMode (Word8, Maybe FunctionKey, Maybe FunctionKey))
 pickCpu loc sOperator sAM = do
-  (c, cloc) <- fromMaybeC ((loc, "meta.cpu is not set"):[sourcePos||]) =<< getMetaMagicMayC [metaCpu]
-  cpu <- fromMaybeC ((loc, "unknown cpu " ++ show c):(cloc, "defined at"):[sourcePos||]) (M.lookup c cpuVariants)
-  ops <- fromMaybeC ((loc, "unknown cpu " ++ show c):(cloc, "defined at"):[sourcePos||]) (IM.lookup (fromCpuVariant cpu) opcodes)
-  op <- fromMaybeC ((loc, "unknown opcode " ++ showPretty sOperator):[sourcePos||]) (IM.lookup (fromOperator sOperator) ops)
-  op' <- fromMaybeC ((loc, "unknown IndexMode " ++ showPretty sOperator):[sourcePos||]) (M.lookup sAM op)
+  (c, cloc) <- $fromJustOrError [(loc, "meta.cpu is not set")] =<< getMetaMagicMayC [metaCpu]
+  cpu <- $fromJustOrError [(loc, "unknown cpu " ++ show c),(cloc, "defined at")] (M.lookup c cpuVariants)
+  ops <- $fromJustOrError [(loc, "unknown cpu " ++ show c),(cloc, "defined at")] (IM.lookup (fromCpuVariant cpu) opcodes)
+  op <- $fromJustOrError [(loc, "unknown opcode " ++ showPretty sOperator)] (IM.lookup (fromOperator sOperator) ops)
+  op' <- $fromJustOrError [(loc, "unknown IndexMode " ++ showPretty sOperator)] (M.lookup sAM op)
   return (cpu, op')

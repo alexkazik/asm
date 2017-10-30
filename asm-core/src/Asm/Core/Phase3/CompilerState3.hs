@@ -9,6 +9,7 @@ import           Asm.Core.Prelude
 import qualified Data.Map.Strict                        as M
 import qualified Data.Set                               as S
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.Cpu
 import           Asm.Core.Data.FunctionKey
 import           Asm.Core.Data.KindDefinition
@@ -83,14 +84,13 @@ addInlineC :: Cpu c => Reference -> (Int64, Maybe (Expr4 c)) -> CSM3 c ()
 addInlineC n v = tell mempty{cs3Inline = M.singleton n v}
 
 resolveNameC :: Cpu c => [(Location, String)] -> Location -> Text -> Reference -> CSM3 c Reference
-resolveNameC errs loc name par = state go
+resolveNameC errs loc name par =
+  gets go >>= \case
+      [] -> $throwFatalError ((loc, "1/Can't find name \"" ++ unpack name ++ "\" on path " ++ show par):errs)
+      [path] -> return path
+      _ -> $throwFatalError ((loc, "Name \"" ++ unpack name ++ "\" is not unique on path " ++ show par):errs)
   where
-    go s@CSt3{..} = case go' of
-      [] -> printErrorS s $ (loc, "1/Can't find name \"" ++ unpack name ++ "\" on path " ++ show par):errs++[sourcePos||]
-      [path] -> (path, s)
-      _ -> printErrorS s $ (loc, "Name \"" ++ unpack name ++ "\" is not unique on path " ++ show par):errs++[sourcePos||]
-      where
-        go' = maybeToList $ R.lookup par name cs3Data
+    go CSt3{..} = maybeToList $ R.lookup par name cs3Data
 
 getCallPathsForReferenceC :: Cpu c => Reference -> CSM3 c (Set [Text])
 getCallPathsForReferenceC n = gets go

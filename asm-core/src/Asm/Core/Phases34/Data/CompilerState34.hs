@@ -13,13 +13,13 @@ module Asm.Core.Phases34.Data.CompilerState34
 import           Asm.Core.Prelude
 import qualified Data.Map.Strict                        as M
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.FunctionKey
 import           Asm.Core.Data.Reference
 import           Asm.Core.Phases.Data.CompilerState1234
 import           Asm.Core.Phases.Data.PoolDefinition
 import           Asm.Core.Phases34.Data.Function
 import           Asm.Core.Phases34.Data.PoolState
-import           Asm.Core.SourcePos
 import           Asm.Data.InfInt64
 
 class CompilerState1234 m => CSM34 m where
@@ -39,7 +39,7 @@ class CompilerState1234 m => CSM34 m where
 getPoolStateC :: CSM34 m => Reference -> m PoolState
 getPoolStateC p = do
   csPool <- toolPoolGetPoolStateC
-  fromMaybeC [sourcePos|pool $p not found|] $ M.lookup p csPool
+  $fromJustOrError [([], "pool " ++ show p ++ " not found")] $ M.lookup p csPool
 
 getPoolDefinitionC :: CSM34 m => Reference -> m (Maybe PoolDefinition)
 getPoolDefinitionC p = do
@@ -70,4 +70,4 @@ getPositionC n = do
 getPositionPoolC :: CSM34 m => Reference -> m (Maybe Reference)
 getPositionPoolC n = do
   csPosition <- toolPositionGetC
-  fst <$> fromMaybeC [sourcePos|name $n not found|] (M.lookup n csPosition)
+  fst <$> $fromJustOrError [([], "name " ++ show n ++ " not found")] (M.lookup n csPosition)

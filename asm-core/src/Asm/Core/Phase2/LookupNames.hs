@@ -6,6 +6,7 @@ module Asm.Core.Phase2.LookupNames
 import           Asm.Core.Prelude
 import qualified Data.List                      as L
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.ByteVal
 import           Asm.Core.Data.Cpu
 import           Asm.Core.Data.Tree
@@ -18,7 +19,7 @@ import           Asm.Core.SourcePos
 
 
 lookupNamesC :: Cpu c => Stmt2Block c -> CSM2 c (Stmt3Block c)
-lookupNamesC x = catMaybes <$> mapM setNameDefinitionStmtC x
+lookupNamesC x = catMaybes <$> mapM (recoverFatalError Nothing . setNameDefinitionStmtC) x
 
 {-
   set name definition: stmt
@@ -105,7 +106,7 @@ setNameDefinitionIfC (name, e, block) = do
 
 lookupNamesExprC :: Cpu c => Expr12 c -> CSM2 c (Expr3 c)
 lookupNamesExprC (E12LabelRef loc l) = do
-  ni <- resolveNameC [sourcePos||] loc l
+  ni <- resolveNameC $sourcePos loc l
   getAliasC ni >>= \case
     Just alias ->
       lookupNamesExprC $ updateLocation ((locationOf alias L.\\ loc) ++ loc) alias
@@ -113,7 +114,7 @@ lookupNamesExprC (E12LabelRef loc l) = do
       return (E3LabelRef loc ni)
 
 lookupNamesExprC (E12Pointer loc l t o) = do
-  ni <- resolveNameC [sourcePos||] loc l
+  ni <- resolveNameC $sourcePos loc l
   return (E3Pointer loc ni t o)
 
 lookupNamesExprC (E12DerefStruct loc e s) = do
@@ -129,7 +130,7 @@ lookupNamesExprC (E12Function loc n es) = do
   es' <- mapM lookupNamesExprC es
   lookupFunctionName n >>= \case
     Just n' -> return (E3Function loc n' es')
-    Nothing -> printErrorC ((loc, "Function with name \"" ++ show n ++ "\" not found"):[sourcePos||])
+    Nothing -> $throwFatalError [(loc, "Function with name \"" ++ show n ++ "\" not found")]
 
 lookupNamesExprC (E12UserArray loc es f) = do
   es' <- mapM lookupNamesExprC es

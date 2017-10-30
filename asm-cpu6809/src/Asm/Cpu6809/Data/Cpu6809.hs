@@ -8,6 +8,7 @@ module Asm.Cpu6809.Data.Cpu6809  where
 
 import           Asm.Core.Prelude
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.Cpu
 import           Asm.Core.Data.KindDefinition
 import           Asm.Core.Data.MetaKey
@@ -31,7 +32,7 @@ import           Asm.Cpu6809.Parser.CpuStmt
 instance CpuParser Cpu6809 PStmtCpu6809 PExprCpu6809 where
   parseCpuStmt = parseCpu6809Stmt
   parseCpuExpr = mzero
-  convertCpuExpr = printError [sourcePos|This cpu has no expressions|]
+  convertCpuExpr = [printInternalError|This cpu has no expressions|]
   convertCpuStmt PSInline{..} =
     return
       CS1Inline
@@ -81,13 +82,13 @@ instance Cpu Cpu6809 where
       )
     ]
   -- phase 2
-  cpuLookupNamesExprC = printError [sourcePos|This cpu has no expressions|]
+  cpuLookupNamesExprC = [printInternalError|This cpu has no expressions|]
   cpuLookupNamesStmtC = cpu6809LookupNamesStmtC
   cpuFunctionKeys _ = cpu6809FunctionKeys
   -- phase 3
   cpuDefaultMetaData = mkmInsert metaOptimise (KDData TDBool, E4ConstBool spBuiltin True, spBuiltin) mkmEmpty
   cpuApplyMetaStmtC = cpu6809ApplyMetaStmtC
-  cpuApplyMetaExprC = printError [sourcePos|This cpu has no expressions|]
+  cpuApplyMetaExprC = [printInternalError|This cpu has no expressions|]
   -- phase 4
   cpuConvertToStmt5C = cpu6809ConvertToStmt5C
   cpuCodeAlign _ = cpu6809CodeAlign
@@ -95,7 +96,7 @@ instance Cpu Cpu6809 where
   cpuStmtInlineNames _ CS4Inline{..} = [s4iInline]
   cpuStmtInlineNames _ CS4Final{..}  = maybeToList s4fInline
   cpuStmtInlineNames _ CS4Data{}     = []
-  cpuMapExprInExpr = printError [sourcePos|This cpu has no expressions|]
+  cpuMapExprInExpr = [printInternalError|This cpu has no expressions|]
   cpuMapExprInStmt f CS4Final{..}  = CS4Final{s4fData = map f s4fData, ..}
   cpuMapExprInStmt _ x@CS4Inline{} = x
   cpuMapExprInStmt f CS4Data{..}   = CS4Data{s4dExpr = map f s4dExpr, ..}

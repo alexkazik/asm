@@ -3,8 +3,9 @@ module Asm.Parser.ToCompiler.Expr
   ) where
 
 import           Asm.Core.Prelude
-import qualified Data.Vector                   as V
+import qualified Data.Vector                    as V
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Phase1.Data.Expr12
 import           Asm.Core.SourcePos
 
@@ -102,9 +103,9 @@ convertExpr (loc, PEMagicValue v) = do
   loc' <- getPathPC loc
   return (E12MagicValue loc' v)
 
-convertExpr (loc, x@PEAntiExpr{}) = printError $ ([loc], "convertExpr: " ++ show x):[sourcePos||]
-convertExpr (loc, x@PEAntiArray{}) = printError $ ([loc], "convertExpr: " ++ show x):[sourcePos||]
-convertExpr (loc, x@PEAntiStruct{}) = printError $ ([loc], "convertExpr: " ++ show x):[sourcePos||]
+convertExpr (loc, x@PEAntiExpr{}) = $printError [([loc], "convertExpr: " ++ show x)]
+convertExpr (loc, x@PEAntiArray{}) = $printError [([loc], "convertExpr: " ++ show x)]
+convertExpr (loc, x@PEAntiStruct{}) = $printError [([loc], "convertExpr: " ++ show x)]
 
 convertParsedStringFstAndExprSnd :: CpuParser c ps pe => Location -> (Maybe LabelIdValue, PExpr pe) -> PCSM (Maybe Text, Expr12 c)
 convertParsedStringFstAndExprSnd loc (a, e) = do

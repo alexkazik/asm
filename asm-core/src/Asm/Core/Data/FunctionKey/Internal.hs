@@ -15,12 +15,12 @@ module Asm.Core.Data.FunctionKey.Internal
   ) where
 
 import           Asm.Core.Prelude
-import qualified Data.IntMap          as IM
-import qualified Data.Map             as M
-import qualified Language.Haskell.TH  as TH
+import qualified Data.IntMap                    as IM
+import qualified Data.Map                       as M
+import qualified Language.Haskell.TH            as TH
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.PrettyPrint
-import           Asm.Core.SourcePos
 
 newtype FunctionKey = FunctionKey (Int, Text)
   deriving (Data, Typeable)
@@ -72,7 +72,7 @@ fklmEmpty :: FunctionKeyLookupMap
 fklmEmpty = FunctionKeyLookupMap M.empty
 
 fklmInsert :: FunctionKey -> FunctionKeyLookupMap -> FunctionKeyLookupMap
-fklmInsert (FunctionKey (i, n)) (FunctionKeyLookupMap m) = FunctionKeyLookupMap (M.insertWith (printError [sourcePos|Duplicate FunctionKey|]) (toLower n) i m)
+fklmInsert (FunctionKey (i, n)) (FunctionKeyLookupMap m) = FunctionKeyLookupMap (M.insertWith [printInternalError|Duplicate FunctionKey|] (toLower n) i m)
 
 fklmLookup :: Text -> FunctionKeyLookupMap -> Maybe FunctionKey
 fklmLookup n (FunctionKeyLookupMap m) = map (\i -> FunctionKey (i, n)) (M.lookup (toLower n) m)
@@ -83,7 +83,7 @@ fkmEmpty :: FunctionKeyMap a
 fkmEmpty = FunctionKeyMap IM.empty
 
 fkmInsert :: FunctionKey -> a -> FunctionKeyMap a -> FunctionKeyMap a
-fkmInsert (FunctionKey (i, _)) v (FunctionKeyMap m) = FunctionKeyMap (IM.insertWith (printError [sourcePos|Duplicate FunctionKey|]) i v m)
+fkmInsert (FunctionKey (i, _)) v (FunctionKeyMap m) = FunctionKeyMap (IM.insertWith [printInternalError|Duplicate FunctionKey|] i v m)
 
 fkmInsertWith :: (a -> a -> a) -> FunctionKey -> a -> FunctionKeyMap a -> FunctionKeyMap a
 fkmInsertWith f (FunctionKey (i, _)) v (FunctionKeyMap m) = FunctionKeyMap (IM.insertWith f i v m)

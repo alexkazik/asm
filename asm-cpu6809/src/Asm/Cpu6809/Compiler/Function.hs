@@ -2,6 +2,7 @@ module Asm.Cpu6809.Compiler.Function where
 
 import           Asm.Core.Prelude
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.KindDefinition
 import           Asm.Core.Data.TypeDefinition
 import           Asm.Core.Phase3.Data.CompilerState3
@@ -47,12 +48,12 @@ checkRelIs8C' loc e1l e1h e2l e2h =
 
 convertRel8C :: CSM34 m => Function m Cpu6809
 convertRel8C loc [(KDData TDInt, E4ConstInt _ e1), (KDData TDInt, E4ConstInt _ e2)] = do
-  when (e1 < 0 || e1 > 0xffff) $ printErrorC $ (loc, "branch target is out of the address range (0-0xffff)"):[sourcePos||]
-  when (e2 < 0 || e2 > 0xffff) $ printErrorC $ (loc, "branch source is out of the address range (0-0xffff)"):[sourcePos||]
+  when (e1 < 0 || e1 > 0xffff) $ $throwError [(loc, "branch target is out of the address range (0-0xffff)")]
+  when (e2 < 0 || e2 > 0xffff) $ $throwError [(loc, "branch source is out of the address range (0-0xffff)")]
   let
     d1 = (e1 - e2) .&. 0xffff
     d2 = if d1 >= 0x8000 then d1 - 0x10000 else d1
-  when (d2 < -128 || d2 > 127) $ printErrorC $ (loc, "branch target is too far away (-128 .. 127 is possible, " ++ show d2 ++ " was requested)"):[sourcePos||]
+  when (d2 < -128 || d2 > 127) $ $throwError [(loc, "branch target is too far away (-128 .. 127 is possible, " ++ show d2 ++ " was requested)")]
   return (FnrResult (KDData TDInt, E4ConstInt loc d2))
 convertRel8C _ [(KDData TDInt, _), (KDData TDInt, _)] =
   return $ FnrUnchanged (KDData TDInt)
@@ -60,8 +61,8 @@ convertRel8C _ _ = return FnrNoMatch
 
 convertRel16C :: CSM34 m => Function m Cpu6809
 convertRel16C loc [(KDData TDInt, E4ConstInt _ e1), (KDData TDInt, E4ConstInt _ e2)] = do
-  when (e1 < 0 || e1 > 0xffff) $ printErrorC $ (loc, "branch target is out of the address range (0-0xffff)"):[sourcePos||]
-  when (e2 < 0 || e2 > 0xffff) $ printErrorC $ (loc, "branch source is out of the address range (0-0xffff)"):[sourcePos||]
+  when (e1 < 0 || e1 > 0xffff) $ $throwError [(loc, "branch target is out of the address range (0-0xffff)")]
+  when (e2 < 0 || e2 > 0xffff) $ $throwError [(loc, "branch source is out of the address range (0-0xffff)")]
   let
     d1 = (e1 - e2) .&. 0xffff
   return (FnrResult (KDData TDInt, E4ConstInt loc d1))
@@ -71,7 +72,7 @@ convertRel16C _ _ = return FnrNoMatch
 
 checkAddr16C :: CSM34 m => Function m Cpu6809
 checkAddr16C loc [(KDData TDInt, E4ConstInt _ e)] = do
-  when (e < 0 || e > 0xffff) $ printErrorC $ (loc, "address is out of the address range (0-0xffff)"):[sourcePos||]
+  when (e < 0 || e > 0xffff) $ $throwError [(loc, "address is out of the address range (0-0xffff)")]
   return (FnrResult (KDData TDInt, E4ConstInt loc e))
 checkAddr16C _ [(KDData TDInt, _)] =
   return $ FnrUnchanged (KDData TDInt)
@@ -79,7 +80,7 @@ checkAddr16C _ _ = return FnrNoMatch
 
 checkAddr8C :: CSM34 m => Function m Cpu6809
 checkAddr8C loc [(KDData TDInt, E4ConstInt _ e)] = do
-  when (e < 0 || e > 0xff) $ printErrorC $ (loc, "address is out of the address range (0-0xff)"):[sourcePos||]
+  when (e < 0 || e > 0xff) $ $throwError [(loc, "address is out of the address range (0-0xff)")]
   return (FnrResult (KDData TDInt, E4ConstInt loc e))
 checkAddr8C _ [(KDData TDInt, _)] =
   return $ FnrUnchanged (KDData TDInt)
@@ -87,7 +88,7 @@ checkAddr8C _ _ = return FnrNoMatch
 
 checkOffsetZeroC :: CSM34 m => Function m Cpu6809
 checkOffsetZeroC loc [(KDData TDInt, E4ConstInt _ e)] = do
-  when (e /= 0) $ printErrorC $ (loc, "the offset is not zero"):[sourcePos||]
+  when (e /= 0) $ $throwError [(loc, "the offset is not zero")]
   return (FnrResult (KDData TDBool, E4ConstBool loc True))
 checkOffsetZeroC _ [(KDData TDInt, _)] =
   return $ FnrUnchanged (KDData TDBool)

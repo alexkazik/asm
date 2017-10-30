@@ -106,4 +106,4 @@ union6502 = do
 -- the compile function
 
 compile6502 :: Asm6502 -> CompilerResult Cpu6502
-compile6502 = compileGeneric
+compile6502 = compileGeneric'

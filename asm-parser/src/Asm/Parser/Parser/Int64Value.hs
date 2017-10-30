@@ -6,6 +6,7 @@ module Asm.Parser.Parser.Int64Value
 
 import           Asm.Core.Prelude
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.SourcePos
 
 import           Asm.Parser.Data.Int64Value
@@ -17,7 +18,7 @@ import           Asm.Parser.Parser.Integer
 
 int64Value :: Location -> Int64Value -> Int64
 int64Value _  (Int64Value x)       =  x
-int64Value loc Int64ValueHaskell{} = printError $ (loc, "parsed string still not executed"):[sourcePos||]
+int64Value loc Int64ValueHaskell{} = $printError [(loc, "parsed string still not executed")]
 
 -- parse
 

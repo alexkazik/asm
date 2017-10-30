@@ -3,6 +3,7 @@ module Asm.Core.Phases34.Function.GenerateArgType where
 import           Asm.Core.Prelude
 import           Language.Haskell.TH
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.ByteVal
 import           Asm.Core.Data.Ternary
 import           Asm.Core.Data.TypeDefinition
@@ -44,7 +45,7 @@ typeToAT t
   -- ranged int
   | t == ''InfInt64 = ATRangedIntOrInt
   -- (currently) unsupported types
-  | otherwise = printError [sourcePos|Unknown type: $t|]
+  | otherwise = [printInternalError|Unknown type: $t|]
 
 -- | Retrieve the 'ArgType' for the function result
 returnAT :: ArgType -> ArgType
@@ -53,7 +54,7 @@ returnAT ATMaskedIntOrInt = ATMaskedInt
 returnAT ATBool           = ATBool
 returnAT ATByte           = ATByte
 returnAT ATRangedIntOrInt = ATRangedIntOrInt
-returnAT a                = printError [sourcePos|Unsupported type: $a|]
+returnAT a                = [printInternalError|Unsupported type: $a|]
 
 -- | Retrieve the 'TypeDefinition' constructor 'Name' for a given 'ArgType'
 atToTDName :: String -> ArgType -> Name
@@ -65,7 +66,7 @@ atToTDName _ ATBool           = 'TDBool
 atToTDName _ ATByte           = 'TDByte
 atToTDName _ ATRangedInt      = 'TDInt
 atToTDName _ ATIntAsRangedInt = 'TDInt
-atToTDName x a                = printError [sourcePos|atToTDName: invalid argument: $a in $x|]
+atToTDName x a                = [printInternalError|atToTDName: invalid argument: $a in $x|]
 
 -- | Retrieve the 'Expr' constructor 'Name' which binds the value of a given 'ArgType'
 atToExpConstName :: String -> ArgType -> Name
@@ -76,7 +77,7 @@ atToExpConstName _ ATBool           = 'E4ConstBool
 atToExpConstName _ ATByte           = 'E4ByteVal
 atToExpConstName _ ATInt64AsInt     = 'E4ConstInt
 atToExpConstName _ ATIntAsRangedInt = 'E4ConstInt
-atToExpConstName x a                = printError [sourcePos|atToExpConstName: invalid argument: $a in $x|]
+atToExpConstName x a                = [printInternalError|atToExpConstName: invalid argument: $a in $x|]
 
 -- | Replace each 'ATMaskedIntOrInt' in the parameter list with 'ATMaskedInt' in one and 'ATIntAsMaskedInt' in another,
 -- | also replace each 'ATRangedIntOrInt' in the parameter list with 'ATRangedInt' in one and 'ATIntAsRangedInt' in another,

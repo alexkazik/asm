@@ -6,25 +6,26 @@ module Asm.Cpu6502.Parser
 
 import           Asm.Core.Prelude
 import           Data.Generics
-import qualified Language.Haskell.TH          as TH
+import qualified Language.Haskell.TH            as TH
 import           Language.Haskell.TH.Quote
 import qualified System.IO
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.File
 import           Asm.Core.SourcePos
 import           Asm.Parser.Parser
 import           Asm.Parser.Quote
 
-import           Asm.Cpu6502.Data.Cpu6502     ()
+import           Asm.Cpu6502.Data.Cpu6502       ()
 import           Asm.Cpu6502.Data.CpuData6502
 
 
 asm6502 :: QuasiQuoter
 asm6502 = QuasiQuoter
   { quoteExp = quoteAsm
-  , quotePat = printError [sourcePos|QuasiQuoter "asm6502" for patterns is not available|]
-  , quoteDec = printError [sourcePos|QuasiQuoter "asm6502" for declarations is not available|]
-  , quoteType = printError [sourcePos|QuasiQuoter "asm6502" for types is not available|]
+  , quotePat = [printInternalError|QuasiQuoter "asm6502" for patterns is not available|]
+  , quoteDec = [printInternalError|QuasiQuoter "asm6502" for declarations is not available|]
+  , quoteType = [printInternalError|QuasiQuoter "asm6502" for types is not available|]
   }
   where
     quoteAsm :: String -> TH.ExpQ
@@ -45,9 +46,9 @@ asmFile6502 fp = do
 expr6502 :: QuasiQuoter
 expr6502 = QuasiQuoter
   { quoteExp = quoteExpr
-  , quotePat = printError [sourcePos|QuasiQuoter "expr6502" for patterns is not available|]
-  , quoteDec = printError [sourcePos|QuasiQuoter "expr6502" for declarations is not available|]
-  , quoteType = printError [sourcePos|QuasiQuoter "expr6502" for types is not available|]
+  , quotePat = [printInternalError|QuasiQuoter "expr6502" for patterns is not available|]
+  , quoteDec = [printInternalError|QuasiQuoter "expr6502" for declarations is not available|]
+  , quoteType = [printInternalError|QuasiQuoter "expr6502" for types is not available|]
   }
   where
     quoteExpr :: String -> TH.ExpQ

@@ -11,6 +11,7 @@ module Asm.Core.Phase2.Data.CompilerState2
 import           Asm.Core.Prelude
 import qualified Data.Map.Strict                        as M
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.CpuData
 import           Asm.Core.Data.FunctionKey
 import           Asm.Core.Data.KindDefinition
@@ -62,7 +63,7 @@ data CompilerState2 c
     }
 
 -- the monad it lives in
-type CSM2 c = RWS (CompilerReader2 c) (CompilerWriter2 c) (CompilerState2 c)
+type CSM2 c = RWST (CompilerReader2 c) (CompilerWriter2 c) (CompilerState2 c) (Error CompilerError)
 
 instance CpuData c => CompilerState1234S (CompilerState2 c) where
   dumpStateS s = displayPretty $ vsep

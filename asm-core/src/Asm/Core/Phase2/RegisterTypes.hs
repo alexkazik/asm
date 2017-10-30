@@ -4,6 +4,7 @@ module Asm.Core.Phase2.RegisterTypes
 
 import           Asm.Core.Prelude
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.Cpu
 import           Asm.Core.Data.KindDefinition
 import           Asm.Core.Data.TypeDefinition
@@ -65,8 +66,8 @@ getTypeDefinition err (E3LabelRef loc l') =
   getKindC l' >>= \case
     (_, KDType ty) -> return ty
     (_, KDTypeInExpr) -> getTypeInExprC l' >>= getTypeDefinition ((loc, "expr"):err)
-    (_, KDAlias) -> getAliasC l' >>= fromMaybeC [sourcePos|alias not found|] >>= lookupNamesExprC >>= getTypeDefinition ((loc, "expr"):err)
-    _ -> printErrorC $ (loc, "can't read the type"):err++[sourcePos||]
+    (_, KDAlias) -> getAliasC l' >>= $fromJustOrError [(loc, "alias not found")] >>= lookupNamesExprC >>= getTypeDefinition ((loc, "expr"):err)
+    _ -> $throwFatalError ((loc, "can't read the type"):err)
 
 getTypeDefinition err (E3DefineArray loc a e) = do
   a' <- getTypeDefinition ((loc,"expr"):err) a
@@ -74,10 +75,10 @@ getTypeDefinition err (E3DefineArray loc a e) = do
     Just (E3ConstInt _ i) ->
       if i >= 0
         then return (TDArray a' (Just i))
-        else printErrorC $ (loc, "can't read the type"):err++[sourcePos||]
+        else $throwFatalError ((loc, "can't read the type"):err)
     Nothing ->
       return (TDArray a' Nothing)
-    _ -> printErrorC $ (loc, "can't read the type"):err++[sourcePos||]
+    _ -> $throwFatalError ((loc, "can't read the type"):err)
 
 getTypeDefinition err (E3TypeStruct loc str) = do
   str' <- mapM evalStr str
@@ -97,4 +98,4 @@ getTypeDefinition err (E3TypeUnion loc str) = do
       x <- getTypeDefinition ((loc, "expr"):err) t
       return (na, x)
 
-getTypeDefinition err expr = printErrorC $ (locationOf expr, "can't read the type"):err++[sourcePos||]
+getTypeDefinition err expr = $throwFatalError ((locationOf expr, "can't read the type"):err)

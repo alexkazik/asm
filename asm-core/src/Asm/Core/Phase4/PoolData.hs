@@ -6,6 +6,7 @@ import           Data.Proxy
 import qualified Data.Set                           as S
 import qualified Data.Vector                        as V
 
+import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.ByteVal
 import           Asm.Core.Data.ByteValPiece
 import           Asm.Core.Data.ByteValPiece.Combine
@@ -26,7 +27,6 @@ import           Asm.Core.Phase4.Pool
 import           Asm.Core.Phases34.Data.PoolState
 import           Asm.Core.Phases34.EvaluateExpr
 import           Asm.Core.PrettyPrint.Use
-import           Asm.Core.SourcePos
 import           Asm.Data.InfInt64
 
 reducePoolDataStateC :: Cpu c => (Reference, PoolData c) -> CSM4 c (Reference, PoolData c)
@@ -67,8 +67,8 @@ conv5 block = concat <$> mapM convert5 block
 
 convert5 :: Cpu c => Stmt4 c ->  CSM4 c (CS5Block c)
 convert5 (S4LabelDefinition loc x) = cpuLabelDefinitionStmt5C loc x
-convert5 S4IfBlock{}               = printErrorC [sourcePos|found if block in optimisation step|]
-convert5 S4For{}                   = printErrorC [sourcePos|found for loop in optimisation step|]
+convert5 stmt@S4IfBlock{}          = $throwFatalError [(locationOf stmt, "found if block in optimisation step")]
+convert5 stmt@S4For{}              = $throwFatalError [(locationOf stmt, "found for loop in optimisation step")]
 convert5 (S4CpuStmt loc cs)        = cpuConvertToStmt5C loc cs
 
 workDefaultC :: Cpu c => (Set (ByteValPiece (Expr4 c)), Set (ByteValPiece (Expr4 c))) -> ByteValPiece (Expr4 c) -> CSM4 c (Set (ByteValPiece (Expr4 c)), Set (ByteValPiece (Expr4 c)))
@@ -120,7 +120,9 @@ reduceStmtC (S4IfBlock _ []) = setHasChangedC *> return []
 reduceStmtC (S4IfBlock loc ((l,e,b):xs)) = do
   (ty, ne) <- evaluateExprTopC e
   if ty /= KDData TDBool
-    then printErrorC $ (loc, "if needs a bool as argument in " ++ showPrettySrc (ty, ne)):[sourcePos||]
+    then do
+      $throwError [(loc, "if needs a bool as argument in " ++ showPrettySrc (ty, ne))]
+      setHasChangedC *> return []
     else
       case ne of
         (E4ConstBool _ True) -> setHasChangedC *> reduceStmtBlockC b
@@ -133,26 +135,33 @@ reduceStmtC x@S4CpuStmt{} = return [x]
 
 reduceStmtC (S4For loc var from cmp to step block) = do
   (fromTy, from') <- evaluateExprC from
-  when (fromTy /= KDData TDInt) $ printErrorC $ (loc, "for needs a int as 'from' argument"):[sourcePos||]
   (toTy, to') <- evaluateExprC to
-  when (toTy /= KDData TDInt) $ printErrorC $ (loc, "for needs a int as 'to' argument"):[sourcePos||]
-  case (conv from', conv to') of
-    ((fromExpr, Just (fromLo, fromHi)), (toExpr, Just (toLo, toHi)))
-      | toLo == maxBound -> printErrorC $ (loc, "for: 'to' argument needs to be less than max int"):[sourcePos||]
-      | doCmp fromHi cmp toLo ->
-          trace ("for:range:gen: " ++ show (fromLo, fromHi) ++ showCmp cmp ++ show (toLo, toHi)) $
-          setMetaIsFlatC False *> setHasChangedC *> reduceStmtBlockC (genBlock ++ [S4For loc var (E4Function loc opPLUS [fromExpr, genStep]) cmp toExpr step block])
-      | doRevCmp fromLo cmp toHi ->
-          trace ("for:range:end: " ++ show (fromLo, fromHi) ++ showCmp cmp ++ show (toLo, toHi)) $
-          setHasChangedC *> return []
-      | otherwise ->
-          trace ("for:range:wait: " ++ show (fromLo, fromHi) ++ showCmp cmp ++ show (toLo, toHi)) $
-          setMetaIsFlatC False *> return [S4For loc var fromExpr cmp toExpr step block]
-      where
-        genBlock = mapExprInStmtBlock (replaceLoopVar var fromExpr) block
-        genStep = replaceLoopVar var fromExpr step
-    ((fromExpr, _), (toExpr, _)) ->
-      trace ("for:unknown: " ++ show fromExpr ++ showCmp cmp ++ show toExpr) $ setMetaIsFlatC False >> return [S4For loc var fromExpr cmp toExpr step block]
+  if | fromTy /= KDData TDInt -> do
+         $throwError [(loc, "for needs a int as 'from' argument")]
+         setHasChangedC *> return []
+     | toTy /= KDData TDInt -> do
+         $throwError [(loc, "for needs a int as 'to' argument")]
+         setHasChangedC *> return []
+     | otherwise ->
+          case (conv from', conv to') of
+            ((fromExpr, Just (fromLo, fromHi)), (toExpr, Just (toLo, toHi)))
+              | toLo == maxBound -> do
+                  $throwError [(loc, "for: 'to' argument needs to be less than max int")]
+                  setHasChangedC *> return []
+              | doCmp fromHi cmp toLo ->
+                  trace ("for:range:gen: " ++ show (fromLo, fromHi) ++ showCmp cmp ++ show (toLo, toHi)) $
+                  setMetaIsFlatC False *> setHasChangedC *> reduceStmtBlockC (genBlock ++ [S4For loc var (E4Function loc opPLUS [fromExpr, genStep]) cmp toExpr step block])
+              | doRevCmp fromLo cmp toHi ->
+                  trace ("for:range:end: " ++ show (fromLo, fromHi) ++ showCmp cmp ++ show (toLo, toHi)) $
+                  setHasChangedC *> return []
+              | otherwise ->
+                  trace ("for:range:wait: " ++ show (fromLo, fromHi) ++ showCmp cmp ++ show (toLo, toHi)) $
+                  setMetaIsFlatC False *> return [S4For loc var fromExpr cmp toExpr step block]
+              where
+                genBlock = mapExprInStmtBlock (replaceLoopVar var fromExpr) block
+                genStep = replaceLoopVar var fromExpr step
+            ((fromExpr, _), (toExpr, _)) ->
+              trace ("for:unknown: " ++ show fromExpr ++ showCmp cmp ++ show toExpr) $ setMetaIsFlatC False >> return [S4For loc var fromExpr cmp toExpr step block]
   where
     conv (E4RangedInt _ l h _ e) = (e, Just (l, h))
     conv e@(E4ConstInt _ i)      = (e, Just (InfInt64 i, InfInt64 i))
