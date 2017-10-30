@@ -8,7 +8,7 @@ module Asm.C64.Image
 
 import           Asm.Core.Prelude
 import qualified Data.ByteString        as BS
-import qualified Data.ByteString.Lazy   as BSL
+import qualified Data.ByteString.Lazy   as BL
 import qualified Data.ByteString.Unsafe as BS
 
 import           Asm.Data.ByteValSimple
@@ -21,8 +21,8 @@ renderHiresBg bg img = go (toByteString img)
   where
     go si =
       let
-        (by', re) = BSL.splitAt 8 si
-        by = BSL.toStrict by'
+        (by', re) = BL.splitAt 8 si
+        by = BL.toStrict by'
       in
         if BS.length by /= 8
           then []
@@ -43,8 +43,8 @@ renderHiresFg fg img = go (toByteString img)
   where
     go si =
       let
-        (by', re) = BSL.splitAt 8 si
-        by = BSL.toStrict by'
+        (by', re) = BL.splitAt 8 si
+        by = BL.toStrict by'
       in
         if BS.length by /= 8
           then []

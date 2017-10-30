@@ -3,7 +3,7 @@ module Asm.Parser.StripComments
   ) where
 
 import           Asm.Core.Prelude
-import qualified Data.Text.Lazy          as LT
+import qualified Data.Text.Lazy          as TL
 
 import           Asm.Parser.Parser.Basic
 
@@ -31,4 +31,4 @@ parseComment mode (c:s)                   = (if isWhiteSpace c then c else ' ') 
 
 
 stripComments :: String -> Text
-stripComments s = toStrict $ LT.dropWhileEnd isWhiteSpace $ parseComment ModeNone s
+stripComments s = toStrict $ TL.dropWhileEnd isWhiteSpace $ parseComment ModeNone s

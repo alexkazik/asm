@@ -7,7 +7,7 @@ module Main where
 
 import           Control.Monad
 import           Data.ByteString.Builder
-import qualified Data.ByteString.Lazy    as BSL
+import qualified Data.ByteString.Lazy    as BL
 import           Data.Semigroup          ((<>))
 import           Options.Applicative
 import           System.Directory
@@ -55,7 +55,7 @@ runAll directory = do
         , moduleMultiUnRLE
         ]
   forM_ (concat $ map moFiles moduleResults) $ \(fileName, fileData) ->
-    BSL.writeFile (directory </> fileName) (toLazyByteString fileData)
+    BL.writeFile (directory </> fileName) (toLazyByteString fileData)
   putStr (concat $ map printInfo moduleResults)
   where
     printInfo mo =

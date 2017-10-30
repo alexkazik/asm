@@ -5,7 +5,7 @@ module Asm.C64.Vice
 import qualified Control.Arrow
 import qualified Data.Map                            as M
 import           Data.Maybe                          (fromMaybe)
-import qualified Data.Text.Lazy                      as LT
+import qualified Data.Text.Lazy                      as TL
 import           Text.Printf
 
 import           Asm.Core
@@ -38,8 +38,8 @@ generateSybolTable = sortOn fst . separateSameName . alignSameName . joinSamePos
             then mp
             else M.alter (\v -> Just $ intercalate "_" n'' : fromMaybe [] v) p mp
           where
-            n' = LT.split (== '.') (LT.fromStrict n)
-            n'' = filter (not . LT.any (=='~')) n'
+            n' = TL.split (== '.') (TL.fromStrict n)
+            n'' = filter (not . TL.any (=='~')) n'
         go _ _ = printError [sourcePos|generateSybolTable: not all symbols are fully defined|]
     joinSamePos :: [(Int64, [LText])] -> [(Int64, LText)]
     joinSamePos = map (\(p,t) -> (p, intercalate "_X_" (sort t)))

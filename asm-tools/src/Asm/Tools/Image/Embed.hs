@@ -7,7 +7,7 @@ module Asm.Tools.Image.Embed
 import           Asm.Core.Prelude
 import           Codec.Picture            as Juicy
 import qualified Data.ByteString          as BS
-import qualified Data.ByteString.Lazy     as LBS
+import qualified Data.ByteString.Lazy     as BL
 import           Data.ByteString.Unsafe
 import qualified Data.Vector.Storable     as SV
 import qualified Data.Vector.Unboxed      as UV
@@ -35,7 +35,7 @@ embedImage conv doUpdate fp = do
 
       (convertedData, imageData') = conv (imageWidth image * imageHeight image) (imageData image)
 
-      newFile = LBS.toStrict $ encodePng (Juicy.Image (imageWidth image) (imageHeight image) imageData' :: Juicy.Image PixelRGBA8)
+      newFile = BL.toStrict $ encodePng (Juicy.Image (imageWidth image) (imageHeight image) imageData' :: Juicy.Image PixelRGBA8)
 
     when
       (doUpdate && origFile /= newFile) $ do

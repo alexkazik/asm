@@ -6,7 +6,7 @@ module Asm.Tools.Image.Internal
 
 import           Asm.Core.Prelude
 import qualified Data.ByteString      as BS
-import qualified Data.ByteString.Lazy as BSL
+import qualified Data.ByteString.Lazy as BL
 
 data Image =
   Image
@@ -34,7 +34,7 @@ createImage (w, h, img) =
 
 toByteString :: Image -> LByteString
 {-# INLINEABLE toByteString #-}
-toByteString Image{..} = BSL.fromChunks
+toByteString Image{..} = BL.fromChunks
   [
     slice ((y + imageOffsetY) * imageFullWidth + imageOffsetX) imageWidth imageData
   | y <- [0 .. imageHeight - 1]

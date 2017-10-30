@@ -11,7 +11,7 @@ module Asm.Tools.Image
  ) where
 
 import           Asm.Core.Prelude
-import qualified Data.ByteString.Lazy     as BSL
+import qualified Data.ByteString.Lazy     as BL
 import qualified Data.IntMap.Strict       as IM
 
 import           Asm.Tools.Image.Internal
@@ -39,5 +39,5 @@ histogram img =
   map (fromIntegral . fst) $
   sortBy (comparing (Down . snd)) $
   IM.toList $
-  BSL.foldr (\i -> IM.insertWith (+) (fromIntegral i) (1 :: Int)) IM.empty $
+  BL.foldr (\i -> IM.insertWith (+) (fromIntegral i) (1 :: Int)) IM.empty $
   toByteString img

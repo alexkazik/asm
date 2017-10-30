@@ -12,7 +12,7 @@ module Asm.Core.Compiler
 import           Asm.Core.Prelude
 import qualified Data.ByteString                     as BS
 import           Data.ByteString.Builder
-import qualified Data.ByteString.Lazy                as BSL
+import qualified Data.ByteString.Lazy                as BL
 import qualified Data.Vector                         as V
 
 import           Asm.Core.Data.Cpu
@@ -30,7 +30,7 @@ poolDataToByteString :: Word8 -> Vector ByteValSimple -> ByteString
 poolDataToByteString def = BS.pack . map (final def) . V.toList
 
 poolDataToLazyByteString :: Word8 -> Vector ByteValSimple -> LByteString
-poolDataToLazyByteString def = BSL.pack . map (final def) . V.toList
+poolDataToLazyByteString def = BL.pack . map (final def) . V.toList
 
 poolDataToByteStringBuilder :: Word8 -> Vector ByteValSimple -> Builder
-poolDataToByteStringBuilder def = lazyByteString . BSL.pack . map (final def) . V.toList
+poolDataToByteStringBuilder def = lazyByteString . BL.pack . map (final def) . V.toList
