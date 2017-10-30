@@ -29,3 +29,17 @@ data Stmt3 c
   | S3VariableUnresolved !Location !VariableType !Reference !(Expr3 c) !(Maybe (Expr3 c)) !(Maybe (Expr3 c)) !Int64 !(Maybe Int64)
 
 type Stmt3Block c = [Stmt3 c]
+
+instance LocationOf (Stmt3 c) where
+  locationOf (S3IfBlock loc _)                        = loc
+  locationOf (S3Namespace loc _ _)                    = loc
+  locationOf (S3Block loc _ _ _)                      = loc
+  locationOf (S3For loc _ _ _ _ _ _ _)                = loc
+  locationOf (S3LabelDefinition loc _)                = loc
+  locationOf (S3CpuStmt loc _)                        = loc
+  locationOf (S3MetaSet loc _ _)                      = loc
+  locationOf (S3MetaUnset loc _)                      = loc
+  locationOf (S3MetaSticky loc _)                     = loc
+  locationOf (S3MetaUnsticky loc _)                   = loc
+  locationOf (S3Variable loc _ _ _ _ _ _ _)           = loc
+  locationOf (S3VariableUnresolved loc _ _ _ _ _ _ _) = loc
