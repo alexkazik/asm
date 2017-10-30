@@ -97,12 +97,10 @@ aTerm' = choice
   , wrapPosition <*> (rword' "false" *> pure (PEConstBool False))
   , wrapPosition <*> (rword' "unused" *> pure (PEByteVal ByteValAny))
   , parseStructOrUnion
-  , try function
+  , function
   , var
   , wrapPosition <*> parseIntExprI
-  , try antiArray
-  , try antiStruct
-  , antitovar
+  , haskell
   , array
   ]
 
@@ -114,8 +112,7 @@ parseStructOrUnion = do
     , rword' "union" *> pure (PETypeUnion, False)
     ]
   symbol "{"
-  d <- withNewlines $ catMaybes <$> sepBy (try (Just <$> parseTypeName isStruct) <|> (sc *> pure Nothing)) (symbol ";")
-  symbol "}"
+  d <- withNewlines $ smartList (parseTypeName isStruct) (symbol ";") (symbol "}")
   arr <- optional $ do
     (aloc, expr) <- optionalExprInBrackets
     return (aloc, fromMaybe (loc, PEConstInt 0) expr)
@@ -125,6 +122,9 @@ parseStructOrUnion = do
 
 function :: CpuParser c ps pe => Parser (PExpr pe)
 function = do
+  lookAhead $ try $ do
+    _ <- parseLabelIdValue
+    symbol "("
   loc <- getPosition
   name <- parseLabelIdValue
   params <- between (symbol "(") (symbol ")") $ sepBy parseExpr (symbol ",")
@@ -137,10 +137,14 @@ var = do
   -- important: this parser can never parse a Haskell variable, but antitovar is used
   return (loc, PELabelId name)
 
+haskell :: CpuParser c ps pe => Parser (PExpr pe)
+haskell = do
+  char '$'
+  antiArray <|> antiStruct <|> antiExpr
+
 antiArray :: CpuParser c ps pe => Parser (PExpr pe)
 antiArray = do
   loc <- getPosition
-  char '$'
   lookAhead (char '[')
   expr <- parseHaskellTermParens '[' ']'
   sc
@@ -149,16 +153,14 @@ antiArray = do
 antiStruct :: CpuParser c ps pe => Parser (PExpr pe)
 antiStruct = do
   loc <- getPosition
-  char '$'
   lookAhead (char '{')
   expr <- parseHaskellTermParens '{' '}'
   sc
   return (loc, PEAntiStruct expr)
 
-antitovar :: CpuParser c ps pe => Parser (PExpr pe)
-antitovar = do
+antiExpr :: CpuParser c ps pe => Parser (PExpr pe)
+antiExpr = do
   loc <- getPosition
-  char '$'
   expr <- parseHaskellExpr
   return (loc, PEAntiExpr expr)
 
@@ -166,9 +168,24 @@ array :: CpuParser c ps pe => Parser (PExpr pe)
 array = do
   loc <- getPosition
   symbol "[["
-  d <- withNewlines $ catMaybes <$> sepBy (try (Just <$> parseExpr) <|> (sc *> pure Nothing)) (symbol ",")
-  symbol "]]"
+  d <- withNewlines $ smartList parseExpr (symbol ",") (symbol "]]")
   return (loc, PEUserArrayL d)
+
+smartList :: Parser a -> Parser () -> Parser () -> Parser [a]
+smartList p s cl =
+  ( do
+      cl
+      return []
+  ) <|> ( do
+      e <- p
+      choice
+        [ cl *> return [e]
+        , do
+            s
+            es <- smartList p s cl
+            return (e:es)
+        ]
+  )
 
 -- helpers
 
