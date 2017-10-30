@@ -15,22 +15,22 @@ import           Asm.Core.SourcePos
 import           Asm.Data.ByteValSimple
 
 getPoolsC :: Cpu c => CSM4 c (Map Reference (PoolData c))
-getPoolsC = state (\s -> (cs4PoolData s, s))
+getPoolsC = gets cs4PoolData
 
 getPoolDataC :: Cpu c => Reference -> CSM4 c (PoolData c)
 getPoolDataC p = state (\s -> (fromMaybe (printErrorS s $ ([], "getPoolDataC " ++ show p ++ show (M.keys $ cs4PoolData s)):[sourcePos||]) $ M.lookup p (cs4PoolData s), s))
 
 setPoolsC :: Cpu c => Map Reference (PoolData c) -> CSM4 c ()
-setPoolsC pools = state (\s -> ((), s{cs4PoolData = pools}))
+setPoolsC pools = modify (\s -> s{cs4PoolData = pools})
 
 getPoolDefinitionsC :: Cpu c => CSM4 c (Map Reference PoolDefinition)
 getPoolDefinitionsC = asks cs4PoolDefinition
 
 setPoolStateC :: Cpu c => Reference -> PoolState -> CSM4 c ()
-setPoolStateC pool ps = state (\s -> ((), s{cs4PoolState = M.insert pool ps (cs4PoolState s)}))
+setPoolStateC pool ps = modify (\s -> s{cs4PoolState = M.insert pool ps (cs4PoolState s)})
 
 areAllPoolsFinalC :: Cpu c => CSM4 c Bool
-areAllPoolsFinalC = state (\s -> (M.foldr areAllPoolsFinalC' True (cs4PoolData s), s))
+areAllPoolsFinalC = gets (\CSt4{..} -> M.foldr areAllPoolsFinalC' True cs4PoolData)
   where
     areAllPoolsFinalC' :: PoolData t1 -> Bool -> Bool
     areAllPoolsFinalC' PoolDataFinal{} b = b

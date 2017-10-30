@@ -92,24 +92,25 @@ addNameC name type'@(loc,_) = state go
             else printErrorS s ((loc, "no names allowed"):[sourcePos||])
 
 getUniqueNameC :: Cpu c => CSM1 c Text
-getUniqueNameC = state getUniqueNameC'
-    where
-      getUniqueNameC' s@CSt1 {cs1UniqueNumber} = ('~' `cons` tshow cs1UniqueNumber, s{cs1UniqueNumber=cs1UniqueNumber+1} )
+getUniqueNameC = do
+  s@CSt1{..} <- get
+  put s{cs1UniqueNumber = cs1UniqueNumber + 1}
+  return ('~' `cons` tshow cs1UniqueNumber)
 
 pushSuperLocalsModeC :: Cpu c => CSM1 c ()
-pushSuperLocalsModeC = state (\s -> ((), s{cs1OnlySuperLocals= cs1OnlySuperLocals s + 1}))
+pushSuperLocalsModeC = modify (\s -> s{cs1OnlySuperLocals= cs1OnlySuperLocals s + 1})
 
 popSuperLocalsModeC :: Cpu c => CSM1 c ()
-popSuperLocalsModeC = state (\s -> ((), s{cs1OnlySuperLocals = cs1OnlySuperLocals s - 1}))
+popSuperLocalsModeC = modify (\s -> s{cs1OnlySuperLocals = cs1OnlySuperLocals s - 1})
 
 pushSystemNameModeC :: Cpu c => CSM1 c ()
-pushSystemNameModeC = state (\s -> ((), s{cs1OnlySystemNames= cs1OnlySystemNames s + 1}))
+pushSystemNameModeC = modify (\s -> s{cs1OnlySystemNames= cs1OnlySystemNames s + 1})
 
 popSystemNameModeC :: Cpu c => CSM1 c ()
-popSystemNameModeC = state (\s -> ((), s{cs1OnlySystemNames = cs1OnlySystemNames s - 1}))
+popSystemNameModeC = modify (\s -> s{cs1OnlySystemNames = cs1OnlySystemNames s - 1})
 
 setKindC :: Cpu c => Reference -> (Location, KindDefinition) -> CSM1 c ()
-setKindC i t = state (\s -> ((), s{cs1Data = R.set i t (cs1Data s)}))
+setKindC i t = modify (\s -> s{cs1Data = R.set i t (cs1Data s)})
 
 addPoolC :: Cpu c => Location -> Text -> [Text] -> Bool -> Int64 -> Int64 -> CSM1 c ()
 addPoolC l n' u' v st b = do

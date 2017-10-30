@@ -23,16 +23,16 @@ getPoolElemRefC loc (k,e, loc2)             = printErrorC $ (loc, "it's not a po
 -}
 
 getAllMetaC :: Cpu c => CSM3 c (MetaKeyMap (KindDefinition, Expr4 c, Location))
-getAllMetaC = state (\s -> (cs3MetaData s, s))
+getAllMetaC = gets cs3MetaData
 
 setAllMetaC :: Cpu c => MetaKeyMap (KindDefinition, Expr4 c, Location) -> CSM3 c ()
-setAllMetaC meta = state (\s -> ((), s{cs3MetaData = meta}))
+setAllMetaC meta = modify (\s -> s{cs3MetaData = meta})
 
 getAllMetaStickyC :: Cpu c => CSM3 c MetaKeySet
-getAllMetaStickyC = state (\s -> (cs3MetaStickyData s, s))
+getAllMetaStickyC = gets cs3MetaStickyData
 
 setAllMetaStickyC :: Cpu c => MetaKeySet -> CSM3 c ()
-setAllMetaStickyC meta = state (\s -> ((), s{cs3MetaStickyData = meta}))
+setAllMetaStickyC meta = modify (\s -> s{cs3MetaStickyData = meta})
 
 {-
   Get/Set one information, set is called by the handler of "#", get within the applyMeta functions

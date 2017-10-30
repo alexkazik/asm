@@ -96,6 +96,6 @@ instance CpuData c => CSM34 (CSM3 c) where
   toolPoolGetPoolStateC = asks cs3PoolState
   toolPoolGetPoolDefinitionC = asks cs3PoolDefinition
   -- position
-  toolPositionGetC = state (\s -> (cs3Position s, s))
-  setPositionC n v = state (\s -> ((), s{cs3Position = M.insert n v (cs3Position s)}))
+  toolPositionGetC = gets cs3Position
+  setPositionC n v = modify (\s -> s{cs3Position = M.insert n v (cs3Position s)})
   isPhase4C = return False

@@ -76,5 +76,5 @@ instance CpuData c => CompilerState1234S (CompilerState2 c) where
 instance CpuData c => CompilerState1234 (CSM2 c)
 
 instance CpuData c => CompilerState12 (CSM2 c) where
-  getPathC = state (\s@CSt2{..} -> ((cs2Path, cs2AliasPath, cs2Data), s))
-  setPathC csPath csAliasPath = state (\s -> ((), s{cs2Path=csPath, cs2AliasPath=csAliasPath}))
+  getPathC = gets (\CSt2{..} -> (cs2Path, cs2AliasPath, cs2Data))
+  setPathC csPath csAliasPath = modify (\s -> s{cs2Path=csPath, cs2AliasPath=csAliasPath})

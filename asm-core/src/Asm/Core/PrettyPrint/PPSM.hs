@@ -22,7 +22,7 @@ data PrettyPrintState
 type PPSM = State PrettyPrintState
 
 addSourceLine :: SourcePos -> PPSM ()
-addSourceLine sp = state (\s -> ((), s{ppsCurrentLine=sp : ppsCurrentLine s}))
+addSourceLine sp = modify (\s -> s{ppsCurrentLine=sp : ppsCurrentLine s})
 
 addFirstSourceLine :: Location -> PPSM ()
 addFirstSourceLine (sp:_) = addSourceLine sp
@@ -32,21 +32,23 @@ getSimplifiedSorceLines :: PrettyPrintState -> Map FilePath [Int]
 getSimplifiedSorceLines s = foldr (\sp m -> M.alter (\a -> Just $ ordNub $ sourceLine sp : fromMaybe [] a) (sourceName sp) m) M.empty (ppsCurrentLine s)
 
 getSourceLines :: PPSM Doc
-getSourceLines = state go
+getSourceLines = do
+  s <- get
+  let
+    slines = getSimplifiedSorceLines s
+    commonLine =
+      case M.toList slines of
+        [(n,[l])] -> Just (n, l)
+        _         -> Nothing
+    renderSP =
+      if M.null slines || linesMatch (ppsPrevLine s) commonLine
+        then mempty
+        else "  -- SP: " ++ pshow slines
+  put (PrettyPrintState commonLine [])
+  return renderSP
   where
-    go s = (renderSP, PrettyPrintState commonLine [])
-      where
-        slines = getSimplifiedSorceLines s
-        commonLine =
-          case M.toList slines of
-            [(n,[l])] -> Just (n, l)
-            _         -> Nothing
-        renderSP =
-          if M.null slines || linesMatch (ppsPrevLine s) commonLine
-            then mempty
-            else "  -- SP: " ++ pshow slines
-        linesMatch (Just (an, al)) (Just (bn, bl)) =
-             an == bn
-          && al <= bl
-          && bl <= al + 10
-        linesMatch _ _ = False
+    linesMatch (Just (an, al)) (Just (bn, bl)) =
+         an == bn
+      && al <= bl
+      && bl <= al + 10
+    linesMatch _ _ = False

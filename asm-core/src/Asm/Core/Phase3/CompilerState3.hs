@@ -62,21 +62,22 @@ initialState3 CRd2{..} CSt2{..} CWr2{..} =
 
 
 addNameC :: Cpu c => Text -> CSM3 c Reference
-addNameC name = state go
-  where
-    go s@CSt3{..} =
-      case R.insertUnlinked R.root name ([], KDCpu) cs3Data of
-        (path, tree) -> (path, s{cs3Data = tree})
+addNameC name = do
+  s@CSt3{..} <- get
+  let
+    (path, tree) = R.insertUnlinked R.root name ([], KDCpu) cs3Data
+  put s{cs3Data = tree}
+  return path
 
 getTypeInExprC :: Cpu c => Reference -> CSM3 c (Expr3 c)
 getTypeInExprC k = asks (\s -> (cs3TypeInExpr s M.! k))
 
 
 getKindC :: Cpu c => Reference -> CSM3 c (Location, KindDefinition)
-getKindC i = state (\s -> (R.get i (cs3Data s), s))
+getKindC i = gets (\CSt3{..} -> R.get i cs3Data)
 
 getPositionsC :: Cpu c => CSM3 c (Map Reference (Maybe Reference, Either (InfInt64, InfInt64) Int64))
-getPositionsC = state (\s -> (cs3Position s, s))
+getPositionsC = gets cs3Position
 
 addInlineC :: Cpu c => Reference -> (Int64, Maybe (Expr4 c)) -> CSM3 c ()
 addInlineC n v = tell mempty{cs3Inline = M.singleton n v}
@@ -92,11 +93,11 @@ resolveNameC errs loc name par = state go
         go' = maybeToList $ R.lookup par name cs3Data
 
 getCallPathsForReferenceC :: Cpu c => Reference -> CSM3 c (Set [Text])
-getCallPathsForReferenceC n = state go
+getCallPathsForReferenceC n = gets go
   where
-    go s@CSt3{..} =
+    go CSt3{..} =
       let
         n' = initEx $ R.pathOfReference n
         s' = mapMaybe (\(k, v) -> bool Nothing (Just v) (isPrefixOf n' k)) $ M.toList cs3CallPaths
       in
-        (concat (S.singleton n':s'), s)
+        concat (S.singleton n':s')

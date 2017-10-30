@@ -39,36 +39,43 @@ initialState4 CRd3{..} CSt3{..} CWr3{..} =
     }
 
 getUniqueNameC :: Cpu c => CSM4 c Text
-getUniqueNameC = state getUniqueNameC'
-  where
-    getUniqueNameC' s@CSt4 {cs4UniqueNumber} = ('~' `cons` tshow cs4UniqueNumber, s{cs4UniqueNumber=cs4UniqueNumber+1} )
+getUniqueNameC = do
+  s@CSt4{..} <- get
+  put s{cs4UniqueNumber = cs4UniqueNumber + 1}
+  return ('~' `cons` tshow cs4UniqueNumber)
 
 resetLoopDataC :: Cpu c => Maybe (Ratio Int) -> CSM4 c ()
-resetLoopDataC def = state (\s -> ((), resetLoopDataS def s))
+resetLoopDataC def = modify (\s -> resetLoopDataS def s)
 
 resetLoopDataS :: Cpu c => Maybe (Ratio Int) -> CompilerState4 c -> CompilerState4 c
 resetLoopDataS def s = s{cs4HighestDefault = Nothing, cs4UseDefault = def, cs4HasChanged = False, cs4MetaIsFlat = False}
 
 setDefaultC :: Cpu c => Ratio Int -> CSM4 c ()
-setDefaultC def = state (\s -> ((), if Just def > cs4HighestDefault s then s{cs4HighestDefault = Just def} else s))
+setDefaultC def = modify (\s -> if Just def > cs4HighestDefault s then s{cs4HighestDefault = Just def} else s)
 
 getHasChangedC :: Cpu c => CSM4 c Bool
-getHasChangedC = state (\s -> (cs4HasChanged s, s))
+getHasChangedC = gets cs4HasChanged
 
 getHighestDefaultC :: Cpu c => CSM4 c (Maybe (Ratio Int))
-getHighestDefaultC = state (\s -> (cs4HighestDefault s, s))
+getHighestDefaultC = gets cs4HighestDefault
 
 getUseDefaultC :: Cpu c => CSM4 c (Maybe (Ratio Int))
-getUseDefaultC = state (\s -> (cs4UseDefault s, s))
+getUseDefaultC = gets cs4UseDefault
 
 resetUseDefaultC :: Cpu c => CSM4 c ()
-resetUseDefaultC = state (\s -> ((), s{cs4UseDefault = Nothing}))
+resetUseDefaultC = modify (\s -> s{cs4UseDefault = Nothing})
 
 getMetaIsFlatC :: Cpu c => CSM4 c Bool
-getMetaIsFlatC = state (\s -> (cs4MetaIsFlat s, s))
+getMetaIsFlatC = gets cs4MetaIsFlat
 
 setMetaIsFlatC :: Cpu c => Bool -> CSM4 c ()
-setMetaIsFlatC isFlat = state (\s -> ((), s{cs4MetaIsFlat = isFlat}))
+setMetaIsFlatC isFlat = modify (\s -> s{cs4MetaIsFlat = isFlat})
 
 getInlineC :: Cpu c => Reference -> CSM4 c (Maybe (Int64, Maybe (Expr4 c)))
-getInlineC n = state (\s -> (M.lookup n $ cs4Inline s, s{cs4Inline = M.delete n $ cs4Inline s}))
+getInlineC n = do
+  s@CSt4{..} <- get
+  case M.lookup n cs4Inline of
+    Nothing -> return Nothing
+    i@Just{} -> do
+      put s{cs4Inline = M.delete n cs4Inline}
+      return i

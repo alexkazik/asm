@@ -77,18 +77,18 @@ instance CpuData c => CompilerState1234S (CompilerState4 c) where
     ]
 
 instance CpuData c => CompilerState1234 (CSM4 c) where
-  setHasChangedC = state (\s -> ((), s{cs4HasChanged = True}))
+  setHasChangedC = modify (\s -> s{cs4HasChanged = True})
 
 instance CpuData c => CSM34 (CSM4 c) where
   -- function
   type CSM34Cpu (CSM4 c) = c
   lookupFunctionC k = asks (fromMaybe [] . fkmLookup k . cs4Functions)
   -- pool
-  toolPoolGetPoolStateC = state (\s -> (cs4PoolState s, s))
+  toolPoolGetPoolStateC = gets cs4PoolState
   toolPoolGetPoolDefinitionC = asks cs4PoolDefinition
   -- position
-  toolPositionGetC = state (\s -> (cs4Position s, s))
-  setPositionC n v = state (\s -> ((), go s))
+  toolPositionGetC = gets cs4Position
+  setPositionC n v = modify (\s -> go s)
     where
       go s
         | Just v == M.lookup n (cs4Position s) = s

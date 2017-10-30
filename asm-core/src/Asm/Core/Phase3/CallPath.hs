@@ -28,7 +28,7 @@ convertCallPathC (cwd, jt) = do
       mapMaybe toPath jt'
   if null jt''
     then return ()
-    else state (\s -> ((), s{cs3CallPaths = M.insert cwd (S.fromList jt'') (cs3CallPaths s)}))
+    else modify (\s -> s{cs3CallPaths = M.insert cwd (S.fromList jt'') (cs3CallPaths s)})
   where
     toPath (_, E4Pointer _ l TDCode _) = Just l
     toPath _                           = Nothing

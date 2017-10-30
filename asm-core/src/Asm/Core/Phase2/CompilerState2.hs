@@ -43,7 +43,7 @@ getAliasC :: Cpu c => Reference -> CSM2 c (Maybe (Expr12 c))
 getAliasC k = asks (M.lookup k . cs2Aliases)
 
 addTypeInExprC :: Cpu c => Reference -> Expr3 c -> CSM2 c ()
-addTypeInExprC k v = state (\s -> ((), s{cs2TypeInExpr = M.insert k v (cs2TypeInExpr s)}))
+addTypeInExprC k v = modify (\s -> s{cs2TypeInExpr = M.insert k v (cs2TypeInExpr s)})
 
 resolveNameC :: Cpu c => [(Location, String)] -> Location -> Text -> CSM2 c Reference
 resolveNameC errs loc name = state go
@@ -58,13 +58,13 @@ resolveNameC errs loc name = state go
           | otherwise = R.search cs2Path name cs2Data
 
 getKindC :: Cpu c => Reference -> CSM2 c (Location, KindDefinition)
-getKindC i = state (\s -> (R.get i (cs2Data s), s))
+getKindC i = gets (\CSt2{..} -> R.get i cs2Data)
 
 setKindC :: Cpu c => Reference -> (Location, KindDefinition) -> CSM2 c ()
-setKindC i t = state (\s -> ((), s{cs2Data = R.set i t (cs2Data s)}))
+setKindC i t = modify (\s -> s{cs2Data = R.set i t (cs2Data s)})
 
 getTypeInExprC :: Cpu c => Reference -> CSM2 c (Expr3 c)
-getTypeInExprC k = state (\s -> (cs2TypeInExpr s M.! k, s))
+getTypeInExprC k = gets (\CSt2{..} -> cs2TypeInExpr M.! k)
 
 setPositionC :: Cpu c => Reference -> CSM2 c ()
 setPositionC n = tell mempty{cs2Position = M.singleton n (Nothing, Left (minBound, maxBound))}

@@ -28,7 +28,7 @@ compile3 (r2, x2, s2, w2) =
     r3 = initialReader3 r2 s2 w2 functionKeyMap
     go = do
       mapM_ convertCallPathC (M.toList $ cs2CallPaths w2)
-      state (\s -> ((), s{cs3CallPaths = mergeCallPaths (cs3CallPaths s)}))
+      modify (\s -> s{cs3CallPaths = mergeCallPaths (cs3CallPaths s)})
       placeInPoolC x2 >>= \case
         [] -> return ()
         (firstStmt:_) -> printErrorC $
