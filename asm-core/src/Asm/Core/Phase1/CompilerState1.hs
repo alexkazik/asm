@@ -29,11 +29,9 @@ initialState1 =
     { cs1Path = R.root
     , cs1AliasPath = [R.root]
     , cs1Data = initTree R.root initialData (R.empty (spBuiltin, KDNamespace))
-    , cs1Aliases = M.empty
     , cs1UniqueNumber = 0
     , cs1OnlySuperLocals = 0
     , cs1OnlySystemNames = 0
-    , cs1PoolDefinition = M.empty
     }
   where
     initialData =
@@ -75,7 +73,7 @@ initialState1 =
           | otherwise = Left p'
 
 addAliasC :: Cpu c => Reference -> Expr12 c -> CSM1 c ()
-addAliasC k v = state (\s -> ((), s{cs1Aliases = M.insert k v (cs1Aliases s)}))
+addAliasC k v = tell mempty{cs1Aliases = M.singleton k v}
 
 addNameC :: Cpu c => Text -> (Location, KindDefinition) -> CSM1 c Reference
 addNameC name type'@(loc,_) = state go
@@ -120,21 +118,11 @@ addPoolC l n' u' v st b = do
   -- add child names and remember the absolute ones
   u <- mapM (`addNameC` (l, KDPointer (TDPool False True v))) u'
   -- add the other pool stuff
-  addPool2C idName PoolDefinition{pdBank = b, pdStart = st, pdVirtual = v, pdPools = u}
-  where
-    addPool2C :: Cpu c => Reference -> PoolDefinition -> CSM1 c ()
-    addPool2C pn pd = state addPoolC'
-      where
-        addPoolC' s@CSt1{..} = ((), s{cs1PoolDefinition = M.insert pn pd cs1PoolDefinition})
+  tell mempty{cs1PoolDefinition = M.singleton idName PoolDefinition{pdBank = b, pdStart = st, pdVirtual = v, pdPools = u}}
 
 addPoolBothC :: Cpu c => Location -> Text -> Bool -> Int64 -> Int64 -> CSM1 c ()
 addPoolBothC l n' v st b = do
   -- add name and remember the absolute one
   idName <- addNameC n' (l, KDPointer (TDPool True True v))
   -- add the other pool stuff
-  addPool2C idName PoolDefinition{pdBank = b, pdStart = st, pdVirtual = v, pdPools = [idName]}
-  where
-    addPool2C :: Cpu c => Reference -> PoolDefinition -> CSM1 c ()
-    addPool2C pn pd = state addPoolC'
-        where
-          addPoolC' s@CSt1{..} = ((), s{cs1PoolDefinition = M.insert pn pd cs1PoolDefinition})
+  tell mempty{cs1PoolDefinition = M.singleton idName PoolDefinition{pdBank = b, pdStart = st, pdVirtual = v, pdPools = [idName]}}

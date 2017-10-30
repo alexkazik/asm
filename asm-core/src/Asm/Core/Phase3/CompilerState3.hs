@@ -28,19 +28,28 @@ import           Asm.Core.Phases34.Data.PoolState
 import           Asm.Core.SourcePos
 import           Asm.Data.InfInt64
 
-initialState3 :: Cpu c => CompilerState2 c -> FunctionKeyMap [Function (CSM3 c) c] -> CompilerState3 c
-initialState3 CSt2{..} fns =
-  CSt3
-    { cs3Data = cs2Data
-    , cs3PoolDefinition = cs2PoolDefinition
-    , cs3MetaData = cpuDefaultMetaData
-    , cs3MetaStickyData = mksEmpty
-    , cs3Position = cs2Position
-    , cs3Inline = M.empty
-    , cs3PoolData = foldl' (createPools ep) M.empty cs2PoolDefinition
+initialReader3 :: Cpu c => CompilerReader2 c -> CompilerState2 c -> CompilerWriter2 c -> FunctionKeyMap [Function (CSM3 c) c] -> CompilerReader3 c
+initialReader3 CRd2{..} CSt2{..} CWr2{..} fns =
+  CRd3
+    { cs3PoolDefinition = cs2PoolDefinition
     , cs3PoolState = foldl' (createPools emptyPoolState) M.empty cs2PoolDefinition
     , cs3TypeInExpr = cs2TypeInExpr
     , cs3Functions = fns
+    }
+  where
+    createPools :: a -> Map Reference a -> PoolDefinition -> Map Reference a
+    createPools def pools pd = foldl' (createPool def) pools (pdPools pd)
+    createPool :: a -> Map Reference a -> Reference -> Map Reference a
+    createPool def pools na = M.insert na def pools
+
+initialState3 :: Cpu c => CompilerReader2 c -> CompilerState2 c -> CompilerWriter2 c -> CompilerState3 c
+initialState3 CRd2{..} CSt2{..} CWr2{..} =
+  CSt3
+    { cs3Data = cs2Data
+    , cs3MetaData = cpuDefaultMetaData
+    , cs3MetaStickyData = mksEmpty
+    , cs3Position = cs2Position
+    , cs3PoolData = foldl' (createPools ep) M.empty cs2PoolDefinition
     , cs3CallPaths = M.empty
     }
   where
@@ -60,7 +69,7 @@ addNameC name = state go
         (path, tree) -> (path, s{cs3Data = tree})
 
 getTypeInExprC :: Cpu c => Reference -> CSM3 c (Expr3 c)
-getTypeInExprC k = state (\s -> (cs3TypeInExpr s M.! k, s))
+getTypeInExprC k = asks (\s -> (cs3TypeInExpr s M.! k))
 
 
 getKindC :: Cpu c => Reference -> CSM3 c (Location, KindDefinition)
@@ -70,7 +79,7 @@ getPositionsC :: Cpu c => CSM3 c (Map Reference (Maybe Reference, Either (InfInt
 getPositionsC = state (\s -> (cs3Position s, s))
 
 addInlineC :: Cpu c => Reference -> (Int64, Maybe (Expr4 c)) -> CSM3 c ()
-addInlineC n v = state (\s -> ((), s{cs3Inline=M.insert n v $ cs3Inline s}))
+addInlineC n v = tell mempty{cs3Inline = M.singleton n v}
 
 resolveNameC :: Cpu c => [(Location, String)] -> Location -> Text -> Reference -> CSM3 c Reference
 resolveNameC errs loc name par = state go

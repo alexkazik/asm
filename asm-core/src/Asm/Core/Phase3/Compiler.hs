@@ -18,16 +18,16 @@ import           Asm.Core.SourcePos
 import           Asm.Data.InfInt64
 
 
-compile3 :: Cpu c => (Stmt3Block c, CompilerState2 c) -> CompilerState3 c
-compile3 (x2, s2) =
+compile3 :: Cpu c => (CompilerReader2 c, Stmt3Block c, CompilerState2 c, CompilerWriter2 c) -> (CompilerReader3 c, CompilerState3 c, CompilerWriter3 c)
+compile3 (r2, x2, s2, w2) =
   let
-    ((), s3) = runState go (initialState3 s2 functionKeyMap)
+    ((), s3, w3) = runRWS go r3 (initialState3 r2 s2 w2)
   in
-    s3
-    -- printErrorS s3 []
+    (r3, s3, w3)
   where
+    r3 = initialReader3 r2 s2 w2 functionKeyMap
     go = do
-      mapM_ convertCallPathC (M.toList $ cs2CallPaths s2)
+      mapM_ convertCallPathC (M.toList $ cs2CallPaths w2)
       state (\s -> ((), s{cs3CallPaths = mergeCallPaths (cs3CallPaths s)}))
       placeInPoolC x2 >>= \case
         [] -> return ()

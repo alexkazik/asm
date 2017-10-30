@@ -22,22 +22,25 @@ import           Asm.Core.Phases.Data.CompilerState1234
 import           Asm.Core.Phases12.Data.CompilerState12
 import           Asm.Core.SourcePos
 
-initialState2 :: forall c. Cpu c => CompilerState1 c -> CompilerState2 c
-initialState2 CSt1{..} =
+initialReader2 :: forall c. Cpu c => CompilerState1 c -> CompilerWriter1 c -> CompilerReader2 c
+initialReader2 CSt1{..} CWr1{..} =
+  CRd2
+    { cs2PoolDefinition = cs1PoolDefinition
+    , cs2Aliases = cs1Aliases
+    , cs2FunctionMap = foldr fklmInsert fklmEmpty (compilerFunctionKeys ++ cpuFunctionKeys (Proxy :: Proxy c))
+    }
+
+initialState2 :: forall c. Cpu c => CompilerState1 c -> CompilerWriter1 c -> CompilerState2 c
+initialState2 CSt1{..} CWr1{..} =
   CSt2
     { cs2Path = R.root
     , cs2AliasPath = [R.root]
     , cs2Data = cs1Data
-    , cs2PoolDefinition = cs1PoolDefinition
-    , cs2Aliases = cs1Aliases
     , cs2TypeInExpr = M.empty
-    , cs2Position = M.empty
-    , cs2FunctionMap = foldr fklmInsert fklmEmpty (compilerFunctionKeys ++ cpuFunctionKeys (Proxy :: Proxy c))
-    , cs2CallPaths = M.empty
-  }
+    }
 
 getAliasC :: Cpu c => Reference -> CSM2 c (Maybe (Expr12 c))
-getAliasC k = state (\s -> (M.lookup k (cs2Aliases s), s))
+getAliasC k = asks (M.lookup k . cs2Aliases)
 
 addTypeInExprC :: Cpu c => Reference -> Expr3 c -> CSM2 c ()
 addTypeInExprC k v = state (\s -> ((), s{cs2TypeInExpr = M.insert k v (cs2TypeInExpr s)}))
@@ -64,10 +67,10 @@ getTypeInExprC :: Cpu c => Reference -> CSM2 c (Expr3 c)
 getTypeInExprC k = state (\s -> (cs2TypeInExpr s M.! k, s))
 
 setPositionC :: Cpu c => Reference -> CSM2 c ()
-setPositionC n = state (\s -> ((), s{cs2Position = M.insert n (Nothing, Left (minBound, maxBound)) (cs2Position s)}))
+setPositionC n = tell mempty{cs2Position = M.singleton n (Nothing, Left (minBound, maxBound))}
 
 lookupFunctionName :: Cpu c => Text -> CSM2 c (Maybe FunctionKey)
-lookupFunctionName n = state (\s -> (fklmLookup n (cs2FunctionMap s), s))
+lookupFunctionName n = asks (fklmLookup n . cs2FunctionMap)
 
 addCallPathsC :: [Text] -> [Expr3 c] -> CSM2 c ()
-addCallPathsC k v = state (\s -> ((), s{cs2CallPaths = M.insertWith (<>) k v (cs2CallPaths s)}))
+addCallPathsC k v = tell mempty{cs2CallPaths = M.singleton k v}

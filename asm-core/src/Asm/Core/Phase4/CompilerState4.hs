@@ -17,11 +17,17 @@ import           Asm.Core.Phases.Data.CompilerState1234
 import           Asm.Core.Phases34.Data.CompilerState34
 import           Asm.Core.Phases34.Function
 
-initialState4 :: Cpu c => CompilerState3 c -> CompilerState4 c
-initialState4 CSt3{..} =
+initialReader4 :: Cpu c => CompilerReader3 c -> CompilerState3 c -> CompilerWriter3 c -> CompilerReader4 c
+initialReader4 CRd3{..} CSt3{..} CWr3{..} =
+  CRd4
+    { cs4PoolDefinition = cs3PoolDefinition
+    , cs4Functions = functionKeyMap
+    }
+
+initialState4 :: Cpu c => CompilerReader3 c -> CompilerState3 c -> CompilerWriter3 c -> CompilerState4 c
+initialState4 CRd3{..} CSt3{..} CWr3{..} =
   CSt4
     { cs4UniqueNumber = 10000
-    , cs4PoolDefinition = cs3PoolDefinition
     , cs4Position = cs3Position
     , cs4Inline = cs3Inline
     , cs4PoolData = cs3PoolData
@@ -30,8 +36,6 @@ initialState4 CSt3{..} =
     , cs4UseDefault = Nothing
     , cs4HasChanged = False
     , cs4MetaIsFlat = False
-    , cs4Functions = functionKeyMap
-    , cs4CallPaths = cs3CallPaths
     }
 
 getUniqueNameC :: Cpu c => CSM4 c Text

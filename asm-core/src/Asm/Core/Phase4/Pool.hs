@@ -24,7 +24,7 @@ setPoolsC :: Cpu c => Map Reference (PoolData c) -> CSM4 c ()
 setPoolsC pools = state (\s -> ((), s{cs4PoolData = pools}))
 
 getPoolDefinitionsC :: Cpu c => CSM4 c (Map Reference PoolDefinition)
-getPoolDefinitionsC = state (\s -> (cs4PoolDefinition s, s))
+getPoolDefinitionsC = asks cs4PoolDefinition
 
 setPoolStateC :: Cpu c => Reference -> PoolState -> CSM4 c ()
 setPoolStateC pool ps = state (\s -> ((), s{cs4PoolState = M.insert pool ps (cs4PoolState s)}))
@@ -35,9 +35,6 @@ areAllPoolsFinalC = state (\s -> (M.foldr areAllPoolsFinalC' True (cs4PoolData s
     areAllPoolsFinalC' :: PoolData t1 -> Bool -> Bool
     areAllPoolsFinalC' PoolDataFinal{} b = b
     areAllPoolsFinalC' _ _               = False
-
-getFinalPoolsC :: Cpu c => CSM4 c [(Reference, Int64, Int64, Maybe (Vector ByteValSimple))]
-getFinalPoolsC = state (\s -> (map (getFinalPoolsS s) (M.toList $ cs4PoolDefinition s), s))
 
 getFinalPoolsS :: Cpu c => CompilerState4 c -> (Reference, PoolDefinition) -> (Reference, Int64, Int64, Maybe (Vector ByteValSimple))
 getFinalPoolsS s (n,pd) = (n,pdStart pd, fromIntegral $ V.length content, if pdVirtual pd then Nothing else Just content)

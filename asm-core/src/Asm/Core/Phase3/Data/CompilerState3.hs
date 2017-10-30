@@ -3,7 +3,9 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 
 module Asm.Core.Phase3.Data.CompilerState3
-  ( CompilerState3(..)
+  ( CompilerReader3(..)
+  , CompilerWriter3(..)
+  , CompilerState3(..)
   , CSM3
   ) where
 
@@ -31,33 +33,55 @@ import           Asm.Data.InfInt64
 
 type Paths = S.Set [Text]
 
+-- the reader of the compiler
+data CompilerReader3 c
+  = CRd3
+    { cs3TypeInExpr     :: Map Reference (Expr3 c)
+    , cs3PoolState      :: Map Reference PoolState
+    , cs3PoolDefinition :: Map Reference PoolDefinition
+    , cs3Functions      :: FunctionKeyMap [Function (CSM3 c) c]
+    }
+
+-- the writer of the compiler
+data CompilerWriter3 c
+  = CWr3
+    { cs3Inline         :: Map Reference (Int64, Maybe (Expr4 c))
+    }
+
+instance Monoid (CompilerWriter3 c) where
+  mempty =
+    CWr3
+      { cs3Inline = mempty
+      }
+  a `mappend` b =
+    CWr3
+      { cs3Inline = M.union (cs3Inline a) (cs3Inline b)
+      }
+
+
 -- the state of the compiler
 data CompilerState3 c
   = CSt3
     { cs3Data           :: R.Tree (Location, KindDefinition)
-    , cs3TypeInExpr     :: Map Reference (Expr3 c)
     , cs3PoolData       :: Map Reference (PoolData c)
-    , cs3PoolState      :: Map Reference PoolState
-    , cs3PoolDefinition :: Map Reference PoolDefinition
     , cs3MetaData       :: MetaKeyMap (KindDefinition, Expr4 c, Location)
     , cs3MetaStickyData :: MetaKeySet
     , cs3Position       :: Map Reference (Maybe Reference, Either (InfInt64, InfInt64) Int64)
-    , cs3Inline         :: Map Reference (Int64, Maybe (Expr4 c))
-    , cs3Functions      :: FunctionKeyMap [Function (CSM3 c) c]
     , cs3CallPaths      :: !(Map [Text] Paths)
     }
 
--- the state monad it lives in
-type CSM3 c = State (CompilerState3 c)
+-- the monad it lives in
+type CSM3 c = RWS (CompilerReader3 c) (CompilerWriter3 c) (CompilerState3 c)
 
 instance CpuData c => CompilerState1234S (CompilerState3 c) where
   dumpStateS s = displayPretty $ vsep
     [ "State: "
     , indent 4 $ vsep
-      [ "data:" <+> align (pretty $ cs3Data s)
-      , "poolData: " <+> align (pretty $ cs3PoolData s)
-      , "poolState: " <+> list (map dumpPoolState $ M.toList $ cs3PoolState s)
-      , "poolDefinition: " <+> pretty (cs3PoolDefinition s)
+      [ "cs3Data:" <+> align (pretty $ cs3Data s)
+      , "cs3PoolData: " <+> align (pretty $ cs3PoolData s)
+      -- , "cs3MetaData: " <+> pretty (cs3MetaData s)
+      -- , "cs3MetaStickyData: " <+> pretty (cs3MetaStickyData s)
+      , "cs3Position: " <+> pshow (cs3Position s)
       , "cs3CallPaths: " <+> pretty (cs3CallPaths s)
       ]
     ]
@@ -67,10 +91,10 @@ instance CpuData c => CompilerState1234 (CSM3 c)
 instance CpuData c => CSM34 (CSM3 c) where
   -- function
   type CSM34Cpu (CSM3 c) = c
-  lookupFunctionC k = state (\s -> (fromMaybe [] $ fkmLookup k (cs3Functions s), s))
+  lookupFunctionC k = asks (fromMaybe [] . fkmLookup k . cs3Functions)
   -- pool
-  toolPoolGetPoolStateC = state (\s -> (cs3PoolState s, s))
-  toolPoolGetPoolDefinitionC = state (\s -> (cs3PoolDefinition s, s))
+  toolPoolGetPoolStateC = asks cs3PoolState
+  toolPoolGetPoolDefinitionC = asks cs3PoolDefinition
   -- position
   toolPositionGetC = state (\s -> (cs3Position s, s))
   setPositionC n v = state (\s -> ((), s{cs3Position = M.insert n v (cs3Position s)}))

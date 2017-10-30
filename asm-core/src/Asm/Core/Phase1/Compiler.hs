@@ -10,5 +10,5 @@ import           Asm.Core.Phase1.Data.Stmt1
 import           Asm.Core.Phase1.RegisterNames
 import           Asm.Core.Phase2.Data.Stmt2
 
-compile1 :: Cpu c => Stmt1Block c -> (Stmt2Block c, CompilerState1 c)
-compile1 blk = runState (registerNamesC blk) initialState1
+compile1 :: Cpu c => Stmt1Block c -> (Stmt2Block c, CompilerState1 c, CompilerWriter1 c)
+compile1 blk = runRWS (registerNamesC blk) () initialState1

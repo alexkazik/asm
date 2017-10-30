@@ -2,7 +2,9 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 
 module Asm.Core.Phase2.Data.CompilerState2
-  ( CompilerState2(..)
+  ( CompilerReader2(..)
+  , CompilerWriter2(..)
+  , CompilerState2(..)
   , CSM2
   ) where
 
@@ -23,22 +25,44 @@ import           Asm.Core.PrettyPrint
 import           Asm.Core.SourcePos
 import           Asm.Data.InfInt64
 
+-- the reader of the compiler
+data CompilerReader2 c
+  = CRd2
+    { cs2Aliases        :: Map Reference (Expr12 c)
+    , cs2PoolDefinition :: Map Reference PoolDefinition
+    , cs2FunctionMap    :: FunctionKeyLookupMap
+    }
+
+-- the writer of the compiler
+data CompilerWriter2 c
+  = CWr2
+    { cs2Position  :: Map Reference (Maybe Reference, Either (InfInt64, InfInt64) Int64)
+    , cs2CallPaths :: !(Map [Text] [Expr3 c])
+    }
+
+instance Monoid (CompilerWriter2 c) where
+  mempty =
+    CWr2
+      { cs2Position = mempty
+      , cs2CallPaths = mempty
+      }
+  a `mappend` b =
+    CWr2
+      { cs2Position = M.union (cs2Position a) (cs2Position b)
+      , cs2CallPaths = M.unionWith (<>) (cs2CallPaths a) (cs2CallPaths b)
+      }
+
 -- the state of the compiler
 data CompilerState2 c
   = CSt2
-    { cs2Path           :: Reference
-    , cs2AliasPath      :: [Reference]
-    , cs2Data           :: R.Tree (Location, KindDefinition)
-    , cs2Aliases        :: Map Reference (Expr12 c)
-    , cs2TypeInExpr     :: Map Reference (Expr3 c)
-    , cs2PoolDefinition :: Map Reference PoolDefinition
-    , cs2Position       :: Map Reference (Maybe Reference, Either (InfInt64, InfInt64) Int64)
-    , cs2FunctionMap    :: FunctionKeyLookupMap
-    , cs2CallPaths      :: !(Map [Text] [Expr3 c])
-  }
+    { cs2Path       :: Reference
+    , cs2AliasPath  :: [Reference]
+    , cs2Data       :: R.Tree (Location, KindDefinition)
+    , cs2TypeInExpr :: Map Reference (Expr3 c)
+    }
 
--- the state monad it lives in
-type CSM2 c = State (CompilerState2 c)
+-- the monad it lives in
+type CSM2 c = RWS (CompilerReader2 c) (CompilerWriter2 c) (CompilerState2 c)
 
 instance CpuData c => CompilerState1234S (CompilerState2 c) where
   dumpStateS s = displayPretty $ vsep
@@ -46,14 +70,8 @@ instance CpuData c => CompilerState1234S (CompilerState2 c) where
     , indent 4 $ vsep
       [ "path: " <+> pretty (cs2Path s)
       , "data:" <+> align (pretty $ cs2Data s)
-      , "aliases:" <+> align (vsep $ map dumpAlias' $ M.toList $ cs2Aliases s)
-      , "poolDefinition: " <+> pretty (cs2PoolDefinition s)
-      , "cs2CallPaths: " <+> pshow (cs2CallPaths s)
       ]
     ]
-    where
-      dumpAlias' :: CpuData c => (Reference, Expr12 c) -> Doc
-      dumpAlias' (i, e) = fillBreak 4 (pretty i) <+> pretty '=' <+> prettySrc e
 
 instance CpuData c => CompilerState1234 (CSM2 c)
 

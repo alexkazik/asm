@@ -2,7 +2,8 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 
 module Asm.Core.Phase1.Data.CompilerState1
-  ( CompilerState1(..)
+  ( CompilerWriter1(..)
+  , CompilerState1(..)
   , CSM1
   ) where
 
@@ -20,21 +21,38 @@ import           Asm.Core.Phases12.Data.CompilerState12
 import           Asm.Core.PrettyPrint
 import           Asm.Core.SourcePos
 
+-- the writer of the compiler
+data CompilerWriter1 c =
+  CWr1
+    { cs1Aliases        :: Map Reference (Expr12 c)
+    , cs1PoolDefinition :: Map Reference PoolDefinition
+    }
+
+instance Monoid (CompilerWriter1 c) where
+  mempty =
+    CWr1
+      { cs1Aliases = mempty
+      , cs1PoolDefinition = mempty
+      }
+  a `mappend` b =
+    CWr1
+      { cs1Aliases = M.union (cs1Aliases a) (cs1Aliases b)
+      , cs1PoolDefinition = M.union (cs1PoolDefinition a) (cs1PoolDefinition b)
+      }
+
 -- the state of the compiler
 data CompilerState1 c =
   CSt1
     { cs1Path            :: Reference
     , cs1AliasPath       :: [Reference]
     , cs1Data            :: R.Tree (Location, KindDefinition)
-    , cs1Aliases         :: Map Reference (Expr12 c)
     , cs1UniqueNumber    :: !Int
     , cs1OnlySuperLocals :: !Int
     , cs1OnlySystemNames :: !Int
-    , cs1PoolDefinition  :: Map Reference PoolDefinition
     }
 
--- the state monad it lives in
-type CSM1 c = State (CompilerState1 c)
+-- the monad it lives in
+type CSM1 c = RWS () (CompilerWriter1 c) (CompilerState1 c)
 
 instance CpuData c => CompilerState1234S (CompilerState1 c) where
   dumpStateS s = displayPretty $ vsep
@@ -42,15 +60,10 @@ instance CpuData c => CompilerState1234S (CompilerState1 c) where
     , indent 4 $ vsep
       [ "path: " <+> pretty (cs1Path s)
       , "data:" <+> align (pretty $ cs1Data s)
-      , "aliases:" <+> align (vsep $ map dumpAlias' $ M.toList $ cs1Aliases s)
       , "uniqueNumber: " <+> pretty (cs1UniqueNumber s)
       , "onlySuperLocals: " <+> pretty (cs1OnlySuperLocals s)
-      , "poolDefinition: " <+> pretty (cs1PoolDefinition s)
       ]
     ]
-    where
-      dumpAlias' :: CpuData c => (Reference, Expr12 c) -> Doc
-      dumpAlias' (i, e) = fillBreak 4 (pretty i) <+> pretty '=' <+> prettySrc e
 
 instance CpuData c => CompilerState1234 (CSM1 c)
 

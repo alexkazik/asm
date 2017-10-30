@@ -17,20 +17,21 @@ import           Asm.Core.Phase4.PoolData
 import           Asm.Core.Phase4.PoolState
 import           Asm.Core.SourcePos
 
-compile4 :: Cpu c => CompilerState3 c -> CompilerResult c
-compile4 s3 =
+compile4 :: Cpu c => (CompilerReader3 c, CompilerState3 c, CompilerWriter3 c) -> CompilerResult c
+compile4 (r3, s3, w3) =
   let
-    (x4, s4) = runState go (initialState4 s3)
+    r4 = (initialReader4 r3 s3 w3)
+    ((), s4, ()) = runRWS go r4 (initialState4 r3 s3 w3)
+    result = map (getFinalPoolsS s4) (M.toList $ cs4PoolDefinition r4)
   in
     -- error $ unpack (dumpState2S True s2 ++ "\n\n" ++ displayPretty (Asm.Core.Phase2.Data.Stmt2.dumpStmtBlock x2) )
     -- error $ unpack (dumpState3S True s3 {- ++ "\n\n" ++ displayPretty (Asm.Core.Phase2.Data.Stmt2.dumpStmtBlock x2) -} )
     -- error $ unpack (dumpState4S True s4)
-    CompilerResult (map (\(a, b, c, d) -> (nameOfReference a, b, c, d)) x4) s4
+    CompilerResult (map (\(a, b, c, d) -> (nameOfReference a, b, c, d)) result) s4
   where
     go = do
       outerLoopC Nothing
       outerLoopC Nothing
-      getFinalPoolsC
 
 
 outerLoopC :: Cpu c => Maybe (Ratio Int) -> CSM4 c ()
