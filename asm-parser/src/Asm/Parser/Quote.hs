@@ -11,7 +11,6 @@ import qualified Language.Haskell.TH.Syntax      as TH
 
 import           Asm.Core.SourcePos              (getPosition)
 
-import           Asm.Parser.Data.Haskell
 import           Asm.Parser.Data.Int64Value
 import           Asm.Parser.Data.LabelIdValue
 import           Asm.Parser.Data.PExpr
@@ -48,7 +47,7 @@ antiStmt _ (loc, PSAntiNamespace v n) =
                  [ TH.liftData loc
                  , TH.conE 'Asm.Parser.Data.PStmt.PSNamespace
                       .$ n
-                      .* toExpQ v
+                      .* return v
                  ]
       ]
 antiStmt _ (loc, PSAntiBlock v n p) =
@@ -60,35 +59,35 @@ antiStmt _ (loc, PSAntiBlock v n p) =
                  , TH.conE 'Asm.Parser.Data.PStmt.PSBlock
                       .$ n
                       .$ p
-                      .* toExpQ v
+                      .* return v
                  ]
       ]
 antiStmt _ _                 = Nothing
 
 antiParsedInt64 :: Int64Value -> Maybe TH.ExpQ
-antiParsedInt64 (Int64ValueHaskell e) = Just $ TH.conE 'Asm.Parser.Data.Int64Value.Int64Value .* (TH.varE 'fromIntegral .* toExpQ e)
+antiParsedInt64 (Int64ValueHaskell e) = Just $ TH.conE 'Asm.Parser.Data.Int64Value.Int64Value .* (TH.varE 'fromIntegral .* return e)
 antiParsedInt64  _       = Nothing
 
 
 antiParsedLabelId :: LabelIdValue -> Maybe TH.ExpQ
-antiParsedLabelId (LabelIdValueHaskell e) = Just $ TH.conE 'Asm.Parser.Data.LabelIdValue.LabelIdValue .* toExpQ e
+antiParsedLabelId (LabelIdValueHaskell e) = Just $ TH.conE 'Asm.Parser.Data.LabelIdValue.LabelIdValue .* return e
 antiParsedLabelId  _                      = Nothing
 
 -- helper for PSAntiBuildDirectIfBlock, converts (Maybe MyExp, [Stmt]) to (HaskellExpression, [Stmt]) or (True, [Stmt])
-consAntiDirect :: ([PStmt ps pe] -> TH.ExpQ) -> (Haskell, [PStmt ps pe]) -> TH.ExpQ -> TH.ExpQ
+consAntiDirect :: ([PStmt ps pe] -> TH.ExpQ) -> (TH.Exp, [PStmt ps pe]) -> TH.ExpQ -> TH.ExpQ
 consAntiDirect liftCpu (x,y)  = (.*) (con ":" .* ne)
   where
-    ne = TH.tupE [toExpQ x, liftCpu y]
+    ne = TH.tupE [return x, liftCpu y]
 
-mapDirect :: (Data ps, Data pe) => ([PStmt ps pe] -> TH.ExpQ) -> [(Haskell, [PStmt ps pe])] -> TH.ExpQ
+mapDirect :: (Data ps, Data pe) => ([PStmt ps pe] -> TH.ExpQ) -> [(TH.Exp, [PStmt ps pe])] -> TH.ExpQ
 mapDirect liftCpu x = foldr (consAntiDirect liftCpu) (TH.liftData ([] `asTypeOf` x)) x
 
 
 -- anti quotation
 antiExpr :: PExpr pe -> Maybe TH.ExpQ
-antiExpr  (loc, PEAntiExpr e)   = Just $ TH.varE 'Asm.Parser.Data.ToExpr.toExpr .$ loc .* toExpQ e
-antiExpr  (loc, PEAntiArray e)  = Just $ TH.varE 'Asm.Parser.Data.ToArray.toArray .$ loc .* toExpQ e
-antiExpr  (loc, PEAntiStruct e) = Just $ TH.varE 'Asm.Parser.Data.ToStructOrUnion.toStructOrUnion .$ loc .* toExpQ e
+antiExpr  (loc, PEAntiExpr e)   = Just $ TH.varE 'Asm.Parser.Data.ToExpr.toExpr .$ loc .* return e
+antiExpr  (loc, PEAntiArray e)  = Just $ TH.varE 'Asm.Parser.Data.ToArray.toArray .$ loc .* return e
+antiExpr  (loc, PEAntiStruct e) = Just $ TH.varE 'Asm.Parser.Data.ToStructOrUnion.toStructOrUnion .$ loc .* return e
 antiExpr  _                     = Nothing
 
 -- lift text

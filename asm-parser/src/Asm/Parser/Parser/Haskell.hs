@@ -1,24 +1,32 @@
 module Asm.Parser.Parser.Haskell
   ( parseHaskellExpr
-  , parseHaskellTerm
+  , parseHaskellTermParens
+  , parseHaskellTermNewline
   ) where
 
 import           Asm.Core.Prelude
-import qualified Text.Megaparsec.Char       as MP
-import qualified Text.Megaparsec.Char.Lexer as MP
+import           Language.Haskell.Exts.Extension
+import           Language.Haskell.Exts.Parser           (ParseMode (..))
+import qualified Language.Haskell.Exts.Parser           as Hs
+import qualified Language.Haskell.Exts.SrcLoc           as Hs
+import qualified Language.Haskell.Exts.Syntax           as Hs
+import qualified Language.Haskell.Meta.Parse            as Hs
+import qualified Language.Haskell.Meta.Syntax.Translate as Hs
+import           Language.Haskell.TH                    (Exp)
+import qualified Language.Haskell.TH                    as TH
+import qualified Text.Megaparsec                        as MP
+import qualified Text.Megaparsec.Char                   as MP
 
-import           Asm.Parser.Data.Haskell
 import           Asm.Parser.Parser.Basic
-import           Asm.Parser.Parser.Integer
 
 
 -- Haskell entry
 
-parseHaskellExpr :: Parser Haskell
+parseHaskellExpr :: Parser Exp
 parseHaskellExpr = lexeme $ choice
-  [ HVar <$> haskellVarName
-  , HCon <$> haskellConName
-  , between (symbol "(") (symbol ")") (withNewlines parseHaskellTerm)
+  [ TH.VarE . TH.mkName <$> haskellVarName
+  , TH.ConE . TH.mkName <$> haskellConName
+  , parseHaskellTermParens '(' ')'
   ]
 
 -- haskell sub-parsers
@@ -33,30 +41,63 @@ haskellNameChar :: String
 {-# INLINABLE haskellNameChar #-}
 haskellNameChar = "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'"
 
-parseHaskellTerm :: Parser Haskell
-parseHaskellTerm = do
-  t <- try (do
-      l <- parseHaskellApp
-      o <- someOf operatorChar
-      r <- parseHaskellApp
-      return $ HApp $ impureNonNull [HVar (unpack o), l, r]
-    ) <|> parseHaskellApp
+parseHaskellTermParens :: Char -> Char -> Parser Exp
+parseHaskellTermParens op cl = do
+  char op
+  (code, ()) <- MP.match helper
+  char cl
+  either
+    fail
+    return
+    (parseExp (unpack code))
+  where
+    helper :: Parser ()
+    helper =
+      void $
+        many $
+          choice
+            [ void $ some $ noneOf (op:cl:"\"")
+            , char '\\' <* MP.anyChar
+            , do
+                char '"'
+                void $ many
+                  (
+                    noneOf "\\\"" <|> ( char '\\' *> MP.anyChar )
+                  )
+                char '"'
+            , do
+                char op
+                helper
+                char cl
+            ]
 
-  optional (symbol "::" *> haskellConName) >>= \case
-    Nothing -> return t
-    Just ty -> return $ HSig ty t
+parseHaskellTermNewline :: Parser Exp
+parseHaskellTermNewline = do
+  code <- many (noneOf "\n")
+  either
+    fail
+    return
+    (parseExp code)
 
-parseHaskellApp :: Parser Haskell
-parseHaskellApp = do
-  a <- sepBy1 parseHaskellElem (some $ MP.oneOf whiteSpaceWithoutNewline)
-  return $ HApp a
+-- adapted from Language.Haskell.Meta.Parse
 
-parseHaskellElem :: Parser Haskell
-parseHaskellElem = choice
-  [ HVar <$> haskellVarName
-  , HCon <$> haskellConName
-  , between (symbol "(") (symbol ")") parseHaskellTerm
-  , HString <$> (char '"' *> many (noneOf "\\\"" <|> (char '\\' *> oneOf "\\\"")) <* char '"')
-  , try (HInteger <$> parseInteger)
-  , HScientific <$> MP.scientific
-  ]
+parseExp :: String -> Either String Exp
+parseExp = either Left (Right . Hs.toExp) . parseHsExp
+
+parseHsExp :: String -> Either String (Hs.Exp Hs.SrcSpanInfo)
+parseHsExp = Hs.parseResultToEither . Hs.parseExpWithMode inlineParseMode
+
+inlineParseMode :: ParseMode
+inlineParseMode = ParseMode
+  { parseFilename = []
+  , baseLanguage = Haskell2010
+  , extensions =
+      map
+        EnableExtension
+        [ BinaryLiterals
+        ]
+  , ignoreLinePragmas = False
+  , ignoreLanguagePragmas = False
+  , fixities = Nothing
+  , ignoreFunctionArity = False
+  }

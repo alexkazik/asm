@@ -40,7 +40,6 @@ library {
   exposed-modules: {
     Asm.Parser
     Asm.Parser.BuildTree
-    Asm.Parser.Data.Haskell
     Asm.Parser.Data.Int64Value
     Asm.Parser.Data.LabelIdValue
     Asm.Parser.Data.LabelName
@@ -75,6 +74,8 @@ library {
     , classy-prelude
     , containers
     , filepath
+    , haskell-src-exts
+    , haskell-src-meta
     , megaparsec
     , mtl
     , scientific

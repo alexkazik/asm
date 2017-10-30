@@ -3,10 +3,9 @@ module Asm.Parser.Data.LabelIdValue
   ) where
 
 import           Asm.Core.Prelude
-
-import           Asm.Parser.Data.Haskell
+import           Language.Haskell.TH (Exp)
 
 data LabelIdValue
-  = LabelIdValueHaskell Haskell
+  = LabelIdValueHaskell Exp
   | LabelIdValue String
   deriving (Eq, Show, Typeable, Data)

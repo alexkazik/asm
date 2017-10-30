@@ -8,13 +8,13 @@ module Asm.Parser.Data.PExpr
 
 import           Asm.Core.Prelude
 import qualified Data.Vector.Storable         as SV
+import           Language.Haskell.TH          (Exp)
 
 import           Asm.Core.Data.ByteVal
 import           Asm.Core.Data.Ternary
 import           Asm.Core.SourcePos
 import           Asm.Data.ByteValSimple
 
-import           Asm.Parser.Data.Haskell
 import           Asm.Parser.Data.LabelIdValue
 
 data PExprI pe
@@ -46,9 +46,9 @@ data PExprI pe
   --  -- Reference to Namespace/Variable/TypeDefinition
   | PELabelId !LabelIdValue
   --  -- created in parser, removed during quotation
-  | PEAntiExpr !Haskell
-  | PEAntiArray !Haskell
-  | PEAntiStruct !Haskell
+  | PEAntiExpr !Exp
+  | PEAntiArray !Exp
+  | PEAntiStruct !Exp
   --  -- only used until convert***
   | PETraceStep !(PExpr pe)
   | PEMagicValue !Text

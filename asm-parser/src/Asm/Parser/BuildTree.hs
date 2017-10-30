@@ -4,10 +4,11 @@ module Asm.Parser.BuildTree
 
 import           Asm.Core.Prelude
 import           Control.Monad.Fail           (MonadFail)
+import           Language.Haskell.TH          (Exp)
+import qualified Language.Haskell.TH          as TH
 
 import           Asm.Core.SourcePos
 
-import           Asm.Parser.Data.Haskell
 import           Asm.Parser.Data.LabelIdValue
 import           Asm.Parser.Data.PExpr
 import           Asm.Parser.Data.PStmt
@@ -55,7 +56,7 @@ buildBlockIf thisLoc thisCond thisStmt allStmts (locstmt:stream) = buildBlockIf 
 buildBlockIf thisLoc _ _ _ [] = fail $ "Missing endif for: " ++ sourcePosPretty thisLoc
 
 
-buildBlockDirectIf :: MonadFail m => SourcePos -> Haskell -> [PStmt ps pe] -> [(Haskell, [PStmt ps pe])] -> [PStmt ps pe] -> m [PStmt ps pe]
+buildBlockDirectIf :: MonadFail m => SourcePos -> Exp -> [PStmt ps pe] -> [(Exp, [PStmt ps pe])] -> [PStmt ps pe] -> m [PStmt ps pe]
 -- if
 buildBlockDirectIf thisLoc thisCond thisStmt allStmts ((loc, PSBuildIf cond):stream) = buildBlockDirectIf thisLoc thisCond thisStmt allStmts =<< buildBlockIf loc cond [] [] stream
 buildBlockDirectIf _thisLoc _ _ _ ((loc, PSBuildElseif _):_) = fail $ "Unexpected elseif: " ++ sourcePosPretty loc
@@ -64,7 +65,7 @@ buildBlockDirectIf _thisLoc _ _ _ ((loc, PSBuildEndif):_) = fail $ "Unexpected e
 -- direct if
 buildBlockDirectIf thisLoc thisCond thisStmt allStmts ((loc, PSBuildDirectIf cond):stream) = buildBlockDirectIf thisLoc thisCond thisStmt allStmts =<< buildBlockDirectIf loc cond [] [] stream
 buildBlockDirectIf thisLoc thisCond thisStmt allStmts ((_loc, PSBuildDirectElseif cond):stream) = buildBlockDirectIf thisLoc cond [] (allStmts ++ [(thisCond, thisStmt)]) stream
-buildBlockDirectIf thisLoc thisCond thisStmt allStmts ((_loc, PSBuildDirectElse):stream) = buildBlockDirectIf thisLoc (HCon "True") [] (allStmts ++ [(thisCond, thisStmt)]) stream
+buildBlockDirectIf thisLoc thisCond thisStmt allStmts ((_loc, PSBuildDirectElse):stream) = buildBlockDirectIf thisLoc (TH.ConE 'True) [] (allStmts ++ [(thisCond, thisStmt)]) stream
 buildBlockDirectIf thisLoc thisCond thisStmt allStmts ((_loc, PSBuildDirectEndif):stream) = return $ (thisLoc, PSAntiBuildDirectIfBlock $ allStmts ++ [(thisCond, thisStmt)]) : stream
 -- block
 buildBlockDirectIf thisLoc thisCond thisStmt allStmts ((loc, PSBuildNamespace na):stream) = buildBlockDirectIf thisLoc thisCond thisStmt allStmts =<< buildNamespace loc na [] stream

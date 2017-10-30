@@ -3,10 +3,9 @@ module Asm.Parser.Data.Int64Value
   ) where
 
 import           Asm.Core.Prelude
-
-import           Asm.Parser.Data.Haskell
+import           Language.Haskell.TH (Exp)
 
 data Int64Value
-  = Int64ValueHaskell Haskell
+  = Int64ValueHaskell Exp
   | Int64Value Int64
   deriving (Eq, Show, Typeable, Data)

@@ -21,8 +21,8 @@ stmt = wrapPosition <*> choice
   , rword' "elseif" *> (PSBuildElseif <$> parseExpr)
   , rword' "else" *> pure PSBuildElse
   , rword' "endif" *> pure PSBuildEndif
-  , rword' "$if" *> (PSBuildDirectIf <$> parseHaskellTerm)
-  , rword' "$elseif" *> (PSBuildDirectElseif <$> parseHaskellTerm)
+  , rword' "$if" *> (PSBuildDirectIf <$> parseHaskellTermNewline)
+  , rword' "$elseif" *> (PSBuildDirectElseif <$> parseHaskellTermNewline)
   , rword' "$else" *> pure PSBuildDirectElse
   , rword' "$endif" *> pure PSBuildDirectEndif
   , rword' "begin" *> pure (PSBuildNamespace Nothing)

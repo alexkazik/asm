@@ -134,23 +134,25 @@ var :: CpuParser c ps pe => Parser (PExpr pe)
 var = do
   loc <- getPosition
   name <- parseLabelId
-  -- impotant: this parser can never parse a haskell variable, but antotovar is used
+  -- important: this parser can never parse a Haskell variable, but antitovar is used
   return (loc, PELabelId name)
 
 antiArray :: CpuParser c ps pe => Parser (PExpr pe)
 antiArray = do
   loc <- getPosition
-  symbol "$["
-  expr <- withNewlines parseHaskellTerm
-  symbol "]"
+  char '$'
+  lookAhead (char '[')
+  expr <- parseHaskellTermParens '[' ']'
+  sc
   return (loc, PEAntiArray expr)
 
 antiStruct :: CpuParser c ps pe => Parser (PExpr pe)
 antiStruct = do
   loc <- getPosition
-  symbol "${"
-  expr <- withNewlines parseHaskellTerm
-  symbol "}"
+  char '$'
+  lookAhead (char '{')
+  expr <- parseHaskellTermParens '{' '}'
+  sc
   return (loc, PEAntiStruct expr)
 
 antitovar :: CpuParser c ps pe => Parser (PExpr pe)
