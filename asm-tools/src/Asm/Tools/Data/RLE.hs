@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeFamilies #-}
+
 module Asm.Tools.Data.RLE
   ( compressRLE
   ) where
@@ -8,10 +10,10 @@ import qualified Data.Vector.Storable   as SV
 
 import           Asm.Data.ByteValSimple
 
-compressRLE :: [ByteValSimple] -> SV.Vector ByteValSimple
+compressRLE :: (MonoFoldable mono, Element mono ~ ByteValSimple) => mono -> SVector ByteValSimple
 compressRLE ivlist = addBuf (foldl' optimiseRle (SV.empty, SV.empty) combined) `SV.snoc` byteValSimpleWord8 0
   where
-    combined = comb $ map ((,) 1) ivlist
+    combined = comb $ map ((,) 1) $ toList ivlist
 
 type NumIVS = (Int, ByteValSimple)
 
@@ -23,13 +25,13 @@ comb (x@(xc,xv):y@(yc,yv):zs) =
 comb [x] = V.singleton x
 comb [] = V.empty
 
-optimiseRle :: (SV.Vector ByteValSimple, SV.Vector ByteValSimple) -> NumIVS -> (SV.Vector ByteValSimple, SV.Vector ByteValSimple)
+optimiseRle :: (SVector ByteValSimple, SVector ByteValSimple) -> NumIVS -> (SVector ByteValSimple, SVector ByteValSimple)
 optimiseRle ob@(out, buf) (num, val)
   | num > 129 = optimiseRle (addBuf ob `SV.snoc` byteValSimpleWord8 0x7f `SV.snoc` val, SV.empty) (num - 129, val)
   | num >= 3 = (addBuf ob `SV.snoc` byteValSimpleWord8 (fromIntegral (num-2)) `SV.snoc` val, SV.empty)
   | otherwise = (out, buf ++ SV.replicate num val)
 
-addBuf :: (SV.Vector ByteValSimple, SV.Vector ByteValSimple) -> SV.Vector ByteValSimple
+addBuf :: (SVector ByteValSimple, SVector ByteValSimple) -> SVector ByteValSimple
 addBuf (out, buf)
   | SV.null buf = out
   | otherwise =

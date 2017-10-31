@@ -21,7 +21,7 @@ import           Demo.Multi.UnRLE
 import           Demo.Output
 
 
-data Options
+newtype Options
   = Options
     { optionsOutput  :: FilePath
     }
@@ -57,9 +57,9 @@ runAll directory = do
         [ moduleC64Image
         , moduleMultiUnRLE
         ]
-  forM_ (concat $ map moFiles moduleResults) $ \(fileName, fileData) ->
+  forM_ (concatMap moFiles moduleResults) $ \(fileName, fileData) ->
     BL.writeFile (directory </> fileName) (toLazyByteString fileData)
-  putStr (concat $ map printInfo moduleResults)
+  putStr (concatMap printInfo moduleResults)
   where
     printInfo mo =
       "Module " ++ moName mo ++ "\n" ++ moStats mo ++ "\n"

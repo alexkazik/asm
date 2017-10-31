@@ -116,7 +116,7 @@ parseOpcodes :: String -> (Map Text Int, [(String, AddressMode, IndexMode, Word8
 parseOpcodes source =
   let
     splitLine = filter (not . null) . split (\x -> x == ' ' || x == '.')
-    removeComment = fst . break (== '#')
+    removeComment = takeWhile (/= '#')
     sourceLines = filter (not . null) $ map (splitLine . removeComment) $ split (== '\n') source
   in
     mapAccumR parseLine M.empty sourceLines

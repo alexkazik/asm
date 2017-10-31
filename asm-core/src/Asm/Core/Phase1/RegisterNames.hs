@@ -36,7 +36,7 @@ registerNamesStmtC :: Cpu c => Stmt1 c -> CSM1 c (Maybe (Stmt2 c))
 registerNamesStmtC (S1LabelDefinition loc name) = (Just . S2LabelDefinition loc) <$> addNameC name (loc, KDPointer TDCode)
 
 registerNamesStmtC (S1Variable loc vt name td v p al pg) =
-  if (not (isPrefixOf "_" name) && vt == VTLocal)
+  if not ("_" `isPrefixOf` name) && vt == VTLocal
     then do
       $throwError [(loc, "local variable must start with a underscore")]
       return Nothing

@@ -37,9 +37,9 @@ convertCallPathC (cwd, jt) = do
       let
         Just (pth, lab) = unsnoc x
       in
-        if isPrefixOf "_" lab
+        if "_" `isPrefixOf` lab
           then pth
-          else L.dropWhileEnd (isPrefixOf "~") pth
+          else L.dropWhileEnd ("~" `isPrefixOf`) pth
 
 mergeCallPaths :: Map [Text] (Set [Text]) -> Map [Text] (Set [Text])
 mergeCallPaths acp =
@@ -55,7 +55,7 @@ mergeCallPaths acp =
         else
           let
             seen' = k:seen
-            todo = concatMap (\(k', v') -> k':(S.toList v')) $ filter (\(k',_) -> k `isPrefixOf` k') $ M.toList acp
+            todo = concatMap (\(k', v') -> k':S.toList v') $ filter (\(k',_) -> k `isPrefixOf` k') $ M.toList acp
             res' = res <> S.fromList todo
           in
             foldl' go (res', seen') todo

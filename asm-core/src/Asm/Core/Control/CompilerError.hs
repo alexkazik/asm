@@ -80,8 +80,8 @@ catchFatalError m h = ME.catchError m (h . fst . fromCompilerError)
 
 -- internal error (without MonadError)
 
-printInternalError  :: QuasiQuoter
-printInternalError  =  QuasiQuoter
+printInternalError :: QuasiQuoter
+printInternalError =  QuasiQuoter
   { quoteExp = quotePrintInternalError
   , quotePat = error "QuasiQuoter \"printInternalError\" for patterns is not available"
   , quoteDec = error "QuasiQuoter \"printInternalError\" for declarations is not available"

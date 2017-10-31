@@ -36,7 +36,7 @@ cpu6502ApplyMetaStmtC loc CS3Data{..} = recoverFatalError [] $ do
   let
     s4dData = flip map s4dData' $ \expr ->
       E4Function loc sdCheck8 [expr]
-  return [S4CpuStmt loc $ CS4Data{..}]
+  return [S4CpuStmt loc CS4Data{..}]
 
 cpu6502ApplyMetaStmtC loc CS3Regular{s3rExpr = Nothing, ..} = do
   (s4fCpu, am) <- pickCpu loc s3rOperator s3rIndexMode
@@ -125,14 +125,14 @@ cpu6502ApplyMetaStmtC loc CS3Inline{..} = do
   let
     s4iOperator = s3iOperator
     s4iName = s3iName
-    s4iSize = sizeOfStmt s3iAddressMode
+  s4iSize <- sizeOfStmt s3iAddressMode
   return [ S4CpuStmt loc CS4Inline{..} ]
   where
-    sizeOfStmt AMAbs = 2
-    sizeOfStmt AMZp  = 1
-    sizeOfStmt AMImm = 1
-    sizeOfStmt AMRel = 1
-    sizeOfStmt _     = $printError [(loc, "Unable to determine size of statement")]
+    sizeOfStmt AMAbs = return 2
+    sizeOfStmt AMZp  = return 1
+    sizeOfStmt AMImm = return 1
+    sizeOfStmt AMRel = return 1
+    sizeOfStmt _     = $throwFatalError [(loc, "Unable to determine size of statement")]
 
 
 -- helper

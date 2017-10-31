@@ -7,7 +7,6 @@ module Asm.Parser.Data.PExpr
   ) where
 
 import           Asm.Core.Prelude
-import qualified Data.Vector.Storable         as SV
 import           Language.Haskell.TH          (Exp)
 
 import           Asm.Core.Data.ByteVal
@@ -28,7 +27,7 @@ data PExprI pe
   --  -- structure and dereferencing
   | PEUserArrayL ![PExpr pe]
   | PEUserArray !(Vector (PExpr pe))
-  | PEUserArrayBVS !(SV.Vector ByteValSimple)
+  | PEUserArrayBVS !(SVector ByteValSimple)
   | PEDerefArray !(PExpr pe) !(PExpr pe)
   | PEDefineArray !(PExpr pe) !(Maybe (PExpr pe))
   --

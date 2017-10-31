@@ -165,7 +165,7 @@ mkOpCodes source aliases = do
     addOp (n, am, is16, c, cpus, addr) os =
       let
         op = IM.singleton (fromIntegral $ namesOprFn' M.! n) $ M.singleton am (c, is16, addr)
-        addCpu cpu ops = IM.unionWith (IM.unionWith M.union) (IM.singleton cpu op) ops
+        addCpu cpu = IM.unionWith (IM.unionWith M.union) (IM.singleton cpu op)
       in
         foldr addCpu os cpus
   ops <- liftData $ foldr addOp IM.empty operatorList

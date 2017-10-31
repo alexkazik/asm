@@ -20,7 +20,7 @@ import           Asm.Core.Phase4.PoolState
 compile4 :: Cpu c => (CompilerReader3 c, CompilerState3 c, CompilerWriter3 c) -> Error CompilerError (CompilerResult c)
 compile4 (r3, s3, w3) = do
   let
-    r4 = (initialReader4 r3 s3 w3)
+    r4 = initialReader4 r3 s3 w3
   ((), s4, ()) <- runRWST go r4 (initialState4 r3 s3 w3)
   let
     result = map (getFinalPoolsS s4) (M.toList $ cs4PoolDefinition r4)
@@ -28,7 +28,7 @@ compile4 (r3, s3, w3) = do
   where
     go = do
       outerLoopC Nothing
-      outerLoopC Nothing
+      when flagDebugCompiler (outerLoopC Nothing) -- in case of debugging: do another loop and check that nothing changes
 
 
 outerLoopC :: Cpu c => Maybe (Ratio Int) -> CSM4 c ()

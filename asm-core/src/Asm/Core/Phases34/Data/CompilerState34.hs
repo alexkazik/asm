@@ -60,12 +60,8 @@ getPositionC :: CSM34 m => Reference -> m (Either (InfInt64, InfInt64) Int64)
 getPositionC n = do
   csPosition <- toolPositionGetC
   case M.lookup n csPosition of
-    Just p -> return (snd p)
-    Nothing ->
-      -- isPhase4C >>=
-      --   bool
-          (return (Left (minBound, maxBound)))
-          -- (printErrorC [sourcePos|name $n not found|])
+    Just p  -> return (snd p)
+    Nothing -> return (Left (minBound, maxBound))
 
 getPositionPoolC :: CSM34 m => Reference -> m (Maybe Reference)
 getPositionPoolC n = do

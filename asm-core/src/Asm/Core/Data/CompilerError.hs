@@ -17,7 +17,7 @@ newtype CompilerError
     }
 
 instance Semigroup CompilerError where
-  CompilerError (ae, as) <> CompilerError (be, bs) = CompilerError (ae ++ be, maybe as Just bs)
+  CompilerError (ae, as) <> CompilerError (be, bs) = CompilerError (ae ++ be, bs <|> as)
 
 convertCompilerError :: CompilerError -> [(String, [String])]
 convertCompilerError (CompilerError (errs, Just sta))
@@ -28,8 +28,8 @@ convertCompilerError (CompilerError (errs, _)) =
   convertCompilerErrorWithoutState errs
 
 convertCompilerErrorWithoutState :: [(Location, String)] -> [(String, [String])]
-convertCompilerErrorWithoutState errs =
-  map (\(loc, err) -> (err, map sourcePosPretty loc)) errs
+convertCompilerErrorWithoutState =
+  map (\(loc, err) -> (err, map sourcePosPretty loc))
 
 printCompilerError :: [(String, [String])] -> a
 printCompilerError err =

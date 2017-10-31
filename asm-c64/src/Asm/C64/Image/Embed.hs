@@ -7,8 +7,8 @@ import           Asm.Core.Prelude
 import           Control.Monad.ST
 import qualified Data.Vector.Storable         as SV
 import qualified Data.Vector.Storable.Mutable as MSV
-import qualified Data.Vector.Unboxed          as V
-import qualified Data.Vector.Unboxed.Mutable  as MV
+import qualified Data.Vector.Unboxed          as UV
+import qualified Data.Vector.Unboxed.Mutable  as MUV
 import qualified Language.Haskell.TH          as TH
 
 import           Asm.Tools.Image.Embed
@@ -21,9 +21,9 @@ imageWithUpdate = embedImage convertImage True
 image :: FilePath -> TH.ExpQ
 image = embedImage convertImage False
 
-convertImage :: Int -> SV.Vector Word8 -> (V.Vector Word8, SV.Vector Word8)
+convertImage :: Int -> SVector Word8 -> (UVector Word8, SVector Word8)
 convertImage len oimg = runST $ do
-  cmg <- MV.new len
+  cmg <- MUV.new len
   img <- MSV.new (len*4)
   forM_ [0..len-1] $ \i -> do
     let
@@ -41,12 +41,12 @@ convertImage len oimg = runST $ do
               snd $
                 minimumByEx (\x y -> fst x `compare` fst y) $
                 map (diff r g b) c64colors
-    MV.write cmg i cc
+    MUV.write cmg i cc
     MSV.write img (i4+0) r'
     MSV.write img (i4+1) g'
     MSV.write img (i4+2) b'
     MSV.write img (i4+3) a'
-  cmg' <- V.unsafeFreeze cmg
+  cmg' <- UV.unsafeFreeze cmg
   img' <- SV.unsafeFreeze img
   return (cmg', img')
 

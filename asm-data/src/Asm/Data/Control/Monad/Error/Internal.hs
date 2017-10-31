@@ -1,5 +1,4 @@
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE UndecidableInstances #-}
 -- can't move this to *cabal since it will break ghci when having this in the same package as the library
@@ -37,7 +36,7 @@ runError (ErrorT m) = toEither (runIdentity m)
 
 -- The ErrorT monad transformer
 
-newtype ErrorT e m a = ErrorT { fromErrorT :: (m (ErrorType e a)) }
+newtype ErrorT e m a = ErrorT { fromErrorT :: m (ErrorType e a) }
 
 -- | The inverse of 'ErrorT' (with the internal type hidden).
 runErrorT :: (Monad m) => ErrorT e m a -> m (Either e a)
@@ -54,20 +53,20 @@ instance (Functor m) => Functor (ErrorT e m) where
 instance (Monad m, Semigroup e) => Applicative (ErrorT e m) where
   pure a = ErrorT $ return (Continue Nothing a)
   {-# INLINE pure #-}
-  f <*> v = ErrorT $ do
+  f <*> v = ErrorT $
     fromErrorT f >>= \case
       Abort e       -> return (Abort e)
-      Continue e f' -> do
+      Continue e f' ->
         fromErrorT v >>= \case
           Abort e'       -> return (Abort (e ?<> e'))
           Continue e' v' -> return (Continue (e <> e') (f' v'))
   {-# INLINEABLE (<*>) #-}
 
 instance (Monad m, Semigroup e) => Monad (ErrorT e m) where
-  v >>= f = ErrorT $ do
+  v >>= f = ErrorT $
     fromErrorT v >>= \case
       Abort e       -> return (Abort e)
-      Continue e v' -> do
+      Continue e v' ->
         fromErrorT (f v') >>= \case
           Abort e'        -> return (Abort (e ?<> e'))
           Continue e' v'' -> return (Continue (e <> e') v'')

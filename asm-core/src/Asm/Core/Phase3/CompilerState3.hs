@@ -75,7 +75,7 @@ addNameC name = do
   return path
 
 getTypeInExprC :: Cpu c => Reference -> CSM3 c (Expr3 c)
-getTypeInExprC k = asks (\s -> (cs3TypeInExpr s M.! k))
+getTypeInExprC k = asks (\s -> cs3TypeInExpr s M.! k)
 
 
 getKindC :: Cpu c => Reference -> CSM3 c (Location, KindDefinition)
@@ -102,6 +102,6 @@ getCallPathsForReferenceC n = gets go
     go CSt3{..} =
       let
         n' = initEx $ R.pathOfReference n
-        s' = mapMaybe (\(k, v) -> bool Nothing (Just v) (isPrefixOf n' k)) $ M.toList cs3CallPaths
+        s' = mapMaybe (\(k, v) -> bool Nothing (Just v) (n' `isPrefixOf` k)) $ M.toList cs3CallPaths
       in
         concat (S.singleton n':s')

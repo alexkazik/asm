@@ -89,7 +89,7 @@ instance CpuData c => CSM34 (CSM4 c) where
   toolPoolGetPoolDefinitionC = asks cs4PoolDefinition
   -- position
   toolPositionGetC = gets cs4Position
-  setPositionC n v = modify (\s -> go s)
+  setPositionC n v = modify go
     where
       go s
         | Just v == M.lookup n (cs4Position s) = s

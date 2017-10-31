@@ -25,7 +25,7 @@ pushPathC name = do
   setPathC path (mkalias csAliasPath path)
   where
     mkalias csAliasPath path =
-      if isPrefixOf "~" name
+      if "~" `isPrefixOf` name
         then headEx csAliasPath : csAliasPath
         else path : csAliasPath
 

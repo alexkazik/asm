@@ -130,7 +130,7 @@ combineL (ByteValLocal a) (ByteValLocal b) =
     else Nothing
   where
     match :: Set [Text] -> Set [Text] -> Bool
-    match c d = any (isPfx c) d
+    match c = any (isPfx c)
     isPfx :: Set [Text] -> [Text] -> Bool
     isPfx e f = any (isPrefixOf f) e
 combineL _ _ = Nothing

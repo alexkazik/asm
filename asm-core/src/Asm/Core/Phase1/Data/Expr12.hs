@@ -4,7 +4,6 @@ module Asm.Core.Phase1.Data.Expr12
   ) where
 
 import           Asm.Core.Prelude
-import qualified Data.Vector.Storable         as SV
 
 import           Asm.Core.Data.ByteVal
 import           Asm.Core.Data.CpuData
@@ -26,7 +25,7 @@ data Expr12 c
   | E12Pointer Location !Text !TypeDefinition !Int64
   -- structure and dereferencing
   | E12UserArray Location !(Vector (Expr12 c)) !(Maybe (Expr12 c))
-  | E12UserArrayBVS Location !(SV.Vector ByteValSimple) !(Maybe (Expr12 c))
+  | E12UserArrayBVS Location !(SVector ByteValSimple) !(Maybe (Expr12 c))
   | E12DerefArray Location !(Expr12 c) !(Expr12 c)
   | E12DefineArray Location !(Expr12 c) !(Maybe (Expr12 c))
 

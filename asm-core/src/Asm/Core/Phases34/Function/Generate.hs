@@ -213,8 +213,8 @@ generateCaseResult fn nameLoc passLoc isMonadic args ret = do
             , (ConE (atToExpConstName "result/*/ret" ret) ... VarE nameLoc) ... args3
             ]
     bodyM =
-      ( (VarE 'map) ...
-        (LamE
+      ( VarE 'map ...
+        LamE
           [ VarP resName ]
           ( ConE 'FnrResult ...
               TupE
@@ -222,7 +222,6 @@ generateCaseResult fn nameLoc passLoc isMonadic args ret = do
                 , (ConE (atToExpConstName "result/*/ret" ret) ... VarE nameLoc) ... VarE resName
                 ]
           )
-        )
       ) ... args3
 
   -- The full code out of the pattern match and function body.

@@ -94,7 +94,7 @@ addNameC name type'@(loc,_) = do
     Right (path, tree) ->
       if isPrefixOf "~" name || cs1OnlySystemNames == 0
         then
-          if isPrefixOf "__" name
+          if "__" `isPrefixOf` name
             then do
               modify (\s -> s{cs1Data = tree})
               return path

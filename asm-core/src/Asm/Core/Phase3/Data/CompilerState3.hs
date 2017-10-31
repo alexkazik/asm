@@ -44,7 +44,7 @@ data CompilerReader3 c
     }
 
 -- the writer of the compiler
-data CompilerWriter3 c
+newtype CompilerWriter3 c
   = CWr3
     { cs3Inline         :: Map Reference (Int64, Maybe (Expr4 c))
     }

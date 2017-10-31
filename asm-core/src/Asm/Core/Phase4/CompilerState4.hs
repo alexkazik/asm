@@ -57,7 +57,7 @@ getUniqueNameC = do
   return ('~' `cons` tshow cs4UniqueNumber)
 
 resetLoopDataC :: Cpu c => Maybe (Ratio Int) -> CSM4 c ()
-resetLoopDataC def = modify (\s -> resetLoopDataS def s)
+resetLoopDataC def = modify (resetLoopDataS def)
 
 resetLoopDataS :: Cpu c => Maybe (Ratio Int) -> CompilerState4 c -> CompilerState4 c
 resetLoopDataS def s = s{cs4HighestDefault = Nothing, cs4UseDefault = def, cs4HasChanged = False, cs4MetaIsFlat = False}

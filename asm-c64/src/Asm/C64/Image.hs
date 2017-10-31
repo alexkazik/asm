@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeFamilies #-}
-
 module Asm.C64.Image
   ( module Asm.Tools.Image
   , module Asm.C64.Image.Embed

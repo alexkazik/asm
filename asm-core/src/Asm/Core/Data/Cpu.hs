@@ -52,7 +52,7 @@ class CpuData c => Cpu c where
   cpuStmt5InlineNames :: proxy c -> CS5 c -> [Reference]
   -- phases 34
   cpuSpecificFunctions :: CSM34 m => [(FunctionKey, Function m c)]
-  cpuSpecificMetaFunctions :: [(FunctionKey, (FunctionKey -> Location -> [Expr4 c] -> CSM3 c (Expr4 c)))]
+  cpuSpecificMetaFunctions :: [(FunctionKey, FunctionKey -> Location -> [Expr4 c] -> CSM3 c (Expr4 c))]
 
 class Cpu c => CpuSource c where
   type Source c

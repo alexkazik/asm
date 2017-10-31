@@ -7,7 +7,6 @@ import           Codec.Picture                  as Juicy
 import qualified Data.ByteString                as BS
 import qualified Data.ByteString.Lazy           as BL
 import           Data.ByteString.Unsafe
-import qualified Data.Vector.Storable           as SV
 import qualified Data.Vector.Unboxed            as UV
 import qualified Language.Haskell.TH            as TH
 import           System.Directory
@@ -19,7 +18,7 @@ import           Asm.Core.SourcePos.Type
 
 import           Asm.Tools.Image.Internal       (createImage)
 
-embedImage :: (Int -> SV.Vector Word8 -> (UV.Vector Word8, SV.Vector Word8)) -> Bool -> FilePath -> TH.Q TH.Exp
+embedImage :: (Int -> SVector Word8 -> (UVector Word8, SVector Word8)) -> Bool -> FilePath -> TH.Q TH.Exp
 {-# INLINE embedImage #-}
 embedImage conv doUpdate fp = do
   pos <- getPosition

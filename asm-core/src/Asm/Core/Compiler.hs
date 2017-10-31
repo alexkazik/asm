@@ -27,7 +27,7 @@ import           Asm.Core.Phase4.Compiler
 import           Asm.Core.Phase4.Data.CompilerResult
 import           Asm.Data.ByteValSimple
 
-compileGeneric :: (CpuSource c) => Source c -> Either ([(String, [String])]) (CompilerResult c)
+compileGeneric :: (CpuSource c) => Source c -> Either [(String, [String])] (CompilerResult c)
 compileGeneric blk =
   left convertCompilerError $
     runError $

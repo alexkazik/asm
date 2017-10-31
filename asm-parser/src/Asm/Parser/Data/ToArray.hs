@@ -27,11 +27,14 @@ instance {-# OVERLAPPING #-} ToArray pe (Vector Word8) where
 instance {-# OVERLAPPING #-} ToArray pe (Vector ByteValSimple) where
   toArray loc v = (loc, PEUserArrayBVS $ V.convert v)
 
-instance {-# OVERLAPPING #-} ToArray pe (SV.Vector Word8) where
+instance {-# OVERLAPPING #-} ToArray pe (SVector Word8) where
   toArray loc v = (loc, PEUserArrayBVS $ SV.map byteValSimpleWord8 v)
 
-instance {-# OVERLAPPING #-} ToArray pe (SV.Vector ByteValSimple) where
+instance {-# OVERLAPPING #-} ToArray pe (SVector ByteValSimple) where
   toArray loc v = (loc, PEUserArrayBVS v)
+
+instance {-# OVERLAPPING #-} ToArray pe (UVector Word8) where
+  toArray loc v = (loc, PEUserArrayBVS $ SV.map byteValSimpleWord8 $ V.convert v)
 
 instance {-# OVERLAPPING #-} Foldable f => ToArray pe (f Word8) where
   toArray loc v = (loc, PEUserArrayBVS $ SV.fromList $ map byteValSimpleWord8 $ Data.Foldable.toList v)

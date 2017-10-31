@@ -85,17 +85,15 @@ getTypeDefinition err (E3TypeStruct loc str) = do
   return (TDStruct str')
   where
     evalStr (n,t) = do
-      let na = n
       x <- getTypeDefinition ((loc, "expr"):err) t
-      return (na, x)
+      return (n, x)
 
 getTypeDefinition err (E3TypeUnion loc str) = do
   str' <- mapM evalStr str
   return (TDUnion str')
   where
     evalStr (n,t) = do
-      let na = n
       x <- getTypeDefinition ((loc, "expr"):err) t
-      return (na, x)
+      return (n, x)
 
 getTypeDefinition err expr = $throwFatalError ((locationOf expr, "can't read the type"):err)

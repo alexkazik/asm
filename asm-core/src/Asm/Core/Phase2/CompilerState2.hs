@@ -57,7 +57,7 @@ addTypeInExprC :: Cpu c => Reference -> Expr3 c -> CSM2 c ()
 addTypeInExprC k v = modify (\s -> s{cs2TypeInExpr = M.insert k v (cs2TypeInExpr s)})
 
 resolveNameC :: Cpu c => [(Location, String)] -> Location -> Text -> CSM2 c Reference
-resolveNameC errs loc name = do
+resolveNameC errs loc name =
   gets go >>= \case
     [] -> do
       cs2Path' <- gets cs2Path
@@ -68,7 +68,7 @@ resolveNameC errs loc name = do
       $throwFatalError ((loc, "1/Name \"" ++ unpack name ++ "\" is not unique on path " ++ show cs2Path'):([], show ps):errs)
   where
     go CSt2{..}
-      | isPrefixOf "__" name = maybeToList $ R.lookup cs2Path name cs2Data
+      | "__" `isPrefixOf` name = maybeToList $ R.lookup cs2Path name cs2Data
       | otherwise = R.search cs2Path name cs2Data
 
 getKindC :: Cpu c => Reference -> CSM2 c (Location, KindDefinition)

@@ -132,7 +132,7 @@ placeStmtInPoolC (S3Variable loc VTPointer n ty v p al pg) = do
   when (ty == poolType) $ $throwFatalError [(loc, "a pool can only be used in a var or const")]
   when (isJust p) $ $throwFatalError [(loc, "pointer can't have a pool")]
   case v of
-    Just vv -> do
+    Just vv ->
       applyMetaExprC vv >>= evaluateExprTopC >>= \case
         (_, E4ConstInt _ i) ->
           setPositionC n (Nothing, Right i)
@@ -297,7 +297,7 @@ toByteValVectorUnionC fn loc constOrInit size union dta fill =
     if sizeTd == size
       then return (res, dta')
       else case fill of
-        Just f -> do
+        Just f ->
           return (res ++ [V.replicate (fromIntegral size) (ByteValCode constOrInit f)], dta)
         Nothing -> $throwFatalError [(loc, "toByteValVectorC: hole in union")]
   _ -> $throwFatalError [(loc, "toByteValVectorC: multiple union sources")]

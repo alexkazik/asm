@@ -30,7 +30,7 @@ cpu6502SpecificFunctions =
   , (fnCheckLaxImm, checkLaxImmC)
   ]
 
-cpu6502SpecificMetaFunctions :: [(FunctionKey, (FunctionKey -> Location -> [Expr4 c] -> CSM3 c (Expr4 c)))]
+cpu6502SpecificMetaFunctions :: [(FunctionKey, FunctionKey -> Location -> [Expr4 c] -> CSM3 c (Expr4 c))]
 cpu6502SpecificMetaFunctions = []
 
 --

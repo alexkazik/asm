@@ -32,10 +32,10 @@ parseHaskellExpr = lexeme $ choice
 -- haskell sub-parsers
 
 haskellVarName :: Parser String
-haskellVarName = (:) <$> oneOf "abcdefghijklmnopqrstuvwxyz" <*> (many $ MP.oneOf haskellNameChar)
+haskellVarName = (:) <$> oneOf "abcdefghijklmnopqrstuvwxyz" <*> many (MP.oneOf haskellNameChar)
 
 haskellConName :: Parser String
-haskellConName = (:) <$> oneOf "ABCDEFGHIJKLMNOPQRSTUVWXYZ" <*> (many $ MP.oneOf haskellNameChar)
+haskellConName = (:) <$> oneOf "ABCDEFGHIJKLMNOPQRSTUVWXYZ" <*> many (MP.oneOf haskellNameChar)
 
 haskellNameChar :: String
 {-# INLINABLE haskellNameChar #-}
@@ -82,7 +82,7 @@ parseHaskellTermNewline = do
 -- adapted from Language.Haskell.Meta.Parse
 
 parseExp :: String -> Either String Exp
-parseExp = either Left (Right . Hs.toExp) . parseHsExp
+parseExp = map Hs.toExp . parseHsExp
 
 parseHsExp :: String -> Either String (Hs.Exp Hs.SrcSpanInfo)
 parseHsExp = Hs.parseResultToEither . Hs.parseExpWithMode inlineParseMode

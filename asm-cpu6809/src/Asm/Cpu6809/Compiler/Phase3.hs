@@ -29,25 +29,26 @@ cpu6809ApplyMetaStmtC :: Location -> CS3 Cpu6809 -> CSM3 Cpu6809 (Stmt4Block Cpu
 cpu6809ApplyMetaStmtC loc CS3Inline{..} = recoverFatalError [] $ do
   (_, am) <- pickCpu loc s3iOperator
   op@(code, _, _) <- $fromJustOrError [(loc, "unknown addressing mode for opcode " ++ showPretty s3iOperator)] (M.lookup s3iAM am)
+  size <- sizeOfStmt s3iAM s3iIW op
   return
     [ S4CpuStmt
         loc
         CS4Inline
           { s4iOperator = s3iOperator
           , s4iCode = code
-          , s4iSize = sizeOfStmt s3iAM s3iIW op
+          , s4iSize = size
           , s4iInline = s3iInline
           }
     ]
   where
-    sizeOfStmt AMImm _ (_, imm16, _) = bool 1 2 imm16
-    sizeOfStmt AMDir _ _             = 1
-    sizeOfStmt AMIdx (Just 1) _      = 1
-    sizeOfStmt AMIdx (Just 2) _      = 2
-    sizeOfStmt AMIdx (Just 3) _      = 3
-    sizeOfStmt AMExt _ _             = 2
-    sizeOfStmt AMRel _ (_, rel16, _) = bool 1 2 rel16
-    sizeOfStmt _ _ _                 = $printError [(loc, "Unable to determine size of statement")]
+    sizeOfStmt AMImm _ (_, imm16, _) = return $ bool 1 2 imm16
+    sizeOfStmt AMDir _ _             = return 1
+    sizeOfStmt AMIdx (Just 1) _      = return 1
+    sizeOfStmt AMIdx (Just 2) _      = return 2
+    sizeOfStmt AMIdx (Just 3) _      = return 3
+    sizeOfStmt AMExt _ _             = return 2
+    sizeOfStmt AMRel _ (_, rel16, _) = return $ bool 1 2 rel16
+    sizeOfStmt _ _ _                 = $throwFatalError [(loc, "Unable to determine size of statement")]
 
 cpu6809ApplyMetaStmtC loc CS3Indexed{..} = do
   (_c, am) <- pickCpu loc s3xOperator
@@ -58,7 +59,7 @@ cpu6809ApplyMetaStmtC loc CS3Indexed{..} = do
   let
     sxOp = bool sxOp' ((\(a,b,_) -> (a,b,Just fnAddrByte)) sxOp') s3xIndirect
   case (s3xIndexed, exprMay, sxOp) of
-    (IMIndirect, Just expr, (s4fCode, _, Just fnAddrType)) -> do
+    (IMIndirect, Just expr, (s4fCode, _, Just fnAddrType)) ->
       return
         [ S4CpuStmt
             loc
@@ -117,14 +118,13 @@ cpu6809ApplyMetaStmtC loc CS3Indexed{..} = do
         ]
 
     (IMRelOffset r, Just expr, (s4fCode, _, Just fnAddrType)) -> do
-      let
-        (regName, regMeta) =
-          case r of
-            RegX -> ("meta.x", metaX)
-            RegY -> ("meta.y", metaY)
-            RegU -> ("meta.u", metaU)
-            RegS -> ("meta.s", metaS)
-            _    -> $printError [(loc, "invalid register")]
+      (regName, regMeta) <-
+        case r of
+          RegX -> return ("meta.x", metaX)
+          RegY -> return ("meta.y", metaY)
+          RegU -> return ("meta.u", metaU)
+          RegS -> return ("meta.s", metaS)
+          _    -> $throwFatalError [(loc, "invalid register")]
       registerValue <- $fromJustOrError [(loc, regName ++ " is undefined")] =<< (map (\(_,a,_) -> a) <$> getMetaExprMayC [regMeta])
       let
         offset =
@@ -247,7 +247,7 @@ cpu6809ApplyMetaStmtC loc CS3Regular{s3rExpr = Just s3rExpr, ..} = do
             , S4LabelDefinition loc nid
             ]
 
-    [(AMImm, (s4fCode, imm16, _))] -> do
+    [(AMImm, (s4fCode, imm16, _))] ->
       if imm16
         then do
           check <- getCheck8C loc [metaCheckImm16, metaCheckImm, metaCheck]
@@ -276,7 +276,7 @@ cpu6809ApplyMetaStmtC loc CS3Regular{s3rExpr = Just s3rExpr, ..} = do
                   , ..
                   }
             ]
-    [(AMDir, (s4fCode, _, Just fnAddrType))] -> return $
+    [(AMDir, (s4fCode, _, Just fnAddrType))] -> return
             [ S4CpuStmt loc
                 CS4Final
                   { s4fOperator = s3rOperator

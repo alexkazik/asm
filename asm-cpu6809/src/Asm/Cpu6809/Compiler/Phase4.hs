@@ -34,7 +34,7 @@ cpu6809ConvertToStmt5C loc CS4Inline{..} =
             { s5lLabel = s4iInline
             }
         , CS5Data
-            { s5dExpr = genData e3 size []
+            { s5dExpr = genData e3 s4iSize []
             }
         ]
     Nothing -> do
@@ -53,7 +53,7 @@ cpu6809ConvertToStmt5C loc CS4Final{..} = do
   return $
     bool
       [ CS5Data
-          { s5dExpr = (operatorCodes loc s4fCode) ++ s5fData
+          { s5dExpr = operatorCodes loc s4fCode ++ s5fData
           }
       ]
       [ CS5Final

@@ -3,7 +3,6 @@ module Asm.Core.Phase4.Data.Expr4
   ) where
 
 import           Asm.Core.Prelude
-import qualified Data.Vector.Storable         as SV
 
 import           Asm.Core.Data.ByteVal
 import           Asm.Core.Data.CpuData
@@ -32,7 +31,7 @@ data Expr4 c
   | E4Pointer Location !Reference !TypeDefinition !Int64
   -- structure and dereferencing
   | E4UserArray Location !(Vector (Expr4 c)) !(Maybe (Expr4 c))
-  | E4UserArrayBVS Location !(SV.Vector ByteValSimple) !(Maybe (Expr4 c))
+  | E4UserArrayBVS Location !(SVector ByteValSimple) !(Maybe (Expr4 c))
   | E4DerefArray Location !(Expr4 c) !(Expr4 c)
   | E4DefineArray Location !(Expr4 c) !(Maybe (Expr4 c))
 

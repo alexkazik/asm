@@ -51,7 +51,7 @@ data PStmtCpu6502
     }
   deriving (Eq, Data, Typeable)
 
-data PExprCpu6502
+newtype PExprCpu6502
   = PExprCpu6502 PExprCpu6502
   deriving (Eq, Data, Typeable, Show)
 

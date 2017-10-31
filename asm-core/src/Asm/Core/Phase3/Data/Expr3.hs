@@ -3,7 +3,6 @@ module Asm.Core.Phase3.Data.Expr3
   ) where
 
 import           Asm.Core.Prelude
-import qualified Data.Vector.Storable         as SV
 
 import           Asm.Core.Data.ByteVal
 import           Asm.Core.Data.CpuData
@@ -27,7 +26,7 @@ data Expr3 c
   | E3Pointer Location !Reference !TypeDefinition !Int64
   -- structure and dereferencing
   | E3UserArray Location !(Vector (Expr3 c)) !(Maybe (Expr3 c))
-  | E3UserArrayBVS Location !(SV.Vector ByteValSimple) !(Maybe (Expr3 c))
+  | E3UserArrayBVS Location !(SVector ByteValSimple) !(Maybe (Expr3 c))
   | E3DerefArray Location !(Expr3 c) !(Expr3 c)
   | E3DefineArray Location !(Expr3 c) !(Maybe (Expr3 c))
 

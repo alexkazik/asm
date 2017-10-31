@@ -30,7 +30,7 @@ checkRelIs8C loc [(KDData TDInt, E4RangedInt _ e1l e1h _ _), (KDData TDInt, E4Co
   return $ checkRelIs8C' loc e1l e1h (InfInt64 e2) (InfInt64 e2)
 checkRelIs8C loc [(KDData TDInt, E4RangedInt _ e1l e1h _ _), (KDData TDInt, E4RangedInt _ e2l e2h _ _)] =
   return $ checkRelIs8C' loc e1l e1h e2l e2h
-checkRelIs8C _ [(KDData TDInt, _), (KDData TDInt, _)] = do
+checkRelIs8C _ [(KDData TDInt, _), (KDData TDInt, _)] =
   return $ FnrUnchanged (KDData TDBool)
 checkRelIs8C _ _ = return FnrNoMatch
 
@@ -107,5 +107,5 @@ cpu6809SpecificFunctions =
   , (fnCheckOffsetZero, checkOffsetZeroC)
   ]
 
-cpu6809SpecificMetaFunctions :: [(FunctionKey, (FunctionKey -> Location -> [Expr4 c] -> CSM3 c (Expr4 c)))]
+cpu6809SpecificMetaFunctions :: [(FunctionKey, FunctionKey -> Location -> [Expr4 c] -> CSM3 c (Expr4 c))]
 cpu6809SpecificMetaFunctions = []

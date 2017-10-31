@@ -52,7 +52,7 @@ cpu6502ConvertToStmt5C loc CS4Inline{..} =
             }
         , CS5LabelDefinition s4iName
         , CS5Data
-            { s5dData = genData e3 size []
+            { s5dData = genData e3 s4iSize []
             }
         ]
     Nothing -> do
