@@ -67,8 +67,8 @@ loopC work = do
     s2 <- resetLoopDataS work <$> get -- DEBUG: state on output
     when (hasChanged /= (s1 /= s2)) $ -- DEBUG: when hasChanges does not reflect a real change
       error $ unsafePerformIO $ do
-        writeFile "/tmp/a" ("[Loop Mismatch IN]\n" ++ encodeUtf8 (toStrict $ dumpStateS s1) ++ "\n")
-        writeFile "/tmp/b" ("[Loop Mismatch OUT]\n" ++ encodeUtf8 (toStrict $ dumpStateS s2) ++ "\n")
+        writeFile "/tmp/asm.sta.in" ("[Loop Mismatch IN]\n" ++ encodeUtf8 (toStrict $ dumpStateS s1) ++ "\n")
+        writeFile "/tmp/asm.sta.out" ("[Loop Mismatch OUT]\n" ++ encodeUtf8 (toStrict $ dumpStateS s2) ++ "\n")
         return $ "Loop Mismatch: " ++ unpack un ++ "; hasChanged=" ++ show hasChanged ++ "; data different=" ++ show (s1 /= s2)
   -- /debug compiler
   when hasChanged $ loopC Nothing

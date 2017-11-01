@@ -6,7 +6,9 @@ module Asm.Core.Data.CompilerError
   ) where
 
 import           Asm.Core.Prelude
+import           System.IO.Unsafe
 
+import           Asm.Core.Flags
 import           Asm.Core.SourcePos.Type
 
 newtype CompilerError
@@ -18,8 +20,12 @@ instance Semigroup CompilerError where
   CompilerError (ae, as) <> CompilerError (be, bs) = CompilerError (ae ++ be, maybe as Just bs)
 
 convertCompilerError :: CompilerError -> [(String, [String])]
-convertCompilerError (CompilerError (errs, sta)) =
-  convertCompilerErrorWithoutState $ errs ++ maybe [] (\l -> [([], unpack l)]) sta
+convertCompilerError (CompilerError (errs, Just sta))
+  | flagDebugCompiler = unsafePerformIO $ do
+      writeFile "/tmp/asm.sta" (encodeUtf8 (toStrict sta) ++ "\n")
+      return (convertCompilerErrorWithoutState errs)
+convertCompilerError (CompilerError (errs, _)) =
+  convertCompilerErrorWithoutState errs
 
 convertCompilerErrorWithoutState :: [(Location, String)] -> [(String, [String])]
 convertCompilerErrorWithoutState errs =
