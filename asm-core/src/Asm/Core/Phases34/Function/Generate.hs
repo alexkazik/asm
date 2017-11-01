@@ -11,6 +11,7 @@ import           Asm.Core.Data.KindDefinition
 import           Asm.Core.Data.Ternary
 import           Asm.Core.Data.TypeDefinition
 import           Asm.Core.Phase4.Data.Expr4
+import           Asm.Core.Phases.Data.CompilerState1234
 import           Asm.Core.Phases34.Data.Function
 import           Asm.Core.Phases34.Function.GenerateArgType
 import           Asm.Core.SourcePos
@@ -47,12 +48,14 @@ toAsmFunction' wild fn = do
     -- it's a more complex definition (e.g. with some type binding)
     x -> [printInternalError|Not a simple function: $x|]
   let
+    -- check if the function is in the CompilerState1234S monad
+    (typeSignature2, isMonadic) = hasCS1234Monad typeSignature1
     -- convert the argument list and map it to 'ArgType'
-    typeSignature2 = map typeToAT $ argumentsToList typeSignature1
+    typeSignature3 = map typeToAT $ argumentsToList typeSignature2
     -- extract the return type (last element)
-    retT = returnAT $ unsafeLast typeSignature2
+    retT = returnAT $ unsafeLast typeSignature3
     -- remove return type from argument list
-    argT1 = unsafeInit typeSignature2
+    argT1 = unsafeInit typeSignature3
     -- check if the first argument is of type Location, remember that and remove it from the argument list
     (argT, passLoc) = case argT1 of
       (ATLoc:ts) -> (ts, True)
@@ -63,7 +66,7 @@ toAsmFunction' wild fn = do
   nameArgs <- newName "args"
 
   -- generate matches for a case
-  matches <- generateCase wild fn nameLoc passLoc retT $ spliceATList argT
+  matches <- generateCase wild fn nameLoc passLoc isMonadic retT $ spliceATList argT
 
   -- return a lambda function which captures two arguments and apply the last to the case generated above
   -- the other argument may be referenced from within
@@ -72,6 +75,18 @@ toAsmFunction' wild fn = do
       [VarP nameLoc, VarP nameArgs]
       (LamCaseE matches ... VarE nameArgs)
     )
+
+hasCS1234Monad :: TH.Type -> (TH.Type, Bool)
+hasCS1234Monad (ForallT [KindedTV m1 (AppT (AppT ArrowT StarT) StarT)] [AppT (ConT st) (VarT m2)] ty) =
+  if m1 == m2 && st == ''CompilerState1234
+    then (removeResultMonad ty, True)
+    else [printInternalError|hasCS1234Monad: Monads don't match|]
+  where
+    removeResultMonad (AppT (VarT m3) ty')
+      | m3 == m1 = ty'
+    removeResultMonad (AppT a b) = AppT a (removeResultMonad b)
+    removeResultMonad _ = [printInternalError|hasCS1234Monad: Monads don't match|]
+hasCS1234Monad ty = (ty, False)
 
 -- | Convert an functions argument list ('TH.Type') into a list of 'Name' of the argment types.
 --   Only really simple functions are possible to parse (no functions or types with a type [e.g. monad] as an argument)
@@ -83,23 +98,24 @@ argumentsToList x                               = [printInternalError|Unknown ty
 -- | For each haskell function two case lines will be generated, one with
 --   'generateCaseResult' and one with 'generateCaseUnchanged' and after that
 --   one which matches everything and returns 'FnrNoMatch' to show that it's not matched.
-generateCase :: Bool -> Name -> Name -> Bool -> ArgType -> [[ArgType]] -> Q [Match]
-generateCase wild fn nameLoc passLoc ret (args:argVariations) = do
-  line1 <- generateCaseResult fn nameLoc passLoc args ret
+generateCase :: Bool -> Name -> Name -> Bool -> Bool -> ArgType -> [[ArgType]] -> Q [Match]
+generateCase wild fn nameLoc passLoc isMonadic ret (args:argVariations) = do
+  line1 <- generateCaseResult fn nameLoc passLoc isMonadic args ret
   line2 <- generateCaseUnchanged args ret
-  next <- generateCase wild fn nameLoc passLoc ret argVariations
+  next <- generateCase wild fn nameLoc passLoc isMonadic ret argVariations
   if ATRangedInt `elem` args || not wild
     then return ( line1 : next )
     else return ( line1 : line2 : next )
-generateCase _ _ _ _ _ [] =
+generateCase _ _ _ _ _ _ [] =
   return [Match WildP (NormalB $ VarE 'return ... ConE 'FnrNoMatch) []]
 
 -- | Create a pattern to match already calculated data (of the requested type),
 --   pass it to the haskell function and return it's result.
-generateCaseResult :: Name -> Name -> Bool -> [ArgType] -> ArgType -> Q Match
-generateCaseResult fn nameLoc passLoc args ATRangedIntOrInt = do
+generateCaseResult :: Name -> Name -> Bool -> Bool -> [ArgType] -> ArgType -> Q Match
+generateCaseResult fn nameLoc passLoc isMonadic args ATRangedIntOrInt = do
   -- create a name for each argument for the pattern match
   typeNamePair <- mapM makeNameForArgument (zip [1..] args)
+  resName <- newName "r"
   let
     -- Generate a pattern for each argument of type '(KDData <Type>, (_, <Const>))' where Type and Const is replaced
     -- by the corresponding type/const constructor for the argument type
@@ -121,11 +137,19 @@ generateCaseResult fn nameLoc passLoc args ATRangedIntOrInt = do
       VarE 'return ...
         (VarE 'genResult ... VarE nameLoc) ...
           ListE args3
-
-  -- body <- [|return $ genResult $ $(return $ (ConE (atToExpConstName ATRangedIntOrInt) ... VarE nameLoc) ... args3) |]
+    bodyM =
+      DoE
+        [ BindS
+            (VarP resName)
+            (VarE 'sequence ... ListE args3)
+        , NoBindS $
+            VarE 'return ...
+              (VarE 'genResult ... VarE nameLoc) ...
+                VarE resName
+        ]
 
   -- The full code out of the pattern match and function body.
-  return $ Match (ListP pat) (NormalB body) []
+  return $ Match (ListP pat) (NormalB $ bool body bodyM isMonadic) []
 
   where
     -- Create a new name based on "arg" and the number of the argument, returning the pair of name and 'ArgType'
@@ -160,9 +184,10 @@ generateCaseResult fn nameLoc passLoc args ATRangedIntOrInt = do
 -- | Create a pattern to match already calculated data (of the requested type),
 --   pass it to the haskell function and return it's result.
 -- generateCaseResult :: Name -> Name -> Bool -> [ArgType] -> ArgType -> Q Match
-generateCaseResult fn nameLoc passLoc args ret = do
+generateCaseResult fn nameLoc passLoc isMonadic args ret = do
   -- create a name for each argument for the pattern match
   typeNamePair <- mapM makeNameForArgument (zip [1..] args)
+  resName <- newName "r"
   let
     -- Generate a pattern for each argument of type '(KDData <Type>, (_, <Const>))' where Type and Const is replaced
     -- by the corresponding type/const constructor for the argument type
@@ -187,9 +212,21 @@ generateCaseResult fn nameLoc passLoc args ret = do
             [ ConE 'KDData ... ConE (atToTDName "result/*/ret" ret)
             , (ConE (atToExpConstName "result/*/ret" ret) ... VarE nameLoc) ... args3
             ]
+    bodyM =
+      ( (VarE 'map) ...
+        (LamE
+          [ VarP resName ]
+          ( ConE 'FnrResult ...
+              TupE
+                [ ConE 'KDData ... ConE (atToTDName "result/*/ret" ret)
+                , (ConE (atToExpConstName "result/*/ret" ret) ... VarE nameLoc) ... VarE resName
+                ]
+          )
+        )
+      ) ... args3
 
   -- The full code out of the pattern match and function body.
-  return $ Match (ListP pat) (NormalB body) []
+  return $ Match (ListP pat) (NormalB $ bool body bodyM isMonadic) []
 
   where
     -- Create a new name based on "arg" and the number of the argument, returning the pair of name and 'ArgType'

@@ -4,6 +4,7 @@ import           Asm.Core.Prelude
 
 import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.Ternary
+import           Asm.Core.Phases.Data.CompilerState1234
 import           Asm.Core.SourcePos
 import           Asm.Data.InfInt64
 
@@ -37,19 +38,22 @@ iMul = (*)
 iiMul :: InfInt64 -> InfInt64 -> InfInt64
 iiMul = (*)
 
-iDiv :: Int64 -> Int64 -> Int64
-iDiv = div
+iDiv :: CompilerState1234 m => Location -> Int64 -> Int64 -> m Int64
+iDiv loc _ 0 = $throwFatalError [(loc, "divide by zero")]
+iDiv _   a b = return $ div a b
 
-iiDiv :: InfInt64 -> InfInt64 -> InfInt64
-iiDiv (InfInt64 a) (InfInt64 b)
+iiDiv :: CompilerState1234 m => Location -> InfInt64 -> InfInt64 -> m InfInt64
+iiDiv loc _            (InfInt64 0) = $throwFatalError [(loc, "divide by zero")]
+iiDiv _   (InfInt64 a) (InfInt64 b)
   | a == minBound || a == maxBound || b == minBound || b == maxBound =
       if (a > 0 && b < 0) || (a < 0 && b > 0)
-        then minBound
-        else maxBound
-  | otherwise = fromInteger (div (toInteger a) (toInteger b))
+        then return minBound
+        else return maxBound
+  | otherwise = return $ fromInteger (div (toInteger a) (toInteger b))
 
-iMod :: Int64 -> Int64 -> Int64
-iMod = mod
+iMod :: CompilerState1234 m => Location -> Int64 -> Int64 -> m Int64
+iMod loc _ 0 = $throwFatalError [(loc, "divide by zero")]
+iMod _   a b = return $ mod a b
 
 iCom :: Int64 -> Int64
 iCom = complement
@@ -81,36 +85,43 @@ iiShiftR (InfInt64 a) b
   | a == maxBound = maxBound
   | otherwise = fromInteger (shiftR (toInteger a) b)
 
-iRotateSection3 :: Location -> Int64 -> Int -> Int -> Int64
+iRotateSection3 :: CompilerState1234 m => Location -> Int64 -> Int -> Int -> m Int64
 iRotateSection3 loc n c w = rotateSection loc 0 w n c
 
-iRotateSection4 :: Location -> Int64 -> Int -> Int -> Int -> Int64
+iRotateSection4 :: CompilerState1234 m => Location -> Int64 -> Int -> Int -> Int -> m Int64
 iRotateSection4 loc n c w o = rotateSection loc o w n c
 
 
 miPlusUnary :: TInt64 -> TInt64
 miPlusUnary x = x
 
-miRotateSection3 :: Location -> TInt64 -> Int -> Int -> TInt64
-miRotateSection3 loc n c w = rotateSection loc 0 w v c *| rotateSection loc 0 w m c
+miRotateSection3 :: CompilerState1234 m => Location -> TInt64 -> Int -> Int -> m TInt64
+miRotateSection3 loc n c w = do
+  v' <- rotateSection loc 0 w v c
+  m' <- rotateSection loc 0 w m c
+  return (v' *| m')
   where
     (v, m) = tValueFillAndMask 0 n
 
-miRotateSection4 :: Location -> TInt64 -> Int -> Int -> Int -> TInt64
-miRotateSection4 loc n c w o = rotateSection loc o w v c *| rotateSection loc o w m c
+miRotateSection4 :: CompilerState1234 m => Location -> TInt64 -> Int -> Int -> Int -> m TInt64
+miRotateSection4 loc n c w o = do
+  v' <- rotateSection loc o w v c
+  m' <- rotateSection loc o w m c
+  return (v' *| m')
   where
     (v, m) = tValueFillAndMask 0 n
 
 
-rotateSection :: (Bits b, Num b) => Location -> Int -> Int -> b -> Int -> b
+rotateSection :: (CompilerState1234 m, Bits b, Num b) => Location -> Int -> Int -> b -> Int -> m b
 rotateSection loc o w n c
-  | o < 0 = $printError [(loc, "rotateSection: offset is negative")]
-  | w < 1 = $printError [(loc, "rotateSection: width is zero or negative")]
+  | o < 0 = $throwFatalError [(loc, "rotateSection: offset is negative")]
+  | w < 1 = $throwFatalError [(loc, "rotateSection: width is zero or negative")]
   | maybe False (\x -> o+w > x) (bitSizeMaybe n)
-      = $printError [(loc, "rotateSection: offset+width is bigger than the size")]
+      = $throwFatalError [(loc, "rotateSection: offset+width is bigger than the size")]
   | otherwise
-      = n .&. complement mask .|.
-        (shiftL maskedN cc .|. shiftR maskedN (w - cc)) .&. mask
+      = return $
+          n .&. complement mask .|.
+          (shiftL maskedN cc .|. shiftR maskedN (w - cc)) .&. mask
       where
         mask = shiftL (2 ^ w - 1) o
         maskedN = n .&. mask
