@@ -2,8 +2,22 @@
 {-# LANGUAGE ImplicitPrelude #-}
 
 module Asm.Data.Ternary
-  ( module Asm.Data.Ternary
-  , Ternary
+  ( Ternary
+  , (*|)
+  , (*&)
+  , unknown
+  , (*-)
+  , (*+>)
+  , (*<+)
+  , (*<+>)
+  , tMask
+  , tUMask
+  , tValue
+  , tValueAndMask
+  , tValueAndUMask
+  , tValueFill
+  , tValueFillAndMask
+  , tValueFillAndUMask
   ) where
 
 import           Data.Bits

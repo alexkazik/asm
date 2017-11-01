@@ -1,4 +1,10 @@
-module Asm.Core.Phase4.Data.PoolData where
+module Asm.Core.Phase4.Data.PoolData
+  ( PoolData(..)
+  , addBlockToStartPool
+  , addVariableToDataPool
+  , addPoolToPoolPoolC
+  , getByteValVector
+  ) where
 
 import           Asm.Core.Prelude
 import qualified Data.Set                       as S

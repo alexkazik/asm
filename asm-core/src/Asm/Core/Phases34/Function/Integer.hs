@@ -1,4 +1,40 @@
-module Asm.Core.Phases34.Function.Integer where
+module Asm.Core.Phases34.Function.Integer
+  ( iMinusUnary
+  , iiMinusUnary
+  , iMinus
+  , iiMinus
+  , iPlusUnary
+  , iiPlusUnary
+  , iPlus
+  , iiPlus
+  , iMul
+  , iiMul
+  , iDiv
+  , iiDiv
+  , iMod
+  , iCom
+  , iAnd
+  , iOr
+  , iXor
+  , iShiftL
+  , iiShiftL
+  , iShiftR
+  , iiShiftR
+  , iRotateSection3
+  , iRotateSection4
+  , miPlusUnary
+  , miRotateSection3
+  , miRotateSection4
+  , miAddDoNotCare
+  , iSetCare
+  , miEqual
+  , miAnd
+  , miOr
+  , miXor
+  , miCom
+  , miShiftL
+  , miShiftR
+  ) where
 
 import           Asm.Core.Prelude
 

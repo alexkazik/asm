@@ -1,7 +1,18 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeFamilies #-}
 
-module Asm.Cpu6809.Data.CpuData6809 where
+module Asm.Cpu6809.Data.CpuData6809
+  ( Cpu6809
+  , PStmtCpu6809(..)
+  , PExprCpu6809
+  , CS12Cpu6809(..)
+  , CS3Cpu6809(..)
+  , CS4Cpu6809(..)
+  , CS5Cpu6809(..)
+  , PStmt6809
+  , PExpr6809
+  , PStmtBlock6809
+  ) where
 
 import           Asm.Core.Prelude
 import           Data.Void

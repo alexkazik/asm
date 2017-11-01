@@ -1,6 +1,11 @@
 module Asm.Cpu6502.Data.FunctionKey
   ( module Asm.Core.Data.FunctionKey
-  , module Asm.Cpu6502.Data.FunctionKey
+  , cpu6502FunctionKeys
+  , fnCheckAddr8
+  , fnCheckAddr16
+  , fnConvertRel8
+  , fnCheckJmpInd
+  , fnCheckLaxImm
   ) where
 
 import           Asm.Core.Data.FunctionKey

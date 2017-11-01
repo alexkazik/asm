@@ -1,4 +1,22 @@
-module Asm.C64.Colors where
+module Asm.C64.Colors
+  ( black, white, red, cyan
+  , purple, green, blue, yellow
+  , orange, brown, lightRed, darkGray
+  , gray, lightGreen, lightBlue, lightGray
+  , darkGrey, grey, lightGrey
+  , black4, white4, red4, cyan4
+  , purple4, green4, blue4, yellow4
+  , orange4, brown4, lightRed4, darkGray4
+  , gray4, lightGreen4, lightBlue4, lightGray4
+  , darkGrey4, grey4, lightGrey4
+  , black8, white8, red8, cyan8
+  , purple8, green8, blue8, yellow8
+  , orange8, brown8, lightRed8, darkGray8
+  , gray8, lightGreen8, lightBlue8, lightGray8
+  , darkGrey8, grey8, lightGrey8
+  , transparent
+  , transparent8
+  ) where
 
 import           Asm.Cpu6502
 

@@ -1,4 +1,7 @@
-module Asm.Cpu6809.Compiler.Function where
+module Asm.Cpu6809.Compiler.Function
+  ( cpu6809SpecificFunctions
+  , cpu6809SpecificMetaFunctions
+  ) where
 
 import           Asm.Core.Prelude
 

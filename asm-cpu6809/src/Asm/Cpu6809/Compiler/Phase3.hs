@@ -1,4 +1,6 @@
-module Asm.Cpu6809.Compiler.Phase3 where
+module Asm.Cpu6809.Compiler.Phase3
+  ( cpu6809ApplyMetaStmtC
+  ) where
 
 import           Asm.Core.Prelude
 import qualified Data.IntMap.Strict               as IM

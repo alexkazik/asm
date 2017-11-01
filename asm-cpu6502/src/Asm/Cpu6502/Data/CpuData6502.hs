@@ -1,7 +1,18 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeFamilies #-}
 
-module Asm.Cpu6502.Data.CpuData6502 where
+module Asm.Cpu6502.Data.CpuData6502
+  ( Cpu6502
+  , PStmtCpu6502(..)
+  , PExprCpu6502
+  , CS12Cpu6502(..)
+  , CS3Cpu6502(..)
+  , CS4Cpu6502(..)
+  , CS5Cpu6502(..)
+  , PStmt6502
+  , PExpr6502
+  , PStmtBlock6502
+  ) where
 
 import           Asm.Core.Prelude
 import           Data.Void

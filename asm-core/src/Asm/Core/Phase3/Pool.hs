@@ -1,4 +1,8 @@
-module Asm.Core.Phase3.Pool where
+module Asm.Core.Phase3.Pool
+  ( addCodeToPoolC
+  , addDataToPoolC
+  , addPoolToPoolC
+  ) where
 
 import           Asm.Core.Prelude
 import qualified Data.Map.Strict                as M

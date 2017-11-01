@@ -1,4 +1,7 @@
-module Asm.Core.Phase4.PoolData where
+module Asm.Core.Phase4.PoolData
+  ( reducePoolDataStateC
+  , calcPoolDataLength
+  ) where
 
 import           Asm.Core.Prelude
 import qualified Data.Map                           as M

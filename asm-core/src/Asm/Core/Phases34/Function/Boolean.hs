@@ -1,4 +1,17 @@
-module Asm.Core.Phases34.Function.Boolean where
+module Asm.Core.Phases34.Function.Boolean
+  ( iLT
+  , iLE
+  , iGT
+  , iGE
+  , iEQ
+  , iNE
+  , miEQ
+  , miNE
+  , bEQ
+  , bNE
+  , addressRangeCompareLessC
+  , addressRangeCompareEqualC
+  ) where
 
 import           Asm.Core.Prelude
 

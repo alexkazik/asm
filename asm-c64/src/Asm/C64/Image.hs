@@ -3,7 +3,10 @@
 module Asm.C64.Image
   ( module Asm.Tools.Image
   , module Asm.C64.Image.Embed
-  , module Asm.C64.Image
+  , renderHiresBg
+  , renderHiresFg
+  , renderHires
+  , renderHiresL
   ) where
 
 import           Asm.Core.Prelude

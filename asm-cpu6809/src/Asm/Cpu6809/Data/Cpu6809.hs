@@ -4,7 +4,9 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 
-module Asm.Cpu6809.Data.Cpu6809  where
+module Asm.Cpu6809.Data.Cpu6809
+  (
+  ) where
 
 import           Asm.Core.Prelude
 

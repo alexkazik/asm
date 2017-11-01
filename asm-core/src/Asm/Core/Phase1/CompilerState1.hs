@@ -1,8 +1,17 @@
 module Asm.Core.Phase1.CompilerState1
   ( module Asm.Core.Phase1.Data.CompilerState1
-  , module Asm.Core.Phase1.CompilerState1
   , module Asm.Core.Phases.Data.CompilerState1234
   , module Asm.Core.Phases12.Data.CompilerState12
+  , initialState1
+  , addAliasC
+  , addNameC
+  , getUniqueNameC
+  , pushSuperLocalsModeC
+  , popSuperLocalsModeC
+  , pushSystemNameModeC
+  , popSystemNameModeC
+  , addPoolC
+  , addPoolBothC
   ) where
 
 import           Asm.Core.Prelude
@@ -115,9 +124,6 @@ pushSystemNameModeC = modify (\s -> s{cs1OnlySystemNames= cs1OnlySystemNames s +
 
 popSystemNameModeC :: Cpu c => CSM1 c ()
 popSystemNameModeC = modify (\s -> s{cs1OnlySystemNames = cs1OnlySystemNames s - 1})
-
-setKindC :: Cpu c => Reference -> (Location, KindDefinition) -> CSM1 c ()
-setKindC i t = modify (\s -> s{cs1Data = R.set i t (cs1Data s)})
 
 addPoolC :: Cpu c => Location -> Text -> [Text] -> Bool -> Int64 -> Int64 -> CSM1 c ()
 addPoolC l n' u' v st b = do

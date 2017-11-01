@@ -1,7 +1,10 @@
 -- can't move this to *cabal since it will break ghci when having this in the same package as the library
 {-# LANGUAGE ImplicitPrelude #-}
 
-module Demo.Output where
+module Demo.Output
+  ( ModuleOutput(..)
+  , moduleOutput
+  ) where
 
 import           Data.ByteString.Builder
 

@@ -4,7 +4,9 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 
-module Asm.Cpu6502.Data.Cpu6502  where
+module Asm.Cpu6502.Data.Cpu6502
+  (
+  ) where
 
 import           Asm.Core.Prelude
 

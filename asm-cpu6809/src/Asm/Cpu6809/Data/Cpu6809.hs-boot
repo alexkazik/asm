@@ -3,7 +3,9 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeSynonymInstances  #-}
 
-module Asm.Cpu6809.Data.Cpu6809 where
+module Asm.Cpu6809.Data.Cpu6809
+  (
+  ) where
 
 import           Asm.Core.Data.Cpu
 import           Asm.Parser.Parser.Tools

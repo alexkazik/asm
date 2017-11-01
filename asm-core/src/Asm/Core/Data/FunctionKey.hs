@@ -1,6 +1,49 @@
 module Asm.Core.Data.FunctionKey
   ( module Asm.Core.Data.FunctionKey.Internal
-  , module Asm.Core.Data.FunctionKey
+  , compilerFunctionKeys
+  -- Address
+  , fnAddr
+  , fnAddrByte
+  , fnAddrCode
+  , fnBank
+  , fnSize
+  , fnByte
+  , fnCode
+  , fnAs
+  -- Boolean
+  , opLT
+  , opLE
+  , opGT
+  , opGE
+  , opEQ
+  , opNE
+  , opNot
+  , opLAND
+  , opLOR
+  , opLXOR
+  -- Check
+  , fnCheckData8
+  , fnCheckData8Unsigned
+  , fnCheckData8Signed
+  , fnCheckData8Both
+  -- Data
+  , opConcat
+  , fnFill
+  -- Integer
+  , opPLUS
+  , opMINUS
+  , opMUL
+  , opDIV
+  , opMOD
+  , opCOM
+  , opAND
+  , opOR
+  , opXOR
+  , opShiftL
+  , opShiftR
+  , fnRotate
+  , opSetCare
+  , opAddDoNotCare
   ) where
 
 import           Asm.Core.Data.FunctionKey.Internal

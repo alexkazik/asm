@@ -1,4 +1,7 @@
-module Asm.Cpu6809.Compiler.Phase4 where
+module Asm.Cpu6809.Compiler.Phase4
+  ( cpu6809ConvertToStmt5C
+  , cpu6809StmtMinMaxLength
+  ) where
 
 import           Asm.Core.Prelude
 

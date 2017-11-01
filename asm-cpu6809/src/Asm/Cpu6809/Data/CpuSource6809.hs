@@ -1,7 +1,9 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 {-# LANGUAGE TypeFamilies #-}
 
-module Asm.Cpu6809.Data.CpuSource6809  where
+module Asm.Cpu6809.Data.CpuSource6809
+  (
+  ) where
 
 import           Asm.Core.Data.Cpu
 import           Asm.Parser.ToCompiler.Stmt

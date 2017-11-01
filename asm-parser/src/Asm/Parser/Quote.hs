@@ -1,6 +1,10 @@
 module Asm.Parser.Quote
- ( module Asm.Parser.Quote
- , getPosition
+ ( getPosition
+ , antiStmt
+ , antiParsedInt64
+ , antiParsedLabelId
+ , antiExpr
+ , liftText
  ) where
 
 import           Asm.Core.Prelude
@@ -21,9 +25,6 @@ import           Asm.Parser.Data.ToStructOrUnion
 import           Asm.Parser.DirectBlock
 
 -- helper for TH
-var :: String -> TH.ExpQ
-var = TH.varE . TH.mkName
-
 con :: String -> TH.ExpQ
 con = TH.conE . TH.mkName
 

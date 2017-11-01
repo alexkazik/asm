@@ -1,8 +1,20 @@
 module Asm.Core.Phase4.CompilerState4
   ( module Asm.Core.Phase4.Data.CompilerState4
-  , module Asm.Core.Phase4.CompilerState4
   , module Asm.Core.Phases34.Data.CompilerState34
   , module Asm.Core.Phases.Data.CompilerState1234
+  , initialReader4
+  , initialState4
+  , getUniqueNameC
+  , resetLoopDataC
+  , resetLoopDataS
+  , setDefaultC
+  , getHasChangedC
+  , getHighestDefaultC
+  , getUseDefaultC
+  , resetUseDefaultC
+  , getMetaIsFlatC
+  , setMetaIsFlatC
+  , getInlineC
   ) where
 
 import           Asm.Core.Prelude

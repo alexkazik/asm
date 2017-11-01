@@ -1,8 +1,16 @@
 module Asm.Core.Phase3.CompilerState3
   ( module Asm.Core.Phase3.Data.CompilerState3
-  , module Asm.Core.Phase3.CompilerState3
   , module Asm.Core.Phases34.Data.CompilerState34
   , module Asm.Core.Phases.Data.CompilerState1234
+  , initialReader3
+  , initialState3
+  , addNameC
+  , getTypeInExprC
+  , getKindC
+  , getPositionsC
+  , addInlineC
+  , resolveNameC
+  , getCallPathsForReferenceC
   ) where
 
 import           Asm.Core.Prelude
@@ -37,11 +45,6 @@ initialReader3 CRd2{..} CSt2{..} CWr2{..} fns =
     , cs3TypeInExpr = cs2TypeInExpr
     , cs3Functions = fns
     }
-  where
-    createPools :: a -> Map Reference a -> PoolDefinition -> Map Reference a
-    createPools def pools pd = foldl' (createPool def) pools (pdPools pd)
-    createPool :: a -> Map Reference a -> Reference -> Map Reference a
-    createPool def pools na = M.insert na def pools
 
 initialState3 :: Cpu c => CompilerReader2 c -> CompilerState2 c -> CompilerWriter2 c -> CompilerState3 c
 initialState3 CRd2{..} CSt2{..} CWr2{..} =
@@ -54,12 +57,13 @@ initialState3 CRd2{..} CSt2{..} CWr2{..} =
     , cs3CallPaths = M.empty
     }
   where
-    createPools :: a -> Map Reference a -> PoolDefinition -> Map Reference a
-    createPools def pools pd = foldl' (createPool def) pools (pdPools pd)
-    createPool :: a -> Map Reference a -> Reference -> Map Reference a
-    createPool def pools na = M.insert na def pools
     ep :: (PoolData c)
     ep = PoolDataStartFlat{stateStart=[], stateFlat=[], stateData=S.empty, statePool=[]}
+
+createPools :: a -> Map Reference a -> PoolDefinition -> Map Reference a
+createPools def pools pd = foldl' (createPool def) pools (pdPools pd)
+createPool :: a -> Map Reference a -> Reference -> Map Reference a
+createPool def pools na = M.insert na def pools
 
 
 addNameC :: Cpu c => Text -> CSM3 c Reference

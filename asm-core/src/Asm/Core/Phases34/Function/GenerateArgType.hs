@@ -1,4 +1,11 @@
-module Asm.Core.Phases34.Function.GenerateArgType where
+module Asm.Core.Phases34.Function.GenerateArgType
+  ( ArgType(..)
+  , typeToAT
+  , returnAT
+  , atToTDName
+  , atToExpConstName
+  , spliceATList
+  ) where
 
 import           Asm.Core.Prelude
 import           Language.Haskell.TH

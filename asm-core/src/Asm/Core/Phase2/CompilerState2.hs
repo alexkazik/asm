@@ -1,8 +1,18 @@
 module Asm.Core.Phase2.CompilerState2
   ( module Asm.Core.Phase2.Data.CompilerState2
-  , module Asm.Core.Phase2.CompilerState2
   , module Asm.Core.Phases.Data.CompilerState1234
   , module Asm.Core.Phases12.Data.CompilerState12
+  , initialReader2
+  , initialState2
+  , getAliasC
+  , addTypeInExprC
+  , resolveNameC
+  , getKindC
+  , setKindC
+  , getTypeInExprC
+  , setPositionC
+  , lookupFunctionName
+  , addCallPathsC
   ) where
 
 import           Asm.Core.Prelude

@@ -1,4 +1,14 @@
-module Asm.Core.Phases34.Function.Address where
+module Asm.Core.Phases34.Function.Address
+  ( AddrCheck(..)
+  , addrC
+  , addrDiffC
+  , bankC
+  , bankMetaFunctionC
+  , sizeC
+  , byteC
+  , codeC
+  , asC
+  ) where
 
 import           Asm.Core.Prelude
 

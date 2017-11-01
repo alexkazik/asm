@@ -3,7 +3,10 @@
 {-# LANGUAGE NoOverloadedStrings #-}
 {-# LANGUAGE NoQuasiQuotes #-}
 
-module Main where
+module Main
+  ( main
+  , runAll
+  ) where
 
 import           Control.Monad
 import           Data.ByteString.Builder

@@ -1,4 +1,10 @@
-module Asm.Cpu6809.Compiler.Phase5 where
+module Asm.Cpu6809.Compiler.Phase5
+  ( cpu6809CodeAlign
+  , cpu6809OptimiseLocalStmtBlockC
+  , cpu6809OptimiseGlobalStmtBlockC
+  , cpu6809StmtBlockToByteValPiece
+  , cpu6809Stmt5MinMaxLength
+  ) where
 
 import           Asm.Core.Prelude
 import qualified Data.Map.Strict                as M

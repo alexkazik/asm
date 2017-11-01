@@ -1,4 +1,16 @@
-module Asm.Core.Phase3.MetaData where
+module Asm.Core.Phase3.MetaData
+  ( getPoolElemRefC
+  , getAllMetaC
+  , setAllMetaC
+  , getAllMetaStickyC
+  , setAllMetaStickyC
+  , getMetaMagicMayC
+  , getMetaExprMayC
+  , setMetaExprC
+  , unsetMetaExprC
+  , stickyMetaExprC
+  , unstickyMetaExprC
+  ) where
 
 import           Asm.Core.Prelude
 

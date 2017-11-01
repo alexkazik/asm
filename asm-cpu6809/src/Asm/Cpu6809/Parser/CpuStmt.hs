@@ -1,4 +1,6 @@
-module Asm.Cpu6809.Parser.CpuStmt where
+module Asm.Cpu6809.Parser.CpuStmt
+  ( parseCpu6809Stmt
+  ) where
 
 import           Asm.Core.Prelude
 

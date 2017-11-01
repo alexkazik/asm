@@ -1,4 +1,12 @@
-module Asm.Core.Phase4.Pool where
+module Asm.Core.Phase4.Pool
+  ( getPoolsC
+  , getPoolDataC
+  , setPoolsC
+  , getPoolDefinitionsC
+  , setPoolStateC
+  , areAllPoolsFinalC
+  , getFinalPoolsS
+  ) where
 
 import           Asm.Core.Prelude
 import qualified Data.Map.Strict                     as M

@@ -1,6 +1,12 @@
 module Asm.Cpu6809.Data.FunctionKey
   ( module Asm.Core.Data.FunctionKey
-  , module Asm.Cpu6809.Data.FunctionKey
+  , cpu6809FunctionKeys
+  , fnCheckRelIs8
+  , fnConvertRel8
+  , fnConvertRel16
+  , fnCheckAddr8
+  , fnCheckAddr16
+  , fnCheckOffsetZero
   ) where
 
 import           Asm.Core.Data.FunctionKey

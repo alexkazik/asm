@@ -1,4 +1,6 @@
-module Asm.Cpu6809.Compiler.Phase2 where
+module Asm.Cpu6809.Compiler.Phase2
+  ( cpu6809LookupNamesStmtC
+  ) where
 
 import           Asm.Core.Prelude
 

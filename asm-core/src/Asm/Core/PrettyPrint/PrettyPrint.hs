@@ -11,7 +11,7 @@ module Asm.Core.PrettyPrint.PrettyPrint
   ) where
 
 import           Asm.Core.Prelude
-import           Data.Text.Prettyprint.Doc                 as Export hiding (Doc, Pretty (..))
+import           Data.Text.Prettyprint.Doc                 hiding (Doc, Pretty (..))
 import qualified Data.Text.Prettyprint.Doc                 as PP
 import           Data.Text.Prettyprint.Doc.Render.Terminal
 import qualified System.Console.Terminal.Size              as Con

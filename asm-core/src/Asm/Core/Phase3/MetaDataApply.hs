@@ -1,6 +1,6 @@
 module Asm.Core.Phase3.MetaDataApply
-  ( module Asm.Core.Phase3.MetaDataApply
-  , module Asm.Core.Phase3.MetaData
+  ( module Asm.Core.Phase3.MetaData
+  , applyMetaExprC
   ) where
 
 import           Asm.Core.Prelude

@@ -1,8 +1,28 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Asm.Parser.Parser.Basic
-  ( module Asm.Parser.Parser.Basic
-  , module Export
+  ( module Export
+  , whiteSpaceWithNewline
+  , sc
+  , lexeme
+  , initialExprState
+  , initialStmtState
+  , withNewlines
+  , withInType
+  , isInType
+  , wrapPosition
+  , sepBy1
+  , operator
+  , identifier'
+  , rword'
+  , char
+  , symbol
+  , symbol'
+  , oneOf
+  , noneOf
+  , someOf
+  , someOf'
+  , manyOf
   ) where
 
 import           Asm.Core.Prelude
@@ -107,19 +127,11 @@ operator :: Text -> Parser Text
 {-# INLINE operator #-}
 operator name = MP.string name <* MP.notFollowedBy (MP.oneOf operatorChar)
 
-identifier :: Text -> Parser Text
-{-# INLINE identifier #-}
-identifier w = MP.string w <* MP.notFollowedBy MP.alphaNumChar
-
 identifier' :: Text -> Parser Text
 {-# INLINE identifier' #-}
 identifier' w = MP.string' w <* MP.notFollowedBy MP.alphaNumChar
 
 -- identifier with optional spaces, no return value
-
-rword :: Text -> Parser ()
-{-# INLINE rword #-}
-rword = lexeme_ . identifier
 
 rword' :: Text -> Parser ()
 {-# INLINE rword' #-}
@@ -157,7 +169,7 @@ someOf' :: String -> Parser Text
 {-# INLINE someOf' #-}
 someOf' = fmap pack . lexeme . some . oneOf'
   where
-    -- grabbed from megaparsec 5 since it's been droppen with 6
+    -- grabbed from megaparsec 5 since it's been dropped with 6
     oneOf' cs = MP.satisfy (`elemi` cs)
     casei x y = C.toUpper x == C.toUpper y
     elemi = any . casei
@@ -165,7 +177,3 @@ someOf' = fmap pack . lexeme . some . oneOf'
 manyOf :: String -> Parser Text
 {-# INLINE manyOf #-}
 manyOf = fmap pack . lexeme . many . MP.oneOf
-
-someNoneOf :: String -> Parser Text
-{-# INLINE someNoneOf #-}
-someNoneOf = fmap pack . lexeme . some . MP.noneOf
