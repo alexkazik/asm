@@ -17,7 +17,7 @@ import           Demo.Output
 
 
 imageRle :: Vector ByteValSimple
-imageRle = SV.convert $ compressRLE $ createScreenAndBitmap $ withSlicesOf 8 8 (renderHiresL 15) $(imageWithUpdate "./image.png")
+imageRle = SV.convert $ compressRLE $ createScreenAndBitmap $ withSlicesOf 8 8 (optimiseHiresBitmap . render1BitWidth [(lightGrey8, 0)] 1) $(imageWithUpdate "./image.png")
   where
     createScreenAndBitmap (a, b) = map byteValSimpleWord8 a ++ replicate 24 byteValSimpleAny ++ b
 

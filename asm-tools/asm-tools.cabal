@@ -39,6 +39,7 @@ library {
   }
   other-modules: {
     Asm.Tools.Image.Internal
+    Asm.Tools.Image.RenderWide
   }
   build-depends:
     { asm-core == 0.4.1

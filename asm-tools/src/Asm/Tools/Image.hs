@@ -4,17 +4,20 @@ module Asm.Tools.Image
  , imageWidth
  , imageHeight
  , toByteString
+ , histogram
+   -- * Asm.Tools.Image.RenderWide
+ , render1BitWidth
+ , render2BitWidth
    -- * Asm.Tools.Image
  , slicesOf
  , withSlicesOf
- , histogram
+ , crop
  ) where
 
 import           Asm.Core.Prelude
-import qualified Data.ByteString.Lazy     as BL
-import qualified Data.IntMap.Strict       as IM
 
 import           Asm.Tools.Image.Internal
+import           Asm.Tools.Image.RenderWide
 
 withSlicesOf :: Monoid m => Int -> Int -> (Image -> m) -> Image -> m
 {-# INLINE withSlicesOf #-}
@@ -34,10 +37,23 @@ slicesOf w h img =
   , x <- [0 .. (imageWidth img `div` w)-1]
   ]
 
-histogram :: Image -> [Word8]
-histogram img =
-  map (fromIntegral . fst) $
-  sortBy (comparing (Down . snd)) $
-  IM.toList $
-  BL.foldr (\i -> IM.insertWith (+) (fromIntegral i) (1 :: Int)) IM.empty $
-  toByteString img
+crop :: Int -> Int -> Int -> Int -> Image -> Image
+crop x y w h Image{..}
+  | x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= imageWidth && y + h <= imageHeight =
+      Image
+        { imageWidth = w
+        , imageHeight = h
+        , imageOffsetX = imageOffsetX + x
+        , imageOffsetY = imageOffsetY + y
+        , ..
+        }
+  | otherwise =
+      Image
+        { imageWidth      = 0
+        , imageHeight     = 0
+        , imageOffsetX    = 0
+        , imageOffsetY    = 0
+        , imageFullWidth  = 0
+        , imageFullHeight = 0
+        , imageData       = mempty
+        }

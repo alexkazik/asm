@@ -2,11 +2,14 @@ module Asm.Tools.Image.Internal
   ( Image(..)
   , createImage
   , toByteString
+  , histogram
+  , histogram'
   ) where
 
 import           Asm.Core.Prelude
 import qualified Data.ByteString      as BS
 import qualified Data.ByteString.Lazy as BL
+import qualified Data.IntMap.Strict   as IM
 
 data Image =
   Image
@@ -42,3 +45,21 @@ toByteString Image{..} = BL.fromChunks
   where
     slice :: Int -> Int -> ByteString -> ByteString
     slice o n s = BS.take n $ BS.drop o s
+
+histogram :: Image -> [Word8]
+histogram img =
+  map (fromIntegral . fst) $
+  sortBy (comparing (Down . snd)) $
+  IM.toList $
+  BL.foldr (\i -> IM.insertWith (+) (fromIntegral i) (1 :: Int)) IM.empty $
+  toByteString img
+
+-- only for internal use
+histogram' :: ByteString -> [Word8]
+{-# INLINE histogram' #-}
+histogram' img =
+  map (fromIntegral . fst) $
+  sortBy (comparing (Down . snd)) $
+  IM.toList $
+  BS.foldr (\i -> IM.insertWith (+) (fromIntegral i) (1 :: Int)) IM.empty $
+  img
