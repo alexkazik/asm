@@ -1,7 +1,7 @@
 name:
   asm-parser
 version:
-  0.4.1
+  0.5.0
 synopsis:
   A parser for the assembler
 homepage:
@@ -68,8 +68,8 @@ library {
     Asm.Parser.ToCompiler.Stmt
   }
   build-depends:
-    { asm-core == 0.4.1
-    , asm-data == 0.4.1
+    { asm-core == 0.5.0
+    , asm-data == 0.5.0
     , base
     , classy-prelude
     , containers

@@ -1,7 +1,7 @@
 name:
   asm-c64
 version:
-  0.4.1
+  0.5.0
 synopsis:
   Files specific to the C64 platform
 homepage:
@@ -44,11 +44,11 @@ library {
     Asm.C64.Vice
   }
   build-depends:
-    { asm-core == 0.4.1
-    , asm-data == 0.4.1
-    , asm-parser == 0.4.1
-    , asm-tools == 0.4.1
-    , asm-cpu6502 == 0.4.1
+    { asm-core == 0.5.0
+    , asm-data == 0.5.0
+    , asm-parser == 0.5.0
+    , asm-tools == 0.5.0
+    , asm-cpu6502 == 0.5.0
     , base
     , bytestring
     , containers

@@ -1,7 +1,7 @@
 name:
   asm-cpu6809
 version:
-  0.4.2
+  0.5.0
 synopsis:
   The 6809 Cpu specific parts of the assembler
 homepage:
@@ -52,9 +52,9 @@ library {
     Asm.Cpu6809.Suffixed
   }
   build-depends:
-    { asm-core == 0.4.1
-    , asm-data == 0.4.1
-    , asm-parser == 0.4.1
+    { asm-core == 0.5.0
+    , asm-data == 0.5.0
+    , asm-parser == 0.5.0
     , base
     , containers
     , extra

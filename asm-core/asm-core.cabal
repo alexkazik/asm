@@ -1,7 +1,7 @@
 name:
   asm-core
 version:
-  0.4.1
+  0.5.0
 synopsis:
   The abstract assembler itself
 homepage:
@@ -126,7 +126,7 @@ library {
     Asm.Core.SourcePos.Type
   }
   build-depends:
-    { asm-data == 0.4.1
+    { asm-data == 0.5.0
     , base
     , bytestring
     , classy-prelude
