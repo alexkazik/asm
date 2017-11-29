@@ -5,11 +5,15 @@
 
 module Asm.Data.Word256
   ( Word256(..)
+  , word256LE
+  , word256BE
   ) where
 
 import           Data.Bits
-import           Data.Data        (Data)
-import           Data.Typeable    (Typeable)
+import qualified Data.ByteString.Builder as BB
+import           Data.Data               (Data)
+import           Data.Semigroup
+import           Data.Typeable           (Typeable)
 import           Data.Word
 import           Foreign.Ptr
 import           Foreign.Storable
@@ -24,7 +28,9 @@ data Word256
   deriving (Data, Eq, Typeable)
 
 instance Bounded Word256 where
+  {-# INLINE minBound #-}
   minBound = Word256 0 0 0 0
+  {-# INLINE maxBound #-}
   maxBound = Word256 maxBound maxBound maxBound maxBound
 
 instance Show Word256 where
@@ -41,12 +47,16 @@ instance Ord Word256 where
     (d `compare` j)
 
 instance Bits Word256 where
+  {-# INLINABLE (.&.) #-}
   (Word256 a b c d) .&. (Word256 g h i j) =
     Word256 (a .&. g) (b .&. h) (c .&. i) (d .&. j)
+  {-# INLINABLE (.|.) #-}
   (Word256 a b c d) .|. (Word256 g h i j) =
     Word256 (a .|. g) (b .|. h) (c .|. i) (d .|. j)
+  {-# INLINABLE xor #-}
   (Word256 a b c d) `xor` (Word256 g h i j) =
     Word256 (a `xor` g) (b `xor` h) (c `xor` i) (d `xor` j)
+  {-# INLINABLE complement #-}
   complement (Word256 a b c d) = Word256 (complement a) (complement b) (complement c) (complement d)
   w `shift` n
     | n >= 256 || n <= -256 = zeroBits
@@ -97,16 +107,22 @@ instance Bits Word256 where
     | n < 192 = b `testBit` (n - 128)
     | n < 256 = a `testBit` (n - 192)
     | otherwise = False
+  {-# INLINE bitSizeMaybe #-}
   bitSizeMaybe _ = Just 256
+  {-# INLINE isSigned #-}
   isSigned _ = False
+  {-# INLINABLE popCount #-}
   popCount (Word256 a b c d) = popCount a + popCount b + popCount c + popCount d
 
 instance FiniteBits Word256 where
   finiteBitSize _ = 256
 
 instance Storable Word256 where
+  {-# INLINE sizeOf #-}
   sizeOf _ = 4 * sizeOf (0 :: Word64)
+  {-# INLINE alignment #-}
   alignment _ = alignment (0 :: Word64)
+  {-# INLINABLE peekByteOff #-}
   peekByteOff ptr off =
     Word256
 #ifdef WORDS_BIGENDIAN
@@ -124,6 +140,7 @@ instance Storable Word256 where
     ptr64 :: Ptr Word64
     ptr64 = castPtr ptr
     size64 = sizeOf (0 :: Word64)
+  {-# INLINABLE pokeByteOff #-}
   pokeByteOff ptr off (Word256 a b c d) = do
 #ifdef WORDS_BIGENDIAN
     pokeByteOff ptr64 (off + 0 * size64) a
@@ -140,3 +157,11 @@ instance Storable Word256 where
     ptr64 :: Ptr Word64
     ptr64 = castPtr ptr
     size64 = sizeOf (0 :: Word64)
+
+word256LE :: Word256 -> BB.Builder
+{-# INLINABLE word256LE #-}
+word256LE (Word256 a b c d) = BB.word64LE d <> BB.word64LE c <> BB.word64LE b <> BB.word64LE a
+
+word256BE :: Word256 -> BB.Builder
+{-# INLINABLE word256BE #-}
+word256BE (Word256 a b c d) = BB.word64BE a <> BB.word64BE b <> BB.word64BE c <> BB.word64BE d

@@ -8,12 +8,20 @@ module Asm.Data.ByteValSimple
   , byteValSimpleAny
   , combine
   , final
+  , final0
+  , final255
+  , byteValSimpleMaskedWord8
+  , byteValSimpleToMaskedWord8
+  , byteValSimpleLE
+  , byteValSimpleBE
   ) where
 
+import           Control.Monad
 import           Data.Bits
-import           Data.Data        (Data)
+import qualified Data.ByteString.Builder as BB
+import           Data.Data               (Data)
 import           Data.List
-import           Data.Typeable    (Typeable)
+import           Data.Typeable           (Typeable)
 import           Data.Word
 import           Foreign.Storable
 
@@ -21,7 +29,7 @@ import           Asm.Data.BitList
 import           Asm.Data.Word256
 
 newtype ByteValSimple = ByteValSimple Word256 -- invariant: value can't be zero
-  deriving (Data, Eq, Storable, Typeable)
+  deriving (Data, Eq, Ord, Storable, Typeable)
 
 instance Show ByteValSimple where
   show (ByteValSimple w) =
@@ -50,9 +58,11 @@ instance Show ByteValSimple where
               else Nothing
 
 byteValSimpleWord8 :: Word8 -> ByteValSimple
+{-# INLINE byteValSimpleWord8 #-}
 byteValSimpleWord8 b = ByteValSimple $ bit (fromIntegral b)
 
 byteValSimpleAny :: ByteValSimple
+{-# INLINE byteValSimpleAny #-}
 byteValSimpleAny = ByteValSimple maxBound
 
 combine :: ByteValSimple -> ByteValSimple -> Maybe ByteValSimple
@@ -65,6 +75,8 @@ combine (ByteValSimple a) (ByteValSimple b) =
       else Just $ ByteValSimple ab
 
 final :: Word8 -> ByteValSimple -> Word8
+final 0 (ByteValSimple w) = fromIntegral (countTrailingZeros w)
+final 255 (ByteValSimple w) = complement $ fromIntegral (countLeadingZeros w)
 final def (ByteValSimple w) =
   case checkPopulation w of
     PrNone       -> error "Asm.Data.ByteValSimple.final invariant: no bits set"
@@ -84,3 +96,59 @@ final def (ByteValSimple w) =
       where
         da = def `xor` a
         db = def `xor` b
+
+final0 :: ByteValSimple -> Word8
+{-# INLINE final0 #-}
+final0 (ByteValSimple w) = fromIntegral (countTrailingZeros w)
+
+final255 :: ByteValSimple -> Word8
+{-# INLINE final255 #-}
+final255 (ByteValSimple w) = complement $ fromIntegral (countLeadingZeros w)
+
+byteValSimpleLE :: ByteValSimple -> BB.Builder
+{-# INLINE byteValSimpleLE #-}
+byteValSimpleLE (ByteValSimple a) = word256LE a
+
+byteValSimpleBE :: ByteValSimple -> BB.Builder
+{-# INLINE byteValSimpleBE #-}
+byteValSimpleBE (ByteValSimple a) = word256BE a
+
+byteValSimpleMaskedWord8 :: Word8 -> Word8 -> ByteValSimple
+byteValSimpleMaskedWord8 _ 0 = byteValSimpleAny
+byteValSimpleMaskedWord8 v 255 = byteValSimpleWord8 v
+byteValSimpleMaskedWord8 v m =
+  ByteValSimple $ foldl' setBit zeroBits $ foldl' addUnknown [fromIntegral $ v .&. m] [0..7]
+  where
+    addUnknown vs b
+      | m `testBit` b = vs
+      | otherwise = vs ++ map (.|. bit b) vs
+
+byteValSimpleToMaskedWord8 :: Word8 -> ByteValSimple -> (Word8, Word8)
+byteValSimpleToMaskedWord8 def (ByteValSimple a)
+  | a == maxBound = (0, 0)
+  | otherwise =
+    let
+      vs = do
+        v <- [0..255]
+        m <- [0..255]
+        guard (v .&. complement m == 0)
+        let
+          (ByteValSimple bvs) = byteValSimpleMaskedWord8 v m
+        guard (complement a .&. bvs == zeroBits)
+        return ((v, m), popCount m)
+    in
+      fst (minimumBy order vs)
+  where
+    order :: ((Word8, Word8), Int) -> ((Word8, Word8), Int) -> Ordering
+    order ((va, _), pa) ((vb, _), pb) =
+      mconcat
+        [ pa `compare` pb
+        , popCount da `compare` popCount db
+        , countLeadingZeros db `compare` countLeadingZeros da
+        , if def < 128
+            then va `compare` vb
+            else vb `compare` va
+        ]
+      where
+        da = def `xor` va
+        db = def `xor` vb
