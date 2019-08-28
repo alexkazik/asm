@@ -1,3 +1,8 @@
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Cpu6809.Compiler.Phase4
   ( cpu6809ConvertToStmt5C
   , cpu6809StmtMinMaxLength

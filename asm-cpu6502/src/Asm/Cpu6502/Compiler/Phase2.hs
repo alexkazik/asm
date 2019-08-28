@@ -1,3 +1,7 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Cpu6502.Compiler.Phase2
   ( cpu6502LookupNamesStmtC
   ) where

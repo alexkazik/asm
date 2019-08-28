@@ -1,3 +1,6 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Asm.Parser.Parser.Stmt
   ( parseAsm
   ) where

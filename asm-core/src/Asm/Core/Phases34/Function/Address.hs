@@ -1,3 +1,7 @@
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Core.Phases34.Function.Address
   ( AddrCheck(..)
   , addrC

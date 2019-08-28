@@ -1,3 +1,8 @@
+{-# LANGUAGE MultiWayIf #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Core.Phase4.Compiler
   ( compile4
   ) where

@@ -1,3 +1,6 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Core.Phases34.TypeDefinition
   ( sizeOfTypeDefinitionC
   ) where

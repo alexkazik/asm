@@ -1,3 +1,7 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE StandaloneDeriving #-}
+
 module Asm.Core.Phase4.Data.Stmt4
     ( Stmt4(..)
     , ForCmp(..)

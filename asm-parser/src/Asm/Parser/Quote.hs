@@ -1,3 +1,6 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE TemplateHaskellQuotes #-}
+
 module Asm.Parser.Quote
  ( getPosition
  , antiStmt

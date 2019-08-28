@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Asm.Core.Phases34.Data.Function
   ( Function
   , FunctionResult(..)

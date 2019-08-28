@@ -1,3 +1,6 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Core.Data.FunctionKey
   ( module Asm.Core.Data.FunctionKey.Internal
   , compilerFunctionKeys

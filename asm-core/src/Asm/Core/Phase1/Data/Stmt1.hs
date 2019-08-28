@@ -1,3 +1,6 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Asm.Core.Phase1.Data.Stmt1
   ( Stmt1(..)
   , ForCmp(..)

@@ -1,3 +1,6 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Asm.Parser.Parser.Integer
   ( parseInteger
   , parseIntExprI

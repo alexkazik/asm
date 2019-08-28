@@ -64,19 +64,4 @@ library {
     , text
     , vector
     }
-  default-extensions: {
-    BinaryLiterals
-    DefaultSignatures
-    DeriveDataTypeable
-    LambdaCase
-    MultiWayIf
-    NamedFieldPuns
-    NoImplicitPrelude
-    OverloadedStrings
-    QuasiQuotes
-    RecordWildCards
-    ScopedTypeVariables
-    StandaloneDeriving
-    TemplateHaskell
-  }
 }

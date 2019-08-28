@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Asm.Core.Phase4.Data.MapExpr4
   ( mapExpr
   , mapExprInStmt

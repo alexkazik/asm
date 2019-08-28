@@ -1,3 +1,6 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Asm.Core.Phase3.Data.Expr3
   ( Expr3(..)
   ) where

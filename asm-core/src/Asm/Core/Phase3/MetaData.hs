@@ -1,3 +1,6 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Core.Phase3.MetaData
   ( getPoolElemRefC
   , getAllMetaC

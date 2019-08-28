@@ -1,3 +1,6 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Asm.Parser.Data.PStmt
   ( PStmt
   , PStmtI(..)

@@ -1,3 +1,7 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE TemplateHaskellQuotes #-}
+
 module Asm.Core.Phases34.Function.GenerateArgType
   ( ArgType(..)
   , typeToAT

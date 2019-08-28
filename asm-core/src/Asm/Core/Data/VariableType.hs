@@ -1,3 +1,6 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Asm.Core.Data.VariableType
   ( VariableType(..)
   ) where

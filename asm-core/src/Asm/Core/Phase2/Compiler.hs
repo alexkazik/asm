@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Asm.Core.Phase2.Compiler
   ( compile2
   ) where

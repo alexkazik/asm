@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Asm.C64.Image.Embed
   ( imageWithUpdate
   , image

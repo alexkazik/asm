@@ -1,3 +1,6 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Cpu6809.Compiler.Function
   ( cpu6809SpecificFunctions
   , cpu6809SpecificMetaFunctions

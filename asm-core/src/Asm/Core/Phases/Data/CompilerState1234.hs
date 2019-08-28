@@ -1,4 +1,6 @@
+{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
 module Asm.Core.Phases.Data.CompilerState1234
   ( CompilerState1234S(..)

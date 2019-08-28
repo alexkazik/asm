@@ -1,3 +1,6 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Asm.Core.Data.ByteVal
   ( module Asm.Data.Word256
   , ByteVal(..)

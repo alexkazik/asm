@@ -1,3 +1,6 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE RecordWildCards #-}
+
 module Asm.Core.Data.ByteValPiece.Combine
  ( combine
  ) where

@@ -1,3 +1,9 @@
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Cpu6502.Compiler.Phase3
   ( cpu6502ApplyMetaStmtC
   ) where

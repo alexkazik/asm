@@ -1,3 +1,7 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Core.Phases34.Function.Check
   ( getCheck8C
   , checkData8MetaFunctionC

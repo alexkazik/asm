@@ -1,3 +1,10 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Core.Phase1.CompilerState1
   ( module Asm.Core.Phase1.Data.CompilerState1
   , module Asm.Core.Phases.Data.CompilerState1234

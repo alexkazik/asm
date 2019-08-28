@@ -1,3 +1,6 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE TemplateHaskellQuotes #-}
+
 module Asm.Core.Data.MetaKey.Internal
   ( MetaKey
   , mkCompilerMetaKeys

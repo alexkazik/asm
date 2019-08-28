@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Asm.Core.Data.TypeDefinition
   ( TypeDefinition(..)
   , showTdAsParam

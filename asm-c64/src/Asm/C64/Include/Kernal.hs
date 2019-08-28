@@ -1,3 +1,6 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE QuasiQuotes #-}
+
 module Asm.C64.Include.Kernal
   ( kernal
   ) where

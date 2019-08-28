@@ -1,3 +1,10 @@
+{-# LANGUAGE BinaryLiterals #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Cpu6809.Compiler.Phase3
   ( cpu6809ApplyMetaStmtC
   ) where

@@ -1,3 +1,6 @@
+{-# LANGUAGE MultiWayIf #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Asm.Core.Phases34.Function.Boolean
   ( iLT
   , iLE

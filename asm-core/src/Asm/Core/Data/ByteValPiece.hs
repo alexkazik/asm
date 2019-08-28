@@ -1,3 +1,6 @@
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Asm.Core.Data.ByteValPiece
  ( ByteValPiece(..)
  , dumpByteValPiece

@@ -146,19 +146,4 @@ library {
     , th-utilities
     , vector
     }
-  default-extensions: {
-    BinaryLiterals
-    DefaultSignatures
-    DeriveDataTypeable
-    LambdaCase
-    MultiWayIf
-    NamedFieldPuns
-    NoImplicitPrelude
-    OverloadedStrings
-    QuasiQuotes
-    RecordWildCards
-    ScopedTypeVariables
-    StandaloneDeriving
-    TemplateHaskell
-  }
 }

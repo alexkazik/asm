@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Asm.Core.Data.Ternary
   ( module Asm.Data.Ternary
   , TInt64

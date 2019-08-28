@@ -1,3 +1,7 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Core.Phases12.Data.CompilerState12
   ( CompilerState12(..)
   , pushPathC

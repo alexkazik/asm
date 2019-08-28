@@ -1,3 +1,6 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Cpu6502.Data.FunctionKey
   ( module Asm.Core.Data.FunctionKey
   , cpu6502FunctionKeys

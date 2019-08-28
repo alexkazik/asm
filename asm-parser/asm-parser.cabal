@@ -87,18 +87,4 @@ library {
     , wl-pprint-text
     , parser-combinators
     }
-  default-extensions: {
-    BinaryLiterals
-    DefaultSignatures
-    DeriveDataTypeable
-    LambdaCase
-    MultiWayIf
-    NamedFieldPuns
-    NoImplicitPrelude
-    OverloadedStrings
-    QuasiQuotes
-    ScopedTypeVariables
-    StandaloneDeriving
-    TemplateHaskell
-  }
 }

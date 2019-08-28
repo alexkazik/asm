@@ -1,5 +1,4 @@
--- can't move this to *cabal since it will break ghci when having this in the same package as the library
-{-# LANGUAGE ImplicitPrelude #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 
 module Asm.Data.BitList
  ( BitList(..)

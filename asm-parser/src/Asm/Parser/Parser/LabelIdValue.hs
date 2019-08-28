@@ -1,3 +1,6 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Parser.Parser.LabelIdValue
   ( LabelIdValue(..)
   , labelIdValue

@@ -1,3 +1,6 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Parser.Parser.Int64Value
   ( Int64Value(..)
   , int64Value

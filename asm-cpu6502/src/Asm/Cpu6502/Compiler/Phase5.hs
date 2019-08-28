@@ -1,3 +1,7 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE RecordWildCards #-}
+
 module Asm.Cpu6502.Compiler.Phase5
   ( cpu6502CodeAlign
   , cpu6502Stmt5MinMaxLength

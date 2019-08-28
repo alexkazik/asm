@@ -1,3 +1,6 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE RecordWildCards #-}
+
 module Asm.Core.Phase4.CompilerState4
   ( module Asm.Core.Phase4.Data.CompilerState4
   , module Asm.Core.Phases34.Data.CompilerState34

@@ -1,3 +1,6 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Asm.Core.Phase1.Data.Expr12
   ( Expr12(..)
   , updateLocation

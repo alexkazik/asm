@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Asm.Parser.Parser.Haskell
   ( parseHaskellExpr
   , parseHaskellTermParens

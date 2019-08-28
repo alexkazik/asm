@@ -2,8 +2,6 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE UndecidableInstances #-}
--- can't move this to *cabal since it will break ghci when having this in the same package as the library
-{-# LANGUAGE ImplicitPrelude #-}
 
 module Asm.Data.Control.Monad.Error.Class
   ( MonadError(..)

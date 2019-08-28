@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Asm.Core.Phase3.Data.Stmt3
   ( Stmt3(..)
   , ForCmp(..)

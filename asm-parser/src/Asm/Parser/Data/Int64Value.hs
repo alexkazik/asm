@@ -1,3 +1,6 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Asm.Parser.Data.Int64Value
   ( Int64Value(..)
   ) where

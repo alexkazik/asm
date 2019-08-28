@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Asm.Core.Phase1.Data.InitTree
   ( InitTree(..)
   ) where

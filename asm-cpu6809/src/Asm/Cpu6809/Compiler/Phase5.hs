@@ -1,3 +1,7 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE RecordWildCards #-}
+
 module Asm.Cpu6809.Compiler.Phase5
   ( cpu6809CodeAlign
   , cpu6809OptimiseLocalStmtBlockC

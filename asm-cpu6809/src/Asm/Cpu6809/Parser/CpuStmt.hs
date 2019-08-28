@@ -1,3 +1,8 @@
+{-# LANGUAGE BinaryLiterals #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
+
 module Asm.Cpu6809.Parser.CpuStmt
   ( parseCpu6809Stmt
   ) where

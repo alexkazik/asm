@@ -50,18 +50,4 @@ library {
     , mtl
     , transformers
     }
-  default-extensions:  {
-    BinaryLiterals
-    DefaultSignatures
-    DeriveDataTypeable
-    LambdaCase
-    MultiWayIf
-    NamedFieldPuns
-    NoImplicitPrelude
-    OverloadedStrings
-    QuasiQuotes
-    ScopedTypeVariables
-    StandaloneDeriving
-    TemplateHaskell
-  }
 }

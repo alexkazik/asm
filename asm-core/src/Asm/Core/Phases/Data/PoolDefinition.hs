@@ -1,3 +1,7 @@
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Asm.Core.Phases.Data.PoolDefinition
   ( PoolDefinition(..)
   ) where

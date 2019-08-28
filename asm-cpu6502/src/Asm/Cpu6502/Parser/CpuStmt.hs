@@ -1,3 +1,6 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Asm.Cpu6502.Parser.CpuStmt
   ( parseCpu6502Stmt
   ) where

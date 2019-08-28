@@ -1,3 +1,6 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Asm.Core.PrettyPrint.PPSM
   ( PrettyPrintState (PrettyPrintState)
   , PPSM

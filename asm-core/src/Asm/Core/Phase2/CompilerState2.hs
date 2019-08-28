@@ -1,3 +1,10 @@
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Core.Phase2.CompilerState2
   ( module Asm.Core.Phase2.Data.CompilerState2
   , module Asm.Core.Phases.Data.CompilerState1234

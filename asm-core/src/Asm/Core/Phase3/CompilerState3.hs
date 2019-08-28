@@ -1,3 +1,8 @@
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Core.Phase3.CompilerState3
   ( module Asm.Core.Phase3.Data.CompilerState3
   , module Asm.Core.Phases34.Data.CompilerState34

@@ -1,5 +1,3 @@
-{-# LANGUAGE ImplicitPrelude #-}
-
 module Asm.Core.File
   ( getRelativeFilePathQ
   , getRelativeFilePath

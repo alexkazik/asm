@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Asm.Parser.Data.LabelName
   ( LabelName(..)
   ) where

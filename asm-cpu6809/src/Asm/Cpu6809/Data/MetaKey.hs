@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Asm.Cpu6809.Data.MetaKey
   ( module Asm.Core.Data.MetaKey
   , metaCpu

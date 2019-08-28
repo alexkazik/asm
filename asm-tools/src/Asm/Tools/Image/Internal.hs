@@ -1,3 +1,6 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE RecordWildCards #-}
+
 module Asm.Tools.Image.Internal
   ( Image(..)
   , createImage
