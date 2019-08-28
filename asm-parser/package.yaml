@@ -1,0 +1,39 @@
+name: asm-parser
+version: '0.5.0'
+synopsis: A parser for the assembler
+category: Compilers/Interpreters
+author: ALeX Kazik
+maintainer: alex@kazik.de
+copyright: 2017 ALeX Kazik
+license: BSD3
+homepage: https://github.com/alexkazik/asm
+dependencies:
+- asm-core ==0.5.0
+- asm-data ==0.5.0
+- base
+- classy-prelude
+- containers
+- filepath
+- haskell-src-exts
+- haskell-src-meta
+- megaparsec
+- mtl
+- scientific
+- split
+- template-haskell
+- terminal-size
+- text
+- vector
+- wl-pprint-text
+- parser-combinators
+library:
+  source-dirs: src
+  ghc-options: -Wall
+  when:
+  - condition: flag(debugcompiler)
+    cpp-options: -DDEBUG_COMPILER
+flags:
+  debugcompiler:
+    description: Enable debugging the compiler.
+    manual: false
+    default: false

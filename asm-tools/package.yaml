@@ -1,0 +1,27 @@
+name: asm-tools
+version: '0.5.0'
+synopsis: Tools used by the platform modules
+category: Compilers/Interpreters
+author: ALeX Kazik
+maintainer: alex@kazik.de
+copyright: 2017 ALeX Kazik
+license: BSD3
+homepage: https://github.com/alexkazik/asm
+dependencies:
+- asm-core ==0.5.0
+- asm-data ==0.5.0
+- base
+- bytestring
+- containers
+- directory
+- JuicyPixels
+- syb
+- template-haskell
+- text
+- vector
+library:
+  source-dirs: src
+  ghc-options: -Wall
+  other-modules:
+  - Asm.Tools.Image.Internal
+  - Asm.Tools.Image.RenderWide

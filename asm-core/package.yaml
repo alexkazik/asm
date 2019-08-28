@@ -1,0 +1,46 @@
+name: asm-core
+version: '0.5.0'
+synopsis: The abstract assembler itself
+category: Compilers/Interpreters
+author: ALeX Kazik
+maintainer: alex@kazik.de
+copyright: 2017 ALeX Kazik
+license: BSD3
+homepage: https://github.com/alexkazik/asm
+dependencies:
+- asm-data ==0.5.0
+- base
+- bytestring
+- classy-prelude
+- containers
+- directory
+- file-embed
+- filepath
+- megaparsec
+- mtl
+- prettyprinter
+- prettyprinter-ansi-terminal
+- scientific
+- split
+- template-haskell
+- terminal-size
+- text
+- th-utilities
+- vector
+library:
+  source-dirs: src
+  ghc-options: -Wall
+  when:
+  - condition: flag(debugcompiler)
+    cpp-options: -DDEBUG_COMPILER
+  - condition: flag(disablelocal)
+    cpp-options: -DDISABLE_LOCAL
+flags:
+  debugcompiler:
+    description: Enable debugging the compiler.
+    manual: false
+    default: false
+  disablelocal:
+    description: Disable local variables (handle them just as var).
+    manual: false
+    default: false
