@@ -66,7 +66,7 @@ parseFor = do
   from <- parseExprTerm
   cmp <- (symbol "<" *> pure False) <|> (symbol "<=" *> pure True)
   to <- parseExprTerm
-  loc <- getPosition
+  loc <- getSourcePos
   step <- optional (symbol "+=" *> parseExprTerm)
   return (PSBuildFor name from cmp to (fromMaybe (loc, PEConstInt 1) step))
 

@@ -29,16 +29,18 @@ data CompilerWriter1 c =
     , cs1PoolDefinition :: Map Reference PoolDefinition
     }
 
+instance Semigroup (CompilerWriter1 c) where
+  a <> b =
+    CWr1
+      { cs1Aliases = M.union (cs1Aliases a) (cs1Aliases b)
+      , cs1PoolDefinition = M.union (cs1PoolDefinition a) (cs1PoolDefinition b)
+      }
+
 instance Monoid (CompilerWriter1 c) where
   mempty =
     CWr1
       { cs1Aliases = mempty
       , cs1PoolDefinition = mempty
-      }
-  a `mappend` b =
-    CWr1
-      { cs1Aliases = M.union (cs1Aliases a) (cs1Aliases b)
-      , cs1PoolDefinition = M.union (cs1PoolDefinition a) (cs1PoolDefinition b)
       }
 
 -- the state of the compiler

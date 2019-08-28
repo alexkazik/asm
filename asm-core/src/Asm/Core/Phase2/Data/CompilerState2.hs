@@ -41,16 +41,18 @@ data CompilerWriter2 c
     , cs2CallPaths :: !(Map [Text] [Expr3 c])
     }
 
+instance Semigroup (CompilerWriter2 c) where
+  a <> b =
+    CWr2
+      { cs2Position = M.union (cs2Position a) (cs2Position b)
+      , cs2CallPaths = M.unionWith (<>) (cs2CallPaths a) (cs2CallPaths b)
+      }
+
 instance Monoid (CompilerWriter2 c) where
   mempty =
     CWr2
       { cs2Position = mempty
       , cs2CallPaths = mempty
-      }
-  a `mappend` b =
-    CWr2
-      { cs2Position = M.union (cs2Position a) (cs2Position b)
-      , cs2CallPaths = M.unionWith (<>) (cs2CallPaths a) (cs2CallPaths b)
       }
 
 -- the state of the compiler

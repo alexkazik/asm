@@ -51,5 +51,5 @@ generateSybolTable = sortOn fst . separateSameName . alignSameName . joinSamePos
     separateSameName ((t, [p]):xs) = (p, t) : separateSameName xs
     separateSameName ((t, ps):xs) = map (go t) (zip (sort ps) [(1::Int)..]) ++ separateSameName xs
       where
-        go t' (p, n) = (p, t' `mappend` "_X" `mappend` ltshow n)
+        go t' (p, n) = (p, t' `mappend` "_X" `mappend` tlshow n)
     separateSameName [] = []

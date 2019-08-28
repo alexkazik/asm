@@ -62,7 +62,7 @@ parsePshPul :: Asm.Cpu6809.Data.OpCodes.Operator -> Parser PStmtCpu6809
 parsePshPul op = do
   _ <- optional $ string' ".imm"
   sc
-  loc <- getPosition
+  loc <- getSourcePos
   regs <- sepBy1 register (symbol ",")
   return $ PSRegular op [AMImm] (Just (loc, PEConstInt $ foldr (.|.) 0 regs))
   where
@@ -84,7 +84,7 @@ parseRegisterOp :: Asm.Cpu6809.Data.OpCodes.Operator -> Parser PStmtCpu6809
 parseRegisterOp op = do
   _ <- optional $ string' ".imm"
   sc
-  loc <- getPosition
+  loc <- getSourcePos
   src <- parseInterRegister
   symbol ","
   dst <- parseInterRegister
@@ -116,7 +116,7 @@ parseTfm = do
   rword' "tfm"
   _ <- optional $ string' ".imm"
   sc
-  loc <- getPosition
+  loc <- getSourcePos
   src <- parseInterRegister
   srcMode <- optional parseIncDec
   symbol ","

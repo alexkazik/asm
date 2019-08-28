@@ -6,7 +6,6 @@ module Demo.C64.Image
   ) where
 
 import           Data.ByteString.Builder
-import           Data.Semigroup
 import           Data.Vector             (Vector)
 import qualified Data.Vector.Storable    as SV
 

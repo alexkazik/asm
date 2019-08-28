@@ -26,15 +26,16 @@ module Asm.Parser.Parser.Basic
   ) where
 
 import           Asm.Core.Prelude
-import qualified Data.Char               as C (toUpper)
-import           Text.Megaparsec         as Export (between, choice, getPosition, label, lookAhead, sepBy, try, (<?>))
-import qualified Text.Megaparsec         as MP
-import           Text.Megaparsec.Char    as Export (newline, string, string')
-import qualified Text.Megaparsec.Char    as MP
-import           Text.Megaparsec.Expr    as Export (Operator (..), makeExprParser)
-import           Text.Megaparsec.Pos     as Export (SourcePos)
+import           Control.Monad.Combinators.Expr as Export (Operator (..), makeExprParser)
+import qualified Data.Char                      as C (toUpper)
+import           Text.Megaparsec                as Export (between, choice, getSourcePos, label, lookAhead, sepBy, try,
+                                                           (<?>))
+import qualified Text.Megaparsec                as MP
+import           Text.Megaparsec.Char           as Export (newline, string, string')
+import qualified Text.Megaparsec.Char           as MP
+import           Text.Megaparsec.Pos            as Export (SourcePos)
 
-import           Asm.Parser.Parser.Class as Export
+import           Asm.Parser.Parser.Class        as Export
 
 --
 -- global parameters
@@ -115,7 +116,7 @@ isInType = do
 
 wrapPosition :: Parser (b -> (SourcePos, b))
 {-# INLINE wrapPosition #-}
-wrapPosition = (,) <$> MP.getPosition
+wrapPosition = (,) <$> MP.getSourcePos
 
 sepBy1 :: Parser a -> Parser sep -> Parser (NonNull [a])
 {-# INLINE sepBy1 #-}

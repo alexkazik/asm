@@ -15,7 +15,6 @@ import qualified Language.Haskell.Meta.Syntax.Translate as Hs
 import           Language.Haskell.TH                    (Exp)
 import qualified Language.Haskell.TH                    as TH
 import qualified Text.Megaparsec                        as MP
-import qualified Text.Megaparsec.Char                   as MP
 
 import           Asm.Parser.Parser.Basic
 
@@ -57,12 +56,12 @@ parseHaskellTermParens op cl = do
         many $
           choice
             [ void $ some $ noneOf (op:cl:"\"")
-            , char '\\' <* MP.anyChar
+            , char '\\' <* MP.anySingle
             , do
                 char '"'
                 void $ many
                   (
-                    noneOf "\\\"" <|> ( char '\\' *> MP.anyChar )
+                    noneOf "\\\"" <|> ( char '\\' *> MP.anySingle )
                   )
                 char '"'
             , do

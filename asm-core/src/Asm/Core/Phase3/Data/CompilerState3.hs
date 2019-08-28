@@ -49,14 +49,15 @@ newtype CompilerWriter3 c
     { cs3Inline         :: Map Reference (Int64, Maybe (Expr4 c))
     }
 
+instance Semigroup (CompilerWriter3 c) where
+  a <> b =
+    CWr3
+      { cs3Inline = M.union (cs3Inline a) (cs3Inline b)
+      }
 instance Monoid (CompilerWriter3 c) where
   mempty =
     CWr3
       { cs3Inline = mempty
-      }
-  a `mappend` b =
-    CWr3
-      { cs3Inline = M.union (cs3Inline a) (cs3Inline b)
       }
 
 

@@ -20,7 +20,6 @@ module Asm.Data.Control.Monad.Error.Internal
 
 import           Control.Monad.Trans
 import           Data.Functor.Identity
-import           Data.Semigroup
 
 import           Asm.Data.Control.Monad.Error.Class
 

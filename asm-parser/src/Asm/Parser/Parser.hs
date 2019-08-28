@@ -19,12 +19,11 @@ import           Asm.Parser.StripComments
 
 parserForExpr :: (CpuParser c ps pe, MonadFail m) => SourcePos -> String -> m (PExpr pe)
 parserForExpr pos s =
-  case runParser (runStateT p initialExprState) "" (stripComments s) of
-    Left err     -> fail $ parseErrorPretty err
+  case runParser'' (runStateT p initialExprState) pos (stripComments s) of
+    Left err     -> fail $ errorBundlePretty err
     Right (e, _) -> return e
   where
     p = do
-      setPosition pos
       sc
       e <- parseExpr
       eof
@@ -32,13 +31,33 @@ parserForExpr pos s =
 
 parserForAsm :: (CpuParser c ps pe, MonadFail m) => SourcePos -> String -> m [PStmt ps pe]
 parserForAsm pos s =
-  case runParser (runStateT p initialStmtState) "" (stripComments s) of
-    Left err     -> fail $ parseErrorPretty err
+  case runParser'' (runStateT p initialStmtState) pos (stripComments s) of
+    Left err     -> fail $ errorBundlePretty err
     Right (e, _) -> buildTree (filter (not . isPSNothing) e)
   where
     p = do
-      setPosition pos
       sc
       e <- parseAsm
       eof
       return e
+
+runParser''
+  :: Parsec e s a -- ^ Parser to run
+  -> SourcePos    -- ^ Initial state
+  -> s
+  -> Either (ParseErrorBundle s e) a
+runParser'' p pos s =
+  snd $
+    runParser'
+    p
+    State
+    { stateInput  = s
+    , stateOffset = 0
+    , statePosState = PosState
+      { pstateInput = s
+      , pstateOffset = 0
+      , pstateSourcePos = pos
+      , pstateTabWidth = defaultTabWidth
+      , pstateLinePrefix = ""
+      }
+    }

@@ -12,7 +12,6 @@ module Asm.Data.Word256
 import           Data.Bits
 import qualified Data.ByteString.Builder as BB
 import           Data.Data               (Data)
-import           Data.Semigroup
 import           Data.Typeable           (Typeable)
 import           Data.Word
 import           Foreign.Ptr

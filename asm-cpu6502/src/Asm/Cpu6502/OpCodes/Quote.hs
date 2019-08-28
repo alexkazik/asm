@@ -7,8 +7,9 @@ module Asm.Cpu6502.OpCodes.Quote
 import           Asm.Core.Prelude
 import qualified Data.IntMap.Strict        as IM
 import           Data.List                 (nub)
+import           Data.List.Extra           (split)
 import qualified Data.Map.Strict           as M
-import           Extra                     (fst3, split)
+import           Data.Tuple.Extra          (fst3)
 import qualified Language.Haskell.TH       as TH
 import           Language.Haskell.TH.Quote
 

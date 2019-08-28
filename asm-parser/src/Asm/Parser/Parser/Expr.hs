@@ -49,13 +49,13 @@ aOperators =
 
 operator1 :: Text -> Parser (PExpr pe -> PExpr pe)
 operator1 name = do
-  loc <- getPosition
+  loc <- getSourcePos
   op <- try $ lexeme $ operator name
   return (\a -> (loc, PEUOperator op a))
 
 operator2 :: Text -> Parser (PExpr pe -> PExpr pe -> PExpr pe)
 operator2 name = do
-  loc <- getPosition
+  loc <- getSourcePos
   op <- try $ lexeme $ operator name
   return (\a b -> (loc, PEBOperator op a b))
 
@@ -71,13 +71,13 @@ parseExprTerm = do
     deref = derefStruct <|> (bool derefArray defineArray =<< isInType)
     derefStruct :: CpuParser c ps pe => Parser (PExpr pe -> PExpr pe)
     derefStruct = do
-      loc <- getPosition
+      loc <- getSourcePos
       symbol "."
       name <- parseLabelIdValue
       return (\x -> (loc, PEDerefStruct x name))
     derefArray :: CpuParser c ps pe => Parser (PExpr pe -> PExpr pe)
     derefArray = do
-      loc <- getPosition
+      loc <- getSourcePos
       symbol "["
       expr <- parseExpr
       symbol "]"
@@ -106,7 +106,7 @@ aTerm' = choice
 
 parseStructOrUnion :: CpuParser c ps pe => Parser (PExpr pe)
 parseStructOrUnion = do
-  loc <- getPosition
+  loc <- getSourcePos
   (td, isStruct) <- choice
     [ rword' "struct" *> pure (PETypeStruct, True)
     , rword' "union" *> pure (PETypeUnion, False)
@@ -125,14 +125,14 @@ function = do
   lookAhead $ try $ do
     _ <- parseLabelIdValue
     symbol "("
-  loc <- getPosition
+  loc <- getSourcePos
   name <- parseLabelIdValue
   params <- between (symbol "(") (symbol ")") $ sepBy parseExpr (symbol ",")
   return (loc, PEFunction name params)
 
 var :: CpuParser c ps pe => Parser (PExpr pe)
 var = do
-  loc <- getPosition
+  loc <- getSourcePos
   name <- parseLabelId
   -- important: this parser can never parse a Haskell variable, but antitovar is used
   return (loc, PELabelId name)
@@ -144,7 +144,7 @@ haskell = do
 
 antiArray :: CpuParser c ps pe => Parser (PExpr pe)
 antiArray = do
-  loc <- getPosition
+  loc <- getSourcePos
   lookAhead (char '[')
   expr <- parseHaskellTermParens '[' ']'
   sc
@@ -152,7 +152,7 @@ antiArray = do
 
 antiStruct :: CpuParser c ps pe => Parser (PExpr pe)
 antiStruct = do
-  loc <- getPosition
+  loc <- getSourcePos
   lookAhead (char '{')
   expr <- parseHaskellTermParens '{' '}'
   sc
@@ -160,13 +160,13 @@ antiStruct = do
 
 antiExpr :: CpuParser c ps pe => Parser (PExpr pe)
 antiExpr = do
-  loc <- getPosition
+  loc <- getSourcePos
   expr <- parseHaskellExpr
   return (loc, PEAntiExpr expr)
 
 array :: CpuParser c ps pe => Parser (PExpr pe)
 array = do
-  loc <- getPosition
+  loc <- getSourcePos
   symbol "[["
   d <- withNewlines $ smartList parseExpr (symbol ",") (symbol "]]")
   return (loc, PEUserArrayL d)
@@ -201,7 +201,7 @@ parseTypeName isStruct = do
 
 optionalExprInBrackets :: CpuParser c ps pe => Parser (SourcePos, Maybe (PExpr pe))
 optionalExprInBrackets = do
-  loc <- getPosition
+  loc <- getSourcePos
   symbol "["
   expr <- optional parseExpr
   symbol "]"
