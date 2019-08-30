@@ -1,5 +1,5 @@
 name: asm-data
-version: '0.5.0'
+version: '0.6.0'
 synopsis: Data structures used by the assembler but not specific to it
 category: Compilers/Interpreters
 author: ALeX Kazik

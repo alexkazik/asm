@@ -1,5 +1,5 @@
 name: asm-core
-version: '0.5.0'
+version: '0.6.0'
 synopsis: The abstract assembler itself
 category: Compilers/Interpreters
 author: ALeX Kazik
@@ -8,7 +8,7 @@ copyright: 2017 ALeX Kazik
 license: BSD3
 homepage: https://github.com/alexkazik/asm
 dependencies:
-- asm-data ==0.5.0
+- asm-data ==0.6.0
 - base >=4.9
 - bytestring
 - classy-prelude
