@@ -13,7 +13,7 @@ dependencies:
 - asm-parser ==0.5.0
 - asm-tools ==0.5.0
 - asm-cpu6502 ==0.5.0
-- base
+- base >=4.9
 - bytestring
 - containers
 - JuicyPixels

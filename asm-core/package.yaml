@@ -9,14 +9,14 @@ license: BSD3
 homepage: https://github.com/alexkazik/asm
 dependencies:
 - asm-data ==0.5.0
-- base
+- base >=4.9
 - bytestring
 - classy-prelude
 - containers
 - directory
 - file-embed
 - filepath
-- megaparsec
+- megaparsec >=7
 - mtl
 - prettyprinter
 - prettyprinter-ansi-terminal

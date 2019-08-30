@@ -8,7 +8,7 @@ copyright: 2017 ALeX Kazik
 license: BSD3
 homepage: https://github.com/alexkazik/asm
 dependencies:
-- base
+- base >=4.9
 - bytestring
 library:
   source-dirs: src

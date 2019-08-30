@@ -10,7 +10,7 @@ homepage: https://github.com/alexkazik/asm
 dependencies:
 - asm-core ==0.5.0
 - asm-data ==0.5.0
-- base
+- base >=4.9
 - bytestring
 - containers
 - directory
