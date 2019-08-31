@@ -22,7 +22,7 @@ library:
   - text
   - vector
 executables:
-  demo:
+  demo-exe:
     main: Main.hs
     source-dirs: app
     ghc-options:
