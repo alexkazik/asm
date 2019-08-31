@@ -17,7 +17,7 @@ module Asm.Data.Ternary
   , tValueFillAndUMask
   ) where
 
-import           Data.Bits
+import           Data.Bits                 (Bits (..))
 
 import           Asm.Data.Ternary.Internal
 

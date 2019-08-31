@@ -5,7 +5,7 @@ module Asm.Data.Ternary.Internal
   ( Ternary(..)
   ) where
 
-import           Data.Bits
+import           Data.Bits     (Bits (..), FiniteBits (..))
 import           Data.Data     (Data)
 import           Data.Typeable (Typeable)
 

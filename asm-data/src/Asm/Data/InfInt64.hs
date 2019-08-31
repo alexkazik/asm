@@ -5,7 +5,7 @@ module Asm.Data.InfInt64
   ) where
 
 import           Data.Data                    (Data)
-import           Data.Int
+import           Data.Int                     (Int64)
 import           Data.Typeable                (Typeable)
 import qualified Text.ParserCombinators.ReadP as RP
 import qualified Text.Read                    as R

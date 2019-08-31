@@ -6,13 +6,14 @@ module Main
   , runAll
   ) where
 
-import           Control.Monad
-import           Data.ByteString.Builder
+import           Control.Monad           (forM_, unless)
+import           Data.ByteString.Builder (toLazyByteString)
 import qualified Data.ByteString.Lazy    as BL
 import           Data.Semigroup          ((<>))
-import           Options.Applicative
-import           System.Directory
-import           System.FilePath
+import           Options.Applicative     (Parser)
+import qualified Options.Applicative     as O
+import           System.Directory        (doesDirectoryExist)
+import           System.FilePath         ((</>))
 
 import           Demo.C64.Image
 import           Demo.Multi.UnRLE
@@ -28,20 +29,20 @@ optionsParser :: Parser Options
 optionsParser =
   Options
     <$>
-      strOption
-        (  long "dir"
-        <> short 'd'
-        <> metavar "DIRECTORY"
-        <> help "Target directory for all compiled modules"
+      O.strOption
+        (  O.long "dir"
+        <> O.short 'd'
+        <> O.metavar "DIRECTORY"
+        <> O.help "Target directory for all compiled modules"
         )
 
 main :: IO ()
 main = do
-  options <- execParser $
-    info
-      (optionsParser <**> helper)
-      (  fullDesc
-      <> progDesc "Compile some demo modules"
+  options <- O.execParser $
+    O.info
+      (optionsParser O.<**> O.helper)
+      (  O.fullDesc
+      <> O.progDesc "Compile some demo modules"
       )
   runAll (optionsOutput options)
 

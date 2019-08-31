@@ -9,7 +9,7 @@ module Asm.Core.Data.CompilerError
   ) where
 
 import           Asm.Core.Prelude
-import           System.IO.Unsafe
+import           System.IO.Unsafe        (unsafePerformIO)
 
 import           Asm.Core.Flags
 import           Asm.Core.SourcePos.Type

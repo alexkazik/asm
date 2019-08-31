@@ -22,7 +22,8 @@ import           Asm.Core.Prelude
 import qualified Data.Text           as T
 import qualified Language.Haskell.TH as TH
 import           Text.Megaparsec     (SourcePos (..), mkPos)
-import           Text.Megaparsec.Pos
+import           Text.Megaparsec.Pos (initialPos, sourcePosPretty, unPos)
+import qualified Text.Megaparsec.Pos
 
 type Location = [SourcePos]
 

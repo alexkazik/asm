@@ -12,7 +12,7 @@ module Asm.Cpu6502.Data.OpCodes
   ) where
 
 import           Asm.Core.Prelude
-import           Text.Heredoc
+import           Text.Heredoc                  (here)
 
 import           Asm.Cpu6502.OpCodes.Generator
 

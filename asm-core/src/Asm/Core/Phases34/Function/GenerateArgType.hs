@@ -12,7 +12,7 @@ module Asm.Core.Phases34.Function.GenerateArgType
   ) where
 
 import           Asm.Core.Prelude
-import           Language.Haskell.TH
+import           Language.Haskell.TH            (Name)
 
 import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.ByteVal

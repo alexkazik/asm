@@ -9,9 +9,9 @@ module Asm.Parser.Parser.Class
 
 import           Asm.Core.Prelude
 import           Control.Monad.State.Strict    (StateT)
-import           Data.Void
-import           Text.Megaparsec
-import           Text.Megaparsec.Pos           as Export (SourcePos)
+import           Data.Void                     (Void)
+import           Text.Megaparsec               (Parsec)
+import           Text.Megaparsec.Pos           (SourcePos)
 
 import           Asm.Core.Data.Cpu
 import           Asm.Core.Data.CpuData

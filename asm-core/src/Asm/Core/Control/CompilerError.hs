@@ -23,9 +23,9 @@ module Asm.Core.Control.CompilerError
   ) where
 
 import           Asm.Core.Prelude
-import           Language.Haskell.TH
-import           Language.Haskell.TH.Quote
-import           Language.Haskell.TH.Syntax             (liftData)
+import           Language.Haskell.TH                    (Exp, Q, appE, listE, litE, varE)
+import           Language.Haskell.TH.Quote              (QuasiQuoter (..))
+import           Language.Haskell.TH.Syntax             (Lit (..), liftData, mkName)
 
 import           Asm.Core.Data.CompilerError
 import           Asm.Core.Flags

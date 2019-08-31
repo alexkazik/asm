@@ -12,7 +12,7 @@ module Asm.Core.Phase4.PoolData
 
 import           Asm.Core.Prelude
 import qualified Data.Map                           as M
-import           Data.Proxy
+import           Data.Proxy                         (Proxy (..))
 import qualified Data.Set                           as S
 import qualified Data.Vector                        as V
 

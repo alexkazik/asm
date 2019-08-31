@@ -8,14 +8,14 @@ module Asm.Data.Word256
   , word256BE
   ) where
 
-import           Data.Bits
+import           Data.Bits               (Bits (..), FiniteBits (..))
 import qualified Data.ByteString.Builder as BB
 import           Data.Data               (Data)
 import           Data.Typeable           (Typeable)
-import           Data.Word
-import           Foreign.Ptr
-import           Foreign.Storable
-import           Text.Printf
+import           Data.Word               (Word64)
+import           Foreign.Ptr             (Ptr, castPtr)
+import           Foreign.Storable        (Storable (..))
+import           Text.Printf             (printf)
 
 data Word256
   = Word256

@@ -26,7 +26,7 @@ module Asm.Cpu6809.Suffixed
 import           Asm.Core.Prelude
 import qualified Data.Map.Strict                 as M
 import qualified Language.Haskell.TH             as TH
-import           Language.Haskell.TH.Quote
+import           Language.Haskell.TH.Quote       (dataToExpQ)
 
 import           Asm.Core
 import           Asm.Core.SourcePos

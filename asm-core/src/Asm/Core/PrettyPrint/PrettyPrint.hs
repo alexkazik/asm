@@ -16,9 +16,16 @@ module Asm.Core.PrettyPrint.PrettyPrint
 import           Asm.Core.Prelude
 import           Data.Text.Prettyprint.Doc                 hiding (Doc, Pretty (..))
 import qualified Data.Text.Prettyprint.Doc                 as PP
-import           Data.Text.Prettyprint.Doc.Render.Terminal
+-- import           Data.Text.Prettyprint.Doc.Render.Terminal
+-- import qualified System.Console.Terminal.Size              as Con
+-- import           System.IO.Unsafe
+
+-- import           Asm.Core.Prelude
+-- import           Data.Text.Prettyprint.Doc                 (encloseSep,softline,softline',PageWidth(..),LayoutOptions(..),layoutPretty)
+-- import qualified Data.Text.Prettyprint.Doc                 as PP
+import           Data.Text.Prettyprint.Doc.Render.Terminal (AnsiStyle, renderLazy)
 import qualified System.Console.Terminal.Size              as Con
-import           System.IO.Unsafe
+import           System.IO.Unsafe                          (unsafePerformIO)
 
 type Doc = PP.Doc AnsiStyle
 

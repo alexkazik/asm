@@ -11,7 +11,7 @@ module Asm.Cpu6809.Data.OpCodes
   ) where
 
 import           Asm.Core.Prelude
-import           Text.Heredoc
+import           Text.Heredoc                  (here)
 
 import           Asm.Cpu6809.OpCodes.Generator
 

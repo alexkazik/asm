@@ -7,7 +7,7 @@ module Asm.Parser.Data.ToExpr
   ) where
 
 import           Asm.Core.Prelude
-import           Data.List.Split
+import           Data.List.Split            (splitOn)
 
 import           Asm.Core.Data.ByteVal
 import           Asm.Core.Data.Ternary

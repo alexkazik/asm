@@ -6,7 +6,7 @@ module Asm.C64.Image.Embed
   ) where
 
 import           Asm.Core.Prelude
-import           Control.Monad.ST
+import           Control.Monad.ST             (runST)
 import qualified Data.Vector.Storable         as SV
 import qualified Data.Vector.Storable.Mutable as MSV
 import qualified Data.Vector.Unboxed          as UV

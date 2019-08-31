@@ -23,7 +23,7 @@ module Asm.Cpu6502
 
 import           Asm.Core.Prelude
 import qualified Language.Haskell.TH          as TH
-import           Language.Haskell.TH.Quote
+import           Language.Haskell.TH.Quote    (QuasiQuoter)
 
 import           Asm.Core
 import           Asm.Parser

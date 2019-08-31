@@ -6,7 +6,7 @@ module Asm.Core.SourcePos.Quasi
   ) where
 
 import           Asm.Core.Prelude
-import           Language.Haskell.TH
+import           Language.Haskell.TH        (Exp, Q)
 import           Language.Haskell.TH.Syntax (liftData)
 
 import           Asm.Core.Flags

@@ -13,7 +13,7 @@ import           Data.List                    (mapAccumR)
 import           Data.List.Extra              (split)
 import qualified Data.Map.Strict              as M
 import qualified Data.Text                    as T
-import           Numeric
+import           Numeric                      (readHex)
 
 import           Asm.Core.PrettyPrint.Use
 

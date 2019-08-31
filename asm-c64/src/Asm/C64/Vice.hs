@@ -10,7 +10,7 @@ import qualified Control.Arrow
 import qualified Data.Map                            as M
 import           Data.Maybe                          (fromMaybe)
 import qualified Data.Text.Lazy                      as TL
-import           Text.Printf
+import           Text.Printf                         (printf)
 
 import           Asm.Core
 import           Asm.Core.Control.CompilerError

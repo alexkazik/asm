@@ -3,7 +3,7 @@ module Demo.Output
   , moduleOutput
   ) where
 
-import           Data.ByteString.Builder
+import           Data.ByteString.Builder (Builder)
 
 import           Asm.Core.Compiler
 

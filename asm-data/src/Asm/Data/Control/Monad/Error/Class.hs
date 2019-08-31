@@ -7,7 +7,7 @@ module Asm.Data.Control.Monad.Error.Class
   ( MonadError(..)
   ) where
 
-import           Control.Monad.Trans
+import           Control.Monad.Trans            (MonadTrans (..), lift)
 import qualified Control.Monad.Trans.RWS.Lazy   as LazyRWS
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWS
 

@@ -9,7 +9,7 @@ module Asm.Core.Phase4.Compiler
 
 import           Asm.Core.Prelude
 import qualified Data.Map                            as M
-import           System.IO.Unsafe
+import           System.IO.Unsafe                    (unsafePerformIO)
 
 import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.Cpu

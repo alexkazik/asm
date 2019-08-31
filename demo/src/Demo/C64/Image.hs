@@ -5,7 +5,7 @@ module Demo.C64.Image
   ( moduleC64Image
   ) where
 
-import           Data.ByteString.Builder
+import           Data.ByteString.Builder (word16LE)
 import           Data.Vector             (Vector)
 import qualified Data.Vector.Storable    as SV
 

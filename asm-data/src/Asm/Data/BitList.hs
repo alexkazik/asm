@@ -5,11 +5,11 @@ module Asm.Data.BitList
  , PopulationResult(..)
  ) where
 
-import           Data.Bits
+import           Data.Bits        (Bits (..), FiniteBits (..))
 import           Data.Data        (Data)
-import           Data.Foldable
+import           Data.Foldable    (foldl')
 import           Data.Typeable    (Typeable)
-import           Data.Word
+import           Data.Word        (Word16, Word32, Word64, Word8)
 
 import           Asm.Data.Word256
 

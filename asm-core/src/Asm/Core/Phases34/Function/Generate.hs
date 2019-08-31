@@ -9,7 +9,10 @@ module Asm.Core.Phases34.Function.Generate
   ) where
 
 import           Asm.Core.Prelude
-import           Language.Haskell.TH                        as TH
+import           Language.Haskell.TH                        (Body (..), Exp (..), Info (..), Lit (..), Match (..), Name,
+                                                             Pat (..), Q, Stmt (..), TyVarBndr (..), Type (..), newName,
+                                                             reify)
+import qualified Language.Haskell.TH                        as TH
 
 import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.KindDefinition

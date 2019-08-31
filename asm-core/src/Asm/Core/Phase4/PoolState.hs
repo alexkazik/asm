@@ -9,7 +9,7 @@ module Asm.Core.Phase4.PoolState
 
 import           Asm.Core.Prelude
 import qualified Data.Map.Strict                     as M
-import           Data.Proxy
+import           Data.Proxy                          (Proxy (..))
 
 import           Asm.Core.Control.CompilerError
 import           Asm.Core.Data.ByteValPiece

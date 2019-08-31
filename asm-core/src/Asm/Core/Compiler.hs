@@ -13,9 +13,9 @@ module Asm.Core.Compiler
   ) where
 
 import           Asm.Core.Prelude
-import           Control.Arrow
+import           Control.Arrow                       (left)
 import qualified Data.ByteString                     as BS
-import           Data.ByteString.Builder
+import           Data.ByteString.Builder             (Builder, lazyByteString)
 import qualified Data.ByteString.Lazy                as BL
 import qualified Data.Vector                         as V
 

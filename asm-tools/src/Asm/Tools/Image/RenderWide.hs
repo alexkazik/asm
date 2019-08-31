@@ -9,7 +9,7 @@ module Asm.Tools.Image.RenderWide
  ) where
 
 import           Asm.Core.Prelude
-import           Control.Monad.ST
+import           Control.Monad.ST               (runST)
 import qualified Data.ByteString.Lazy           as BL
 import qualified Data.ByteString.Unsafe         as BS
 import qualified Data.Vector.Unboxed            as UV

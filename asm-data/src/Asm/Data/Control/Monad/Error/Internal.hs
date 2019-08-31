@@ -17,8 +17,8 @@ module Asm.Data.Control.Monad.Error.Internal
   , toEither
   ) where
 
-import           Control.Monad.Trans
-import           Data.Functor.Identity
+import           Control.Monad.Trans                (MonadTrans (..))
+import           Data.Functor.Identity              (Identity (..))
 
 import           Asm.Data.Control.Monad.Error.Class
 

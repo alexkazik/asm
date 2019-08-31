@@ -12,7 +12,7 @@ import           Asm.Core.Prelude
 import qualified Data.Map.Strict                  as M
 import qualified Data.Set                         as S
 import qualified Data.Text.Prettyprint.Doc        as PP
-import           Data.Void
+import           Data.Void                        (Void)
 import qualified Language.Haskell.TH              as TH
 
 import           Asm.Core.Data.ByteVal

@@ -5,13 +5,13 @@ module Asm.Core.File
   , embedDir
   ) where
 
-import           Control.Monad
+import           Control.Monad              (when)
 import qualified Data.FileEmbed             as FE
 import qualified Language.Haskell.TH        as TH
 import qualified Language.Haskell.TH.Syntax as TH
-import           System.Directory
-import           System.FilePath
-import           TH.RelativePaths
+import           System.Directory           (getCurrentDirectory)
+import           System.FilePath            (normalise, splitDirectories, takeDirectory, (</>))
+import           TH.RelativePaths           (pathRelativeToCabalPackage)
 
 getRelativeFilePathQ :: Bool -> FilePath -> TH.Q FilePath
 getRelativeFilePathQ addDependentFile fp = do

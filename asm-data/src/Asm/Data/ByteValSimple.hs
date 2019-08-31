@@ -15,14 +15,14 @@ module Asm.Data.ByteValSimple
   , byteValSimpleBE
   ) where
 
-import           Control.Monad
-import           Data.Bits
+import           Control.Monad           (guard)
+import           Data.Bits               (Bits (..), FiniteBits (..))
 import qualified Data.ByteString.Builder as BB
 import           Data.Data               (Data)
-import           Data.List
+import           Data.List               (foldl', minimumBy, partition)
 import           Data.Typeable           (Typeable)
-import           Data.Word
-import           Foreign.Storable
+import           Data.Word               (Word8)
+import           Foreign.Storable        (Storable)
 
 import           Asm.Data.BitList
 import           Asm.Data.Word256

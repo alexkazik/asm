@@ -17,7 +17,7 @@ module Asm.Cpu6502.Data.CpuData6502
   ) where
 
 import           Asm.Core.Prelude
-import           Data.Void
+import           Data.Void                      (Void)
 
 import           Asm.Core.Data.CpuData
 import           Asm.Core.Data.Reference

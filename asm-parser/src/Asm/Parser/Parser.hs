@@ -9,7 +9,8 @@ import           Asm.Core.Prelude
 
 import           Control.Monad.Fail         (MonadFail)
 import           Control.Monad.State.Strict (runStateT)
-import           Text.Megaparsec
+import           Text.Megaparsec            (ParseErrorBundle, Parsec, PosState (..), State (..), defaultTabWidth, eof,
+                                             errorBundlePretty, runParser')
 
 import           Asm.Parser.BuildTree
 import           Asm.Parser.Data.PExpr

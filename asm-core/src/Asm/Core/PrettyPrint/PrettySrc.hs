@@ -9,8 +9,8 @@ module Asm.Core.PrettyPrint.PrettySrc
 
 import           Asm.Core.Prelude
 import qualified Data.Map.Strict                  as M
-import           Data.Void
-import           System.FilePath
+import           Data.Void                        (Void, absurd)
+import           System.FilePath                  (takeFileName)
 
 import           Asm.Core.PrettyPrint.PPSM
 import           Asm.Core.PrettyPrint.PrettyPrint as PP

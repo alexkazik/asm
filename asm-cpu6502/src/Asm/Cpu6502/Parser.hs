@@ -9,9 +9,9 @@ module Asm.Cpu6502.Parser
   ) where
 
 import           Asm.Core.Prelude
-import           Data.Generics
+import           Data.Generics                  (extQ)
 import qualified Language.Haskell.TH            as TH
-import           Language.Haskell.TH.Quote
+import           Language.Haskell.TH.Quote      (QuasiQuoter (..), dataToExpQ)
 import qualified System.IO
 
 import           Asm.Core.Control.CompilerError

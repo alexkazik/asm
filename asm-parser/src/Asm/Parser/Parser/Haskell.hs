@@ -7,7 +7,7 @@ module Asm.Parser.Parser.Haskell
   ) where
 
 import           Asm.Core.Prelude
-import           Language.Haskell.Exts.Extension
+import           Language.Haskell.Exts.Extension        (Extension (..), KnownExtension (..), Language (..))
 import           Language.Haskell.Exts.Parser           (ParseMode (..))
 import qualified Language.Haskell.Exts.Parser           as Hs
 import qualified Language.Haskell.Exts.SrcLoc           as Hs

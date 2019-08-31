@@ -12,7 +12,7 @@ import           Data.List.Extra           (split)
 import qualified Data.Map.Strict           as M
 import           Data.Tuple.Extra          (fst3)
 import qualified Language.Haskell.TH       as TH
-import           Language.Haskell.TH.Quote
+import           Language.Haskell.TH.Quote (QuasiQuoter (..))
 
 import           Asm.Cpu6809.Data.OpCodes
 

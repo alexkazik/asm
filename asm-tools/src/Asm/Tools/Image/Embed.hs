@@ -6,14 +6,15 @@ module Asm.Tools.Image.Embed
   ) where
 
 import           Asm.Core.Prelude
-import           Codec.Picture                  as Juicy
+import           Codec.Picture                  (Image (..), PixelRGBA8, convertRGBA8, decodePng, encodePng)
+import qualified Codec.Picture                  as Juicy
 import qualified Data.ByteString                as BS
 import qualified Data.ByteString.Lazy           as BL
-import           Data.ByteString.Unsafe
+import           Data.ByteString.Unsafe         (unsafePackAddressLen)
 import qualified Data.Vector.Unboxed            as UV
 import qualified Language.Haskell.TH            as TH
-import           System.Directory
-import           System.IO.Unsafe
+import           System.Directory               (removeFile)
+import           System.IO.Unsafe               (unsafePerformIO)
 
 import           Asm.Core.Control.CompilerError
 import           Asm.Core.File
